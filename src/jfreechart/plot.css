@@ -1,0 +1,26 @@
+.chart-symbol{ 
+  -fx-background-radius: 2px;
+  -fx-padding: 2px;
+  -fx-shape: "M0 0 L0 4 L4 4 L4 0 L0 0 Z";
+}
+
+.chart-legend-item-symbol{
+  -fx-background-radius: 5px;
+  -fx-padding: 5px;
+}
+
+.default-color0.chart-symbol { -fx-background-color: #66c2a5; }
+.default-color1.chart-symbol { -fx-background-color: #fc8d62; }
+.default-color2.chart-symbol { -fx-background-color: #8da0cb; }
+.default-color3.chart-symbol { -fx-background-color: #e78ac3; }
+.default-color4.chart-symbol { -fx-background-color: #a6d854; }
+.default-color5.chart-symbol { -fx-background-color: #ffd92f; }
+.default-color6.chart-symbol { -fx-background-color: #e5c494; }
+
+.default-color0-selected-chart-symbol { -fx-stroke: #307962; -fx-fill: #307962; }
+.default-color1-selected-chart-symbol { -fx-stroke: #db3f04; -fx-fill: #db3f04; }
+.default-color2-selected-chart-symbol { -fx-stroke: #445c94; -fx-fill: #445c94; }
+.default-color3-selected-chart-symbol { -fx-stroke: #c9298a; -fx-fill: #c9298a; }
+.default-color4-selected-chart-symbol { -fx-stroke: #648d20; -fx-fill: #648d20; }
+.default-color5-selected-chart-symbol { -fx-stroke: #af8e00; -fx-fill: #af8e00; }
+.default-color6-selected-chart-symbol { -fx-stroke: #c88b31; -fx-fill: #c88b31; }
