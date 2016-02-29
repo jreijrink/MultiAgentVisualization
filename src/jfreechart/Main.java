@@ -12,12 +12,10 @@ import java.util.List;
 import javafx.application.Application;
 import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.SplitPane;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
@@ -33,6 +31,7 @@ import org.dockfx.DockPos;
 public class Main extends Application {
   private List<FieldCanvas> fields;
   private List<ScatterPlot> plots;
+  private List<AgentPlot> agents;  
   private List<TimeFrame> data;
   
   @Override
@@ -40,6 +39,7 @@ public class Main extends Application {
     stage.setTitle("Prototype");
 
     fields = new ArrayList();
+    agents = new ArrayList();
     plots = new ArrayList();
     data = new ArrayList();
     
@@ -117,18 +117,21 @@ public class Main extends Application {
     FieldCanvas newField = new FieldCanvas(new ArrayList(), new int[]{0}, "ball");
     fields.add(newField);
     
-    plots.add(new ScatterPlot(scene, new int[]{0}, "time", 0, "batteryVoltage", 0, new ArrayList()));
-    plots.add(new ScatterPlot(scene, new int[]{1}, "time", 0, "batteryVoltage", 0, new ArrayList()));
-    plots.add(new ScatterPlot(scene, new int[]{2}, "time", 0, "batteryVoltage", 0, new ArrayList()));
-    plots.add(new ScatterPlot(scene, new int[]{3}, "time", 0, "batteryVoltage", 0, new ArrayList()));
+    plots.add(new ScatterPlot(scene, new int[]{0}, "batteryVoltage", 0, new ArrayList()));
+    plots.add(new ScatterPlot(scene, new int[]{1}, "batteryVoltage", 0, new ArrayList()));
+    //plots.add(new ScatterPlot(scene, new int[]{2}, "batteryVoltage", 0, new ArrayList()));
+    //plots.add(new ScatterPlot(scene, new int[]{3}, "batteryVoltage", 0, new ArrayList()));
+    
+    AgentPlot agentPlot = new AgentPlot(scene, new ArrayList());
+    agents.add(agentPlot);
     
     for (ScatterPlot scatterPlot : plots) {
-      scatterPlot.addSelectionEventListener((List<Integer> frames) -> {
+      scatterPlot.addSelectionEventListener((int startIndex, int endIndex) -> {
         for (ScatterPlot plot : plots) {
-          plot.selectFrames(frames);
+          plot.selectFrames(startIndex, endIndex);
         }
         for (FieldCanvas field : fields) {
-        field.selectFrames(frames);
+          field.selectFrames(startIndex, endIndex);
         }
       });
       
@@ -136,6 +139,9 @@ public class Main extends Application {
       dockPane.dock(chartDock, DockPos.TOP);
     }
     
+    DockNode agentDock = new DockNode(agentPlot.getChart(), "AgentPlot", new ImageView(dockImage));
+    dockPane.dock(agentDock, DockPos.TOP);
+
     DockNode fieldDock = new DockNode(newField, "Field", new ImageView(dockImage));
     fieldDock.setPrefSize(100, 100);
     dockPane.dock(fieldDock, DockPos.RIGHT);
@@ -154,15 +160,15 @@ public class Main extends Application {
   }
   
   private void addChart(Scene scene, DockPane dockPane) {
-    ScatterPlot newPlot = new ScatterPlot(scene, new int[]{0}, "time", 0, "batteryVoltage", 0, data);
+    ScatterPlot newPlot = new ScatterPlot(scene, new int[]{0}, "batteryVoltage", 0, data);
     plots.add(newPlot);
 
-    newPlot.addSelectionEventListener((List<Integer> frames) -> {
+    newPlot.addSelectionEventListener((int startIndex, int endIndex) -> {
       for (ScatterPlot plot : plots) {
-        plot.selectFrames(frames);
+        plot.selectFrames(startIndex, endIndex);
       }
       for (FieldCanvas field : fields) {
-      field.selectFrames(frames);
+      field.selectFrames(startIndex, endIndex);
       }
     });
     
@@ -180,6 +186,10 @@ public class Main extends Application {
     for (FieldCanvas field : fields) {
       field.updateData(data);      
     }
+    for (AgentPlot agentPlot : agents) {
+      agentPlot.updateData(data);      
+    }
+    
   }
 
   public static void main(String[] args) {

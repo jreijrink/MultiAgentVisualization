@@ -7,6 +7,7 @@ package jfreechart;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,9 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.LineTo;
+import javafx.scene.shape.MoveTo;
+import javafx.scene.shape.Path;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Pair;
 import static jfreechart.Parser.MAX_TURTLES;
@@ -45,20 +49,19 @@ public class FieldCanvas extends Pane {
   private static final double GOALDEPTH = 0.575000;
 
   private List<TimeFrame> data;
-  private List<Integer> frames;
-  private TimeFrame frame;
+  private List<TimeFrame> selection;
   private Rectangle field;
-  private int[] selectedHeatRobots;
-  private String heatmapParameter;
+  private int[] selectedRobots;
+  private String selectedParameter;
   
   private Canvas canvas;
   
   public FieldCanvas(List<TimeFrame> data,  int[] defaultRobots, String defaultParameter) {
     this.data = data;
-    this.selectedHeatRobots = defaultRobots;
-    this.heatmapParameter = defaultParameter;
+    this.selectedRobots = defaultRobots;
+    this.selectedParameter = defaultParameter;
     
-    frames = new ArrayList();
+    selection = new ArrayList();
 
     setStyle("-fx-background-color: white;");
     
@@ -82,18 +85,13 @@ public class FieldCanvas extends Pane {
   
   public void updateData(List<TimeFrame> data) {
     this.data = data;
-    frames = new ArrayList();
+    selection = new ArrayList();
     this.requestLayout();
   }
   
-  public void selectFrames(List<Integer> frames) {
-    this.frames = frames;
-    
-    if(frames.size() > 0 && frames.get(0) < data.size())
-      frame = data.get(frames.get(0));
-    else
-      frame = null;  
-    
+  public void selectFrames(int startIndex, int endIndex) {
+    this.selection = data.subList(startIndex, endIndex);
+        
     this.requestLayout();
   }
   
@@ -107,15 +105,13 @@ public class FieldCanvas extends Pane {
    
     drawField(gc);
     
-    /*
+    drawHistoryLines(gc);
+    
     drawOpponents(gc);
     
     drawturtles(gc);
     
     drawBall(gc);
-    */
-    
-    drawHeatMap(gc);
   }
 
   private void showparameterDialog() {
@@ -136,7 +132,7 @@ public class FieldCanvas extends Pane {
     list.add("ball");
     list.add("opponent");
     parameterChoiceBox.setItems(list);
-    parameterChoiceBox.getSelectionModel().select(heatmapParameter);
+    parameterChoiceBox.getSelectionModel().select(selectedParameter);
 
     ListView<StringValuePair<String, Integer>> turtleListView = new ListView();              
     ObservableList<StringValuePair<String, Integer>> turtleList = FXCollections.observableArrayList();
@@ -146,7 +142,7 @@ public class FieldCanvas extends Pane {
     }
 
     turtleListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-    for(int selection : selectedHeatRobots) {
+    for(int selection : selectedRobots) {
       turtleListView.getSelectionModel().select(selection);
     }        
     turtleListView.setPrefHeight(200);
@@ -176,16 +172,16 @@ public class FieldCanvas extends Pane {
 
     Optional<Pair<String, int[]>> result = parameterDialog.showAndWait();
 
-    if(result.isPresent() && result.get() != null && result.get().getValue().length > 0 && result.get().getValue() != selectedHeatRobots) {
-      selectedHeatRobots = result.get().getValue();
-      heatmapParameter = result.get().getKey();
+    if(result.isPresent() && result.get() != null && result.get().getValue().length > 0 && result.get().getValue() != selectedRobots) {
+      selectedRobots = result.get().getValue();
+      selectedParameter = result.get().getKey();
       requestLayout();
     }
   }
   
   private void drawturtles(GraphicsContext g) {
-    if(frame != null) {
-      for(Turtle turtle : frame.getTurtles()) {
+    if(selection.size() > 0) {
+      for(Turtle turtle : selection.get(selection.size() - 1).getTurtles()) {
         ParameterMap paremeters = turtle.getParameters();
         if(paremeters.getValue("robotInField")[0][0] > 0) {
           double[][] position = paremeters.getValue("pose");
@@ -211,8 +207,8 @@ public class FieldCanvas extends Pane {
     
     Map<String, List<double[]>> opponentsPositions = new HashMap();
     
-    if(frame != null) {
-      for(Turtle turtle : frame.getTurtles()) {
+    if(selection.size() > 0) {
+      for(Turtle turtle : selection.get(selection.size() - 1).getTurtles()) {
         ParameterMap paremeters = turtle.getParameters();
         if(paremeters.getValue("robotInField")[0][0] > 0) {
           double[][] opponents = paremeters.getValue("opponent");
@@ -245,8 +241,8 @@ public class FieldCanvas extends Pane {
   
   private void drawBall(GraphicsContext g) {
     List<double[]> ballPositions = new ArrayList();
-    if(frame != null) {
-      for(Turtle turtle : frame.getTurtles()) {
+    if(selection.size() > 0) {
+      for(Turtle turtle : selection.get(selection.size() - 1).getTurtles()) {
         ParameterMap paremeters = turtle.getParameters();
         if(paremeters.getValue("robotInField")[0][0] > 0) {
           if(paremeters.getValue("ballFound")[0][0] == 1) {
@@ -265,28 +261,55 @@ public class FieldCanvas extends Pane {
       g.fillOval(ballPos.getX() - 10, ballPos.getY() - 10, 20, 20);
     }
   }
-    
-  private void drawHeatMap(GraphicsContext g) {
-    HeatMap heatMap = new HeatMap(field.getWidth(), field.getHeight());
-    
-    for(int index : frames) {
-      if(index >= 0 && index < data.size()) {
-        List<Turtle> turtles = data.get(index).getTurtles();
-        for(int selectedTurtle : selectedHeatRobots) {
-          Turtle turtle = turtles.get(selectedTurtle);
-          ParameterMap paremeters = turtle.getParameters();
-          if(paremeters.getValue("robotInField")[0][0] > 0) {
-            double[][] value = paremeters.getValue(heatmapParameter);            
-            for(int i = 0; i < value.length; i++) {
+  
+  private void drawHistoryLines(GraphicsContext g) {
+    if(selection.size() > 0) {
+      List<List<Point>> paths = new ArrayList();
+      
+      for(int turtleIndex : selectedRobots) {
+        
+        
+        ParameterMap initalCount = selection.get(0).getTurtles().get(turtleIndex).getParameters();
+        int size = initalCount.getValue(selectedParameter).length;
+        List<Point>[] newPaths = new List[size];
+        for(int i = 0; i < size; i++) {
+          newPaths[i] = new ArrayList();
+        }
+
+        for(int frameIndex = 0; frameIndex < selection.size(); frameIndex++) {
+          
+          Turtle turle = selection.get(frameIndex).getTurtles().get(turtleIndex);
+          ParameterMap paremeters = turle.getParameters();
+          double[][] value = paremeters.getValue(selectedParameter);
+          
+          for(int i = 0; i < value.length; i++) {
+            if(value[i][0] != 0 || value[i][1] != 0) {
               Point position = getPosition(field, value[i][0], value[i][1]);
-              heatMap.addPosition(position.getX(), position.getY());
+              newPaths[i].add(position);
             }
           }
         }
+        
+        paths.addAll(Arrays.asList(newPaths));
       }
+      
+      g.setStroke(Color.LIGHTGRAY);
+      g.setLineWidth(4);
+
+      for(List<Point> path : paths) {
+        if(path.size() > 0) {
+          g.beginPath();
+          g.moveTo(path.get(0).x, path.get(0).y);
+          for(Point point : path) {
+            g.lineTo(point.x, point.y);
+          }
+          g.stroke();
+          g.closePath();
+        }
+      }
+      
+      g.setLineWidth(1);
     }
-    
-    heatMap.draw(g);
   }
   
   private double[] averagePoint(List<double[]> positions) {

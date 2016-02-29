@@ -17,10 +17,18 @@
 .default-color5.chart-symbol { -fx-background-color: #ffd92f; }
 .default-color6.chart-symbol { -fx-background-color: #e5c494; }
 
-.default-color0-selected-chart-symbol { -fx-stroke: #307962; -fx-fill: #307962; }
-.default-color1-selected-chart-symbol { -fx-stroke: #db3f04; -fx-fill: #db3f04; }
-.default-color2-selected-chart-symbol { -fx-stroke: #445c94; -fx-fill: #445c94; }
-.default-color3-selected-chart-symbol { -fx-stroke: #c9298a; -fx-fill: #c9298a; }
-.default-color4-selected-chart-symbol { -fx-stroke: #648d20; -fx-fill: #648d20; }
-.default-color5-selected-chart-symbol { -fx-stroke: #af8e00; -fx-fill: #af8e00; }
-.default-color6-selected-chart-symbol { -fx-stroke: #c88b31; -fx-fill: #c88b31; }
+.default-color0-selected-chart-symbol { -fx-background-color: #307962 !important; }
+.default-color1-selected-chart-symbol { -fx-background-color: #db3f04 !important; }
+.default-color2-selected-chart-symbol { -fx-background-color: #445c94 !important; }
+.default-color3-selected-chart-symbol { -fx-background-color: #c9298a !important; }
+.default-color4-selected-chart-symbol { -fx-background-color: #648d20 !important; }
+.default-color5-selected-chart-symbol { -fx-background-color: #af8e00 !important; }
+.default-color6-selected-chart-symbol { -fx-background-color: #c88b31 !important; }
+
+.default-color0-status-symbol { -fx-fill: #66c2a5 !important; }
+.default-color1-status-symbol { -fx-fill: #fc8d62 !important; }
+.default-color2-status-symbol { -fx-fill: #8da0cb !important; }
+.default-color3-status-symbol { -fx-fill: #e78ac3 !important; }
+.default-color4-status-symbol { -fx-fill: #a6d854 !important; }
+.default-color5-status-symbol { -fx-fill: #ffd92f !important; }
+.default-color6-status-symbol { -fx-fill: #e5c494 !important; }

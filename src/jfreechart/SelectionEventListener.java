@@ -9,5 +9,5 @@ import java.util.EventListener;
 import java.util.List;
 
 public interface SelectionEventListener extends EventListener {
-  public void timeFrameSelected(List<Integer> frames);  
+  public void timeFrameSelected(int startIndex, int endIndex);  
 }

@@ -18,6 +18,7 @@ import javafx.scene.Scene;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
@@ -42,8 +43,6 @@ public class ScatterPlot {
   
   private Scene scene;
   private int[] selectedTurtles;
-  private String xParameter;
-  private int xParameterIndex;
   private String yParameter;
   private int yParameterIndex;
   private List<TimeFrame> data;
@@ -60,11 +59,9 @@ public class ScatterPlot {
   private Rectangle selectionRectangle;
   private ScatterChart<Number,Number> scatterChart;
   
-  public ScatterPlot(Scene scene, int[] selectedTurtles, String xParameter, int xParameterIndex, String yParameter, int yParameterIndex, List<TimeFrame> data) {
+  public ScatterPlot(Scene scene, int[] selectedTurtles, String yParameter, int yParameterIndex, List<TimeFrame> data) {
     this.scene = scene;
     this.selectedTurtles = selectedTurtles;
-    this.xParameter = xParameter;
-    this.xParameterIndex = xParameterIndex;
     this.yParameter = yParameter;
     this.yParameterIndex = yParameterIndex;
     this.data = data;
@@ -85,74 +82,70 @@ public class ScatterPlot {
     initialize();
   }
   
-  public void selectFrames(List<Integer> frames) {
+  public void selectFrames(int startIndex, int endIndex) {
     ScatterChart<Number,Number> scattterChart = (ScatterChart<Number,Number>)rootPane.getCenter();
 
-    NumberAxis yAxis = (NumberAxis) scattterChart.getYAxis();
-    NumberAxis xAxis = (NumberAxis) scattterChart.getXAxis();
-             
-    double xAxisShift = getSceneXShift(xAxis);
-    double yAxisShift = getSceneYShift(yAxis);
-    
     clearSelection();
     
+    System.out.printf("SELECTFRAME\n");
+      
     for(int selected : selectedTurtles) {
       List<Point2D> turtleData = dataMap[selected];
       
       List<Point2D> points = new ArrayList();
-      for(int frame : frames) {        
+      for(int frame = startIndex; frame < endIndex; frame++) {    
         Point2D point = turtleData.get(frame);
         points.add(point);
       }
       
-      double xTolerance = (maxValueX - minValueX) / 500;
-      double yTolerance = (maxValueY - minValueY) / 500;
-      List<DataPoint> sortedPoints = simplifyRadialDistance(points, xTolerance, yTolerance);
-              
-      for(DataPoint point : sortedPoints) {
-        double xPosition = xAxis.getDisplayPosition(point.getLocation().getX());
-        double yPosition = yAxis.getDisplayPosition(point.getLocation().getY());
-
-         Rectangle selectionPoint = RectangleBuilder.create()
-                 .x(xPosition + xAxisShift - 2)
-                 .y(yPosition + yAxisShift - 2)
-                 .height(4)
-                 .width(4)
-                 .styleClass(String.format("default-color%d-selected-chart-symbol", selected))
-                 .build();
-         this.rootPane.getChildren().add(selectionPoint);
+      ObservableList<Series<Number, Number>> series = scatterChart.getData();
+      Series<Number,Number> serie = series.get(selected);
+      ObservableList<Data<Number, Number>> datas = serie.getData();
+      for(Data<Number, Number> data : datas) { 
+        List<Integer> indices = (List<Integer>)data.getExtraValue();
+        for(int index : indices){
+          Node node = data.getNode();  
+          List<String> classes = node.getStyleClass();
+          
+          if(index >= startIndex && index <= endIndex) {
+            if(classes.contains(String.format("default-color%d", selected))) {
+              node.getStyleClass().add(String.format("default-color%d-selected-chart-symbol", selected));
+              node.getStyleClass().remove(String.format("default-color%d", selected));
+            }
+          } else {
+            if(classes.contains(String.format("default-color%d-selected-chart-symbol", selected))) {
+              node.getStyleClass().add(String.format("default-color%d", selected));
+              node.getStyleClass().remove(String.format("default-color%d-selected-chart-symbol", selected));
+            }
+          }
+        }
       }
     }
   }
   
-  private void notifyListeners(List<Integer> frames) {
+  private void notifyListeners(int startIndex, int endIndex) {
     List<Integer> selectedTimeFrames = new ArrayList();
     Object[] listeners = listenerList.getListenerList();
     for (int i = 0; i < listeners.length; i = i+2) {
       if (listeners[i] == SelectionEventListener.class) {
-        ((SelectionEventListener) listeners[i+1]).timeFrameSelected(frames);
+        ((SelectionEventListener) listeners[i+1]).timeFrameSelected(startIndex, endIndex);
       }
     }
   }
   
-  private void clearSelection() {
-    List<Node> pointChildren = new ArrayList();
-    for(Node child : this.rootPane.getChildren()) {
-      if(child.getClass() == Rectangle.class && child.getId() == null) {
-        pointChildren.add(child);
-      }
-    }
-    this.rootPane.getChildren().removeAll(pointChildren);
-
+  private void clearSelection() {    
+    NumberAxis yAxis = (NumberAxis) scatterChart.getYAxis();
+    double yAxisShift = getSceneYShift(yAxis);
+  
     selectionRectangle.setX(0);
     selectionRectangle.setY(0);
     selectionRectangle.setWidth(0);
-    selectionRectangle.setHeight(0);
+    selectionRectangle.setHeight(yAxis.getHeight() + yAxisShift);
   }
   
   private void initialize() {
     if(data.size() > 0) {
-      this.dataMap = createDataMap(xParameter, xParameterIndex, yParameter, yParameterIndex, data);
+      this.dataMap = createDataMap(yParameter, yParameterIndex, data);
 
       getMinMaxValue();
       createChart();
@@ -170,10 +163,9 @@ public class ScatterPlot {
     
     if(data.size() > 0) {
       ParameterMap parameters = data.get(0).getTurtles().get(0).getParameters();
-      String selectedXIndex = getParameterIndices(parameters, this.xParameter).get(this.xParameterIndex);
       String selectedYIndex = getParameterIndices(parameters, this.yParameter).get(this.yParameterIndex);
 
-      xAxis.setLabel(this.xParameter + " " +selectedXIndex);
+      xAxis.setLabel("Time");
 
       yAxis.setLabel(this.yParameter + " " + selectedYIndex);
 
@@ -189,7 +181,7 @@ public class ScatterPlot {
     System.out.printf("SET CENTER \n");
   }
   
-  private EventHandler<MouseEvent> createParameterHandler(final boolean xAxis) {    
+  private EventHandler<MouseEvent> createParameterHandler() {    
     EventHandler<MouseEvent> handler;
     handler = new EventHandler<MouseEvent>() {        
       public void handle(MouseEvent event) {
@@ -216,12 +208,12 @@ public class ScatterPlot {
         
         ChoiceBox<String> parameterChoiceBox = new ChoiceBox();
         parameterChoiceBox.setItems(options);
-        parameterChoiceBox.getSelectionModel().select(xAxis ? xParameter : yParameter);
+        parameterChoiceBox.getSelectionModel().select(yParameter);
         
         ChoiceBox<String> indexChoiceBox = new ChoiceBox();
-        ObservableList<String> selectedOptions = getParameterIndices(parameters, xAxis ? xParameter : yParameter);
+        ObservableList<String> selectedOptions = getParameterIndices(parameters, yParameter);
         indexChoiceBox.setItems(selectedOptions);
-        indexChoiceBox.getSelectionModel().select(xAxis ? xParameterIndex : yParameterIndex);
+        indexChoiceBox.getSelectionModel().select(yParameterIndex);
         
         parameterChoiceBox.getSelectionModel().selectedIndexProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
           ObservableList<String> indexOptions = getParameterIndices(parameters, choices.get(newValue.intValue()));
@@ -248,14 +240,9 @@ public class ScatterPlot {
         Optional<Pair<String, Integer>> result = parameterDialog.showAndWait();
         
         if (result.isPresent() && result.get() != null){
-          if(!result.get().getKey().equals(xAxis ? xParameter : yParameter) || !result.get().getValue().equals(xAxis ? xParameterIndex : yParameterIndex)) {
-            if(xAxis) {
-              xParameter = result.get().getKey();
-              xParameterIndex = result.get().getValue();
-            } else {
-              yParameter = result.get().getKey();
-              yParameterIndex = result.get().getValue();
-            }
+          if(!result.get().getKey().equals(yParameter) || !result.get().getValue().equals(yParameterIndex)) {
+            yParameter = result.get().getKey();
+            yParameterIndex = result.get().getValue();
             initialize();
           }
         }
@@ -285,27 +272,19 @@ public class ScatterPlot {
     NumberAxis xAxis = (NumberAxis) scattterChart.getXAxis();
     NumberAxis yAxis = (NumberAxis) scattterChart.getYAxis();
 
-    xAxis.setOnMouseEntered((MouseEvent event) -> {
-        scene.setCursor(Cursor.HAND); //Change cursor to hand      
-    });    
-    xAxis.setOnMouseExited((MouseEvent event) -> {
-        scene.setCursor(Cursor.DEFAULT); //Change cursor to default
-    });
-    xAxis.setOnMouseClicked(createParameterHandler(true));
-    
     yAxis.setOnMouseEntered((MouseEvent event) -> {
         scene.setCursor(Cursor.HAND); //Change cursor to hand      
     });    
     yAxis.setOnMouseExited((MouseEvent event) -> {
         scene.setCursor(Cursor.DEFAULT); //Change cursor to default
     });
-    yAxis.setOnMouseClicked(createParameterHandler(false));
+    yAxis.setOnMouseClicked(createParameterHandler());
     
     scatterChart.widthProperty().addListener((ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) -> {
-      notifyListeners(new ArrayList());
+      //notifyListeners(0, 0);
     });
     scatterChart.heightProperty().addListener((ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) -> {
-      notifyListeners(new ArrayList());
+      //notifyListeners(0, 0);
     });
     
     for(Series series : scatterChart.getData()) {
@@ -391,7 +370,7 @@ public class ScatterPlot {
     selectionRectangle = RectangleBuilder.create()
             .x(0)
             .y(0)
-            .height(0)
+            .height(yAxis.getHeight())
             .width(0)
             .stroke(Color.web("0x222222"))
             .fill(Color.TRANSPARENT)
@@ -415,7 +394,7 @@ public class ScatterPlot {
 
       selectionPoint = new Point2D(event.getX() + xChartShift, event.getY() + yChartShift);
       
-      notifyListeners(new ArrayList());
+      notifyListeners(0, 0);
     });
 
     node.setOnMouseDragged((MouseEvent event) -> {
@@ -426,28 +405,29 @@ public class ScatterPlot {
       double xAxisShift = getSceneXShift(xAxis);
       double yAxisShift = getSceneYShift(yAxis);
 
-      List<Integer> selectedTimeFrames = new ArrayList();
-
-      for(int selected : selectedTurtles) {
-        ObservableList<XYChart.Data<Number, Number>> plotData = scattterChart.getData().get(selected).getData();
-        for(XYChart.Data<Number, Number> point : plotData) {
-
-          Point2D localPoint = new Point2D(xAxis.getDisplayPosition(point.getXValue()) + xAxisShift, yAxis.getDisplayPosition(point.getYValue()) + yAxisShift);
-
-          if(selectionRectangle.contains(localPoint)) {
-            List<Integer> frames = (List<Integer>)point.getExtraValue();
-            selectedTimeFrames.addAll(frames);
-          }
-        }
-      }
-
-      notifyListeners(selectedTimeFrames);
-      
       Rectangle selection = getSelectionRectangle(event.getX(), event.getY(), xChartShift, yChartShift, xAxis.getWidth() + xAxisShift - xChartShift, yAxis.getHeight() + yAxisShift- yChartShift);
+            
       selectionRectangle.setX(selection.getX());
-      selectionRectangle.setY(selection.getY());
       selectionRectangle.setWidth(selection.getWidth());
-      selectionRectangle.setHeight(selection.getHeight());
+    });
+    
+    node.setOnMouseReleased((MouseEvent event) -> {
+      System.out.printf("MOUSE_RELEASED \n");      
+
+      double xChartShift = getSceneXShift(node);
+      double yChartShift = getSceneYShift(node);
+      double xAxisShift = getSceneXShift(xAxis);
+      double yAxisShift = getSceneYShift(yAxis);
+
+      Rectangle selection = getSelectionRectangle(event.getX(), event.getY(), xChartShift, yChartShift, xAxis.getWidth() + xAxisShift - xChartShift, yAxis.getHeight() + yAxisShift- yChartShift);
+      
+      int start = xAxis.getValueForDisplay(selection.getX() - xChartShift).intValue();
+      int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xChartShift).intValue();
+      
+      notifyListeners(start, end);
+      
+      selectionRectangle.setX(0);
+      selectionRectangle.setWidth(0);      
     });
   }
   
@@ -600,23 +580,21 @@ public class ScatterPlot {
     System.out.printf("getMinMaxValue DONE!\n");
   }
   
-  private List<Point2D>[] createDataMap(String xParameter, int xParameterIndex, String yParameter, int yParameterIndex, List<TimeFrame> data) {
+  private List<Point2D>[] createDataMap(String yParameter, int yParameterIndex, List<TimeFrame> data) {
     
     System.out.printf("createDataMap!\n");
     
     List<Point2D>[] map = new List[MAX_TURTLES];
     
-    int[] xSelectedRowCol = getSelectedColRow(data, xParameter, xParameterIndex);
     int[] ySelectedRowCol = getSelectedColRow(data, yParameter, yParameterIndex);
 
     for(int turtle = 0; turtle < MAX_TURTLES; turtle++) {
       map[turtle] = new ArrayList();
       for(int i = 0; i < data.size(); i++) {
           List<jfreechart.Turtle> turtles = data.get(i).getTurtles();
-          double xValue = turtles.get(turtle).getParameters().getValue(xParameter)[xSelectedRowCol[0]][xSelectedRowCol[1]];
           double yValue = turtles.get(turtle).getParameters().getValue(yParameter)[ySelectedRowCol[0]][ySelectedRowCol[1]];
 
-          map[turtle].add(new Point2D(xValue, yValue));
+          map[turtle].add(new Point2D(i, yValue));
       }
     }
     System.out.printf("createDataMap DONE!\n");
