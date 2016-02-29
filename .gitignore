@@ -12,5 +12,6 @@
 hs_err_pid*
 
 private.xml
+private.properties 
 ~*
 .*
