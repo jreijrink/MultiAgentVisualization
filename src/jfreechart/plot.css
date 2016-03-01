@@ -25,10 +25,16 @@
 .default-color5-selected-chart-symbol { -fx-background-color: #af8e00 !important; }
 .default-color6-selected-chart-symbol { -fx-background-color: #c88b31 !important; }
 
-.default-color0-status-symbol { -fx-fill: #66c2a5 !important; }
-.default-color1-status-symbol { -fx-fill: #fc8d62 !important; }
-.default-color2-status-symbol { -fx-fill: #8da0cb !important; }
-.default-color3-status-symbol { -fx-fill: #e78ac3 !important; }
-.default-color4-status-symbol { -fx-fill: #a6d854 !important; }
-.default-color5-status-symbol { -fx-fill: #ffd92f !important; }
-.default-color6-status-symbol { -fx-fill: #e5c494 !important; }
+.default-color-1-status-symbol { -fx-fill: #dddddd !important; }
+.default-color0-status-symbol { -fx-fill: #1f78b4 !important; }
+.default-color1-status-symbol { -fx-fill: #33a02c !important; }
+.default-color2-status-symbol { -fx-fill: #e31a1c !important; }
+.default-color3-status-symbol { -fx-fill: #ff7f00 !important; }
+.default-color4-status-symbol { -fx-fill: #6a3d9a !important; }
+.default-color5-status-symbol { -fx-fill: #ffff99 !important;  }
+.default-color6-status-symbol { -fx-fill: #b15928 !important; }
+.default-color7-status-symbol { -fx-fill: #a6cee3 !important; }
+.default-color8-status-symbol { -fx-fill: #b2df8a !important; }
+.default-color9-status-symbol { -fx-fill: #fb9a99 !important; }
+.default-color10-status-symbol { -fx-fill: #fdbf6f !important; }
+.default-color11-status-symbol { -fx-fill: #cab2d6 !important; }

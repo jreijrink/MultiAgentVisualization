@@ -66,6 +66,7 @@ public class ScatterPlot {
     this.yParameterIndex = yParameterIndex;
     this.data = data;
     this.rootPane = new BorderPane();
+    this.rootPane.getStylesheets().add("jfreechart/plot.css");
     initialize();
   }
   
@@ -101,7 +102,7 @@ public class ScatterPlot {
       ObservableList<Series<Number, Number>> series = scatterChart.getData();
       Series<Number,Number> serie = series.get(selected);
       ObservableList<Data<Number, Number>> datas = serie.getData();
-      for(Data<Number, Number> data : datas) { 
+      for(Data<Number, Number> data : datas) {
         List<Integer> indices = (List<Integer>)data.getExtraValue();
         for(int index : indices){
           Node node = data.getNode();  
@@ -421,8 +422,8 @@ public class ScatterPlot {
 
       Rectangle selection = getSelectionRectangle(event.getX(), event.getY(), xChartShift, yChartShift, xAxis.getWidth() + xAxisShift - xChartShift, yAxis.getHeight() + yAxisShift- yChartShift);
       
-      int start = xAxis.getValueForDisplay(selection.getX() - xChartShift).intValue();
-      int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xChartShift).intValue();
+      int start = xAxis.getValueForDisplay(selection.getX() - xAxisShift).intValue();
+      int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xAxisShift).intValue();
       
       notifyListeners(start, end);
       

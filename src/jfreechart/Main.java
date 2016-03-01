@@ -114,7 +114,7 @@ public class Main extends Application {
     
     Image dockImage = new Image(DockPane.class.getResource("docknode.png").toExternalForm());
     
-    FieldCanvas newField = new FieldCanvas(new ArrayList(), new int[]{0}, "ball");
+    FieldCanvas newField = new FieldCanvas(new ArrayList(), new int[]{0, 1, 2, 3, 4 }, "pose");
     fields.add(newField);
     
     plots.add(new ScatterPlot(scene, new int[]{0}, "batteryVoltage", 0, new ArrayList()));
@@ -122,8 +122,7 @@ public class Main extends Application {
     //plots.add(new ScatterPlot(scene, new int[]{2}, "batteryVoltage", 0, new ArrayList()));
     //plots.add(new ScatterPlot(scene, new int[]{3}, "batteryVoltage", 0, new ArrayList()));
     
-    AgentPlot agentPlot = new AgentPlot(scene, new ArrayList());
-    agents.add(agentPlot);
+    agents.add(new AgentPlot(scene, new int[]{0, 1, 2, 3, 4 }, new ArrayList()));
     
     for (ScatterPlot scatterPlot : plots) {
       scatterPlot.addSelectionEventListener((int startIndex, int endIndex) -> {
@@ -133,15 +132,34 @@ public class Main extends Application {
         for (FieldCanvas field : fields) {
           field.selectFrames(startIndex, endIndex);
         }
+        for (AgentPlot agent : agents) {
+          agent.selectFrames(startIndex, endIndex);
+        }
       });
       
       DockNode chartDock = new DockNode(scatterPlot.getChart(), "Scatterchart", new ImageView(dockImage));
       dockPane.dock(chartDock, DockPos.TOP);
     }
     
-    DockNode agentDock = new DockNode(agentPlot.getChart(), "AgentPlot", new ImageView(dockImage));
-    dockPane.dock(agentDock, DockPos.TOP);
-
+    
+    
+    for (AgentPlot agentPlot : agents) {
+      agentPlot.addSelectionEventListener((int startIndex, int endIndex) -> {
+        for (ScatterPlot plot : plots) {
+          plot.selectFrames(startIndex, endIndex);
+        }
+        for (FieldCanvas field : fields) {
+          field.selectFrames(startIndex, endIndex);
+        }
+        for (AgentPlot agent : agents) {
+          agent.selectFrames(startIndex, endIndex);
+        }
+      });
+      
+      DockNode agentDock = new DockNode(agentPlot.getChart(), "AgentPlot", new ImageView(dockImage));
+      dockPane.dock(agentDock, DockPos.TOP);
+    }    
+    
     DockNode fieldDock = new DockNode(newField, "Field", new ImageView(dockImage));
     fieldDock.setPrefSize(100, 100);
     dockPane.dock(fieldDock, DockPos.RIGHT);
