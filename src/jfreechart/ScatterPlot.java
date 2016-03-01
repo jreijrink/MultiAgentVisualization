@@ -408,6 +408,11 @@ public class ScatterPlot {
 
       Rectangle selection = getSelectionRectangle(event.getX(), event.getY(), xChartShift, yChartShift, xAxis.getWidth() + xAxisShift - xChartShift, yAxis.getHeight() + yAxisShift- yChartShift);
             
+      int start = xAxis.getValueForDisplay(selection.getX() - xAxisShift).intValue();
+      int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xAxisShift).intValue();
+      
+      notifyListeners(start, end);
+      
       selectionRectangle.setX(selection.getX());
       selectionRectangle.setWidth(selection.getWidth());
     });

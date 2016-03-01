@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -16,12 +17,17 @@ import javafx.collections.ObservableList;
 import javafx.css.CssMetaData;
 import javafx.css.Styleable;
 import javafx.geometry.Point2D;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
@@ -154,6 +160,67 @@ public class AgentPlot {
             });
           }
         }, 100);
+    
+    initMouseListeners();
+  }
+  
+  private void initMouseListeners() {
+    
+      CategoryAxis yAxis = (CategoryAxis) scattterChart.getYAxis();
+    
+    yAxis.setOnMouseEntered((MouseEvent event) -> {
+        scene.setCursor(Cursor.HAND); //Change cursor to hand      
+    });    
+    yAxis.setOnMouseExited((MouseEvent event) -> {
+        scene.setCursor(Cursor.DEFAULT); //Change cursor to default
+    });
+    yAxis.setOnMouseClicked((MouseEvent event) -> {
+      Dialog<int[]> dialog = new Dialog();
+      dialog.setTitle("Turtle Choise Dialog");
+      dialog.setHeaderText("Choose turtles");
+
+      dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+      ListView<StringValuePair<String, Integer>> listView = new ListView();              
+      ObservableList<StringValuePair<String, Integer>> list = FXCollections.observableArrayList();
+      listView.setItems(list);
+      list.add(new StringValuePair("Turtle 1", 0));
+      list.add(new StringValuePair("Turtle 2", 1));
+      list.add(new StringValuePair("Turtle 3", 2));
+      list.add(new StringValuePair("Turtle 4", 3));
+      list.add(new StringValuePair("Turtle 5", 4));
+      list.add(new StringValuePair("Turtle 6", 5));
+      list.add(new StringValuePair("Turtle 7", 6));
+
+      listView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+      for(int selection : selectedTurtles) {
+        listView.getSelectionModel().select(selection);
+      }
+
+      dialog.getDialogPane().setContent(listView);
+      listView.setPrefHeight(200);
+
+      dialog.setResultConverter(dialogButton -> {
+        if(dialogButton == ButtonType.OK) {
+          ObservableList<StringValuePair<String, Integer>> selectedItems = listView.getSelectionModel().getSelectedItems();
+          int[] results = new int[selectedItems.size()];
+
+          for(int i = 0; i < selectedItems.size(); i++) {
+            results[i] = selectedItems.get(i).getValue();
+          }
+
+          return results;
+        }
+        return null;
+      });
+
+      Optional<int[]> result = dialog.showAndWait();
+
+      if(result.isPresent() && result.get() != null && result.get().length > 0 && result.get() != selectedTurtles) {
+        selectedTurtles = result.get();
+        initialize();
+      }
+    });    
   }
   
   private Collection getData() {
@@ -370,6 +437,11 @@ public class AgentPlot {
 
       Rectangle selection = getSelectionRectangle(event.getX(), event.getY(), xChartShift, yChartShift, xAxis.getWidth() + xAxisShift - xChartShift, yAxis.getHeight() + yAxisShift- yChartShift);
             
+      int start = xAxis.getValueForDisplay(selection.getX() - xAxisShift).intValue();
+      int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xAxisShift).intValue();
+      
+      notifyListeners(start, end);
+      
       selectionRectangle.setX(selection.getX());
       selectionRectangle.setWidth(selection.getWidth());
     });
