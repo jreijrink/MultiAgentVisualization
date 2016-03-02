@@ -5,49 +5,64 @@
  */
 package jfreechart;
 
-import javafx.scene.image.Image;
 import java.io.File;
+import javafx.scene.image.Image;
 import java.util.ArrayList;
+import java.util.EventListener;
 import java.util.List;
+import java.util.Random;
 import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.beans.value.ObservableValue;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.dockfx.DockNode;
 import org.dockfx.DockPane;
 import org.dockfx.DockPos;
+import org.dockfx.NodeManager;
+import org.dockfx.events.DockNodeEvent;
+import org.dockfx.events.DockNodeEventListenerInterface;
 
 public class Main extends Application {
-  private List<FieldCanvas> fields;
-  private List<ScatterPlot> plots;
-  private List<AgentPlot> agents;  
+  private List<Chart> charts;
   private List<TimeFrame> data;
+  private DockPane dockPane;
+  private NodeManager nodeManager;
+  private int startIndex;
+  private int endIndex;
+  private boolean drag;
   
   @Override
   public void start(Stage stage) {
     stage.setTitle("Prototype");
 
-    fields = new ArrayList();
-    agents = new ArrayList();
-    plots = new ArrayList();
+    charts = new ArrayList();
     data = new ArrayList();
     
     BorderPane root = new BorderPane();
 
-    Scene scene = new Scene(root, 900, 600, Color.WHITE);
+    Scene scene = new Scene(root, 800, 500);
 
-    DockPane dockPane = createDefaultLayout(scene);
+    this.dockPane = new DockPane();
+    this.nodeManager = new NodeManager(dockPane);
+    
+    setEventListener();
+        
     root.setCenter(dockPane);
     
     MenuBar menuBar = new MenuBar();
@@ -82,25 +97,51 @@ public class Main extends Application {
     fileMenu.getItems().add(openMenu);
     
     Menu elementMenu = new Menu("Elements");
+    
+    MenuItem newScatterMenu = new MenuItem("Add scatterplot");
+    newScatterMenu.setOnAction(new EventHandler() {
+      @Override
+      public void handle(Event t) {
+        ScatterPlot plot = new ScatterPlot(scene, new int[]{ 0 }, "batteryVoltage", 0, new ArrayList());
+        addChart(dockPane, null, plot);
+      }
+    });
+    elementMenu.getItems().add(newScatterMenu);
+    
+    MenuItem newLineMenu = new MenuItem("Add lineplot");
+    newLineMenu.setOnAction(new EventHandler() {
+      @Override
+      public void handle(Event t) {
+        LinePlot plot = new LinePlot(scene, new int[]{ 0 }, "batteryVoltage", 0, new ArrayList());
+        addChart(dockPane, null, plot);
+      }
+    });
+    elementMenu.getItems().add(newLineMenu);
+    
+    MenuItem newAgentMenu = new MenuItem("Add agentplot");
+    newAgentMenu.setOnAction(new EventHandler() {
+      @Override
+      public void handle(Event t) {
+        AgentPlot plot = new AgentPlot(scene, new int[]{ 0, 1, 2, 3, 4 }, new ArrayList());
+        addChart(dockPane, null, plot);
+      }
+    });
+    elementMenu.getItems().add(newAgentMenu);
+    
     MenuItem newFieldMenu = new MenuItem("Add field");
     newFieldMenu.setOnAction(new EventHandler() {
       @Override
       public void handle(Event t) {
-        addField(scene, dockPane);
+        FieldCanvas field = new FieldCanvas(new ArrayList(), new int[]{0, 1, 2, 3, 4 }, "pose");
+        addChart(dockPane, null, field);
       }
     });
     elementMenu.getItems().add(newFieldMenu);
-    MenuItem newChartMenu = new MenuItem("Add chart");
-    newChartMenu.setOnAction(new EventHandler() {
-      @Override
-      public void handle(Event t) {
-        addChart(scene, dockPane);
-      }
-    });
-    elementMenu.getItems().add(newChartMenu);
-    
+            
     menuBar.getMenus().addAll(fileMenu, elementMenu);
 
+    createDefaultLayout(scene);
+    
     Application.setUserAgentStylesheet(Application.STYLESHEET_MODENA);
     DockPane.initializeDefaultUserAgentStylesheet();
 
@@ -108,106 +149,75 @@ public class Main extends Application {
     stage.setScene(scene);
     stage.show();
   }
-
+  
   private DockPane createDefaultLayout(Scene scene) {
-    DockPane dockPane = new DockPane();
     
-    Image dockImage = new Image(DockPane.class.getResource("docknode.png").toExternalForm());
+    ScatterPlot scatter = new ScatterPlot(scene, new int[]{0}, "batteryVoltage", 0, new ArrayList());
+    addChart(dockPane, DockPos.TOP, scatter);
     
-    FieldCanvas newField = new FieldCanvas(new ArrayList(), new int[]{0, 1, 2, 3, 4 }, "pose");
-    fields.add(newField);
+    LinePlot line = new LinePlot(scene, new int[]{0}, "cpu0Load", 0, new ArrayList());
+    addChart(dockPane, DockPos.TOP, line);
     
-    plots.add(new ScatterPlot(scene, new int[]{0}, "batteryVoltage", 0, new ArrayList()));
-    plots.add(new ScatterPlot(scene, new int[]{1}, "batteryVoltage", 0, new ArrayList()));
-    //plots.add(new ScatterPlot(scene, new int[]{2}, "batteryVoltage", 0, new ArrayList()));
-    //plots.add(new ScatterPlot(scene, new int[]{3}, "batteryVoltage", 0, new ArrayList()));
+    AgentPlot agent = new AgentPlot(scene, new int[]{ 0, 1, 2, 3, 4 }, new ArrayList());
+    addChart(dockPane, DockPos.TOP, agent);
     
-    agents.add(new AgentPlot(scene, new int[]{0, 1, 2, 3, 4 }, new ArrayList()));
-    
-    for (ScatterPlot scatterPlot : plots) {
-      scatterPlot.addSelectionEventListener((int startIndex, int endIndex) -> {
-        for (ScatterPlot plot : plots) {
-          plot.selectFrames(startIndex, endIndex);
-        }
-        for (FieldCanvas field : fields) {
-          field.selectFrames(startIndex, endIndex);
-        }
-        for (AgentPlot agent : agents) {
-          agent.selectFrames(startIndex, endIndex);
-        }
-      });
-      
-      DockNode chartDock = new DockNode(scatterPlot.getChart(), "Scatterchart", new ImageView(dockImage));
-      dockPane.dock(chartDock, DockPos.TOP);
-    }
-    
-    
-    
-    for (AgentPlot agentPlot : agents) {
-      agentPlot.addSelectionEventListener((int startIndex, int endIndex) -> {
-        for (ScatterPlot plot : plots) {
-          plot.selectFrames(startIndex, endIndex);
-        }
-        for (FieldCanvas field : fields) {
-          field.selectFrames(startIndex, endIndex);
-        }
-        for (AgentPlot agent : agents) {
-          agent.selectFrames(startIndex, endIndex);
-        }
-      });
-      
-      DockNode agentDock = new DockNode(agentPlot.getChart(), "AgentPlot", new ImageView(dockImage));
-      dockPane.dock(agentDock, DockPos.TOP);
-    }    
-    
-    DockNode fieldDock = new DockNode(newField, "Field", new ImageView(dockImage));
-    fieldDock.setPrefSize(100, 100);
-    dockPane.dock(fieldDock, DockPos.RIGHT);
-    
+    FieldCanvas field = new FieldCanvas(new ArrayList(), new int[]{0, 1, 2, 3, 4 }, "pose");
+    addChart(dockPane, DockPos.RIGHT, field);
     
     return dockPane;
   }
   
-  private void addField(Scene scene, DockPane dockPane) {
-    FieldCanvas field = new FieldCanvas(data, new int[]{0}, "ball");
-    fields.add(field);
-    
-    Image dockImage = new Image(DockPane.class.getResource("docknode.png").toExternalForm());
-    DockNode fieldDock = new DockNode(field, "Field", new ImageView(dockImage));
-    dockPane.dock(fieldDock, DockPos.RIGHT);
-  }
-  
-  private void addChart(Scene scene, DockPane dockPane) {
-    ScatterPlot newPlot = new ScatterPlot(scene, new int[]{0}, "batteryVoltage", 0, data);
-    plots.add(newPlot);
-
-    newPlot.addSelectionEventListener((int startIndex, int endIndex) -> {
-      for (ScatterPlot plot : plots) {
-        plot.selectFrames(startIndex, endIndex);
+  private void setEventListener() {
+    nodeManager.addEventListener(new DockNodeEventListenerInterface() {
+      @Override public void dockNodeClosed(DockNodeEvent e) {
+        Chart chart = (Chart)e.getSource().getUserData();
+        charts.remove(chart);
       }
-      for (FieldCanvas field : fields) {
-      field.selectFrames(startIndex, endIndex);
+      @Override public void dockNodeMaximized(DockNodeEvent e) {}
+      @Override public void dockNodeWindowed(DockNodeEvent e) {}
+      @Override public void dockNodeMinimized(DockNodeEvent e) {}
+      @Override public void dockNodeRestored(DockNodeEvent e) {}
+      @Override public void dockNodeDocked(DockNodeEvent e) {}
+      @Override public void dockNodeFloated(DockNodeEvent e) {}
+      @Override public void dockNodeFocused(DockNodeEvent e) {}
+      @Override public void dockNodeDefocused(DockNodeEvent e) {}
+    });
+  }
+    
+  private void addChart(DockPane dockPane, DockPos position, Chart chart) {
+    this.charts.add(chart);
+
+    chart.updateData(this.data);
+    chart.selectFrames(this.startIndex, this.endIndex, this.drag);
+    
+    chart.addSelectionEventListener((int startIndex, int endIndex, boolean drag) -> {
+      for (Chart exisintg : this.charts) {
+        this.startIndex = startIndex;
+        this.endIndex = endIndex;
+        this.drag = drag;
+        exisintg.selectFrames(startIndex, endIndex, drag);
       }
     });
     
+    
     Image dockImage = new Image(DockPane.class.getResource("docknode.png").toExternalForm());
-    DockNode chartDock = new DockNode(newPlot.getChart(), "Scatterchart", new ImageView(dockImage));
-    dockPane.dock(chartDock, DockPos.LEFT);
+        
+    DockNode chartDock = nodeManager.getDockNode(chart.getNode(), chart.getName(), new ImageView(dockImage));
+    chartDock.setUserData(chart);
+    chartDock.setPrefSize(500, 500);
+    
+    if(position == null)
+      chartDock.floatNode(dockPane, true);
+    else
+      chartDock.dock(dockPane, position);
   }
-
+  
   private void updateLayout(List<TimeFrame> data) {
     this.data = data;
     
-    for (ScatterPlot scatterPlot : plots) {
-      scatterPlot.updateData(data);
+    for (Chart chart : this.charts) {
+      chart.updateData(data);
     }
-    for (FieldCanvas field : fields) {
-      field.updateData(data);      
-    }
-    for (AgentPlot agentPlot : agents) {
-      agentPlot.updateData(data);      
-    }
-    
   }
 
   public static void main(String[] args) {

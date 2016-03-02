@@ -15,8 +15,8 @@ import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
@@ -37,7 +37,10 @@ import javafx.util.Pair;
 import javax.swing.event.EventListenerList;
 import static jfreechart.Parser.MAX_TURTLES;
 
-public class ScatterPlot implements Chart {
+public class LinePlot implements Chart {
+  
+  protected EventListenerList listenerList = new EventListenerList();
+  
   private Scene scene;
   private int[] selectedTurtles;
   private String yParameter;
@@ -54,9 +57,9 @@ public class ScatterPlot implements Chart {
   private BorderPane rootPane; 
   private Point2D selectionPoint;
   private Rectangle selectionRectangle;
-  private ScatterChart<Number,Number> scatterChart;
+  private LineChart<Number,Number> lineChart;
   
-  public ScatterPlot(Scene scene, int[] selectedTurtles, String yParameter, int yParameterIndex, List<TimeFrame> data) {
+  public LinePlot(Scene scene, int[] selectedTurtles, String yParameter, int yParameterIndex, List<TimeFrame> data) {
     this.scene = scene;
     this.selectedTurtles = selectedTurtles;
     this.yParameter = yParameter;
@@ -74,7 +77,7 @@ public class ScatterPlot implements Chart {
   
   @Override
   public String getName() {
-    return "ScatterPlot";
+    return "LinePlot";
   }
   
   @Override
@@ -91,7 +94,7 @@ public class ScatterPlot implements Chart {
   @Override
   public void selectFrames(int startIndex, int endIndex, boolean drag) {
     if(!drag && data.size() > 0) {
-      ScatterChart<Number,Number> scattterChart = (ScatterChart<Number,Number>)rootPane.getCenter();
+      LineChart<Number,Number> lineChart = (LineChart<Number,Number>)rootPane.getCenter();
 
       clearSelection();
 
@@ -106,7 +109,7 @@ public class ScatterPlot implements Chart {
           points.add(point);
         }
 
-        ObservableList<Series<Number, Number>> series = scatterChart.getData();
+        ObservableList<Series<Number, Number>> series = lineChart.getData();
         Series<Number,Number> serie = series.get(selected);
         ObservableList<Data<Number, Number>> datas = serie.getData();
         for(Data<Number, Number> data : datas) {
@@ -144,7 +147,7 @@ public class ScatterPlot implements Chart {
   }
   
   private void clearSelection() {    
-    NumberAxis yAxis = (NumberAxis) scatterChart.getYAxis();
+    NumberAxis yAxis = (NumberAxis) lineChart.getYAxis();
     double yAxisShift = getSceneYShift(yAxis);
   
     selectionRectangle.setX(0);
@@ -169,7 +172,7 @@ public class ScatterPlot implements Chart {
     final NumberAxis xAxis = getAxis(this.minValueX, this.maxValueX);
     final NumberAxis yAxis = getAxis(this.minValueY, this.maxValueY);
     
-    this.scatterChart = new ScatterChart<>(xAxis,yAxis);
+    this.lineChart = new LineChart<>(xAxis,yAxis);
     
     if(data.size() > 0) {
       ParameterMap parameters = data.get(0).getTurtles().get(0).getParameters();
@@ -179,7 +182,7 @@ public class ScatterPlot implements Chart {
 
       yAxis.setLabel(this.yParameter + " " + selectedYIndex);
 
-      this.scatterChart.getData().addAll(getData());
+      this.lineChart.getData().addAll(getData());
     }
     
     System.out.printf("Completed chart\n");
@@ -187,7 +190,7 @@ public class ScatterPlot implements Chart {
     rootPane.getChildren().clear();
     
     System.out.printf("CLEARED \n");
-    rootPane.setCenter(this.scatterChart);
+    rootPane.setCenter(this.lineChart);
     System.out.printf("SET CENTER \n");
   }
   
@@ -277,7 +280,7 @@ public class ScatterPlot implements Chart {
 
     System.out.printf("START LISTEN \n");
     
-    ScatterChart<Number,Number> scattterChart = (ScatterChart<Number,Number>)rootPane.getCenter();
+    LineChart<Number,Number> scattterChart = (LineChart<Number,Number>)rootPane.getCenter();
     
     NumberAxis xAxis = (NumberAxis) scattterChart.getXAxis();
     NumberAxis yAxis = (NumberAxis) scattterChart.getYAxis();
@@ -290,14 +293,14 @@ public class ScatterPlot implements Chart {
     });
     yAxis.setOnMouseClicked(createParameterHandler());
     
-    scatterChart.widthProperty().addListener((ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) -> {
+    lineChart.widthProperty().addListener((ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) -> {
       //notifyListeners(0, 0);
     });
-    scatterChart.heightProperty().addListener((ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) -> {
+    lineChart.heightProperty().addListener((ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) -> {
       //notifyListeners(0, 0);
     });
     
-    for(Series series : scatterChart.getData()) {
+    for(Series series : lineChart.getData()) {
       for (Node n : series.getChart().getChildrenUnmodifiable()) {
         
         if (n instanceof Legend)
@@ -394,7 +397,7 @@ public class ScatterPlot implements Chart {
   }
   
   private void createRectangleSelectionEvents(Node node, NumberAxis xAxis, NumberAxis yAxis) {
-    ScatterChart<Number,Number> scattterChart = (ScatterChart<Number,Number>)rootPane.getCenter();
+    LineChart<Number,Number> lineChart = (LineChart<Number,Number>)rootPane.getCenter();
     
     node.setOnMousePressed((MouseEvent event) -> {
       System.out.printf("MOUSE_PRESSED \n");
@@ -648,7 +651,7 @@ public class ScatterPlot implements Chart {
     do {  
         shift += node.getLayoutX();  
         node = node.getParent(); 
-    } while (node != null && node.getClass() != ScatterChart.class); 
+    } while (node != null && node.getClass() != LineChart.class); 
     return shift; 
   }
   
@@ -657,7 +660,7 @@ public class ScatterPlot implements Chart {
     do {  
         shift += node.getLayoutY();
         node = node.getParent(); 
-    } while (node != null && node.getClass() != ScatterChart.class); 
+    } while (node != null && node.getClass() != LineChart.class); 
     return shift; 
   }
 }

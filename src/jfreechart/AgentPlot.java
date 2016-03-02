@@ -37,9 +37,7 @@ import javafx.scene.shape.RectangleBuilder;
 import javafx.util.Pair;
 import javax.swing.event.EventListenerList;
 
-public class AgentPlot {
-  
-  protected EventListenerList listenerList = new EventListenerList();
+public class AgentPlot implements Chart {
   
   private Scene scene;
   private int[] selectedTurtles;
@@ -51,6 +49,10 @@ public class AgentPlot {
   private Rectangle selectionRectangle;
   private Point2D selectionPoint;
   
+  private double initSelectionX = 0;
+  private double initSelectionWidth = 0;
+  private Object[] initSelectionData = new Object[]{ 0, 0 };
+  
   public AgentPlot(Scene scene, int[] selectedTurtles, List<TimeFrame> data) {
     this.scene = scene;
     this.selectedTurtles = selectedTurtles;
@@ -60,35 +62,53 @@ public class AgentPlot {
     initialize();
   }
   
-  public Node getChart() {
+  @Override
+  public Node getNode() {
     return rootPane;
   }
   
+  @Override
+  public String getName() {
+    return "AgentPlot";
+  }
+  
+  @Override
   public void addSelectionEventListener(SelectionEventListener listener) {
     listenerList.add(SelectionEventListener.class, listener);
   }
   
+  @Override
   public void updateData(List<TimeFrame> data) {
     this.data = data;
     initialize();
   }
-    
-  public void selectFrames(int startIndex, int endIndex) {
-    NumberAxis xAxis = (NumberAxis) scattterChart.getXAxis();
-    double xAxisShift = getSceneXShift(xAxis);
-    double start = xAxis.getDisplayPosition(startIndex);
-    double end = xAxis.getDisplayPosition(endIndex);
-    selectionRectangle.setX(xAxisShift + start);
-    selectionRectangle.setWidth(end - start);
-    selectionRectangle.setUserData(new Object[]{ startIndex, endIndex });
+  
+  @Override
+  public void selectFrames(int startIndex, int endIndex, boolean drag) {
+    if(!drag && data.size() > 0) {
+      NumberAxis xAxis = (NumberAxis) scattterChart.getXAxis();
+      double xAxisShift = getSceneXShift(xAxis);
+      double start = xAxis.getDisplayPosition(startIndex);
+      double end = xAxis.getDisplayPosition(endIndex);
+      
+      if(selectionRectangle != null) {
+        selectionRectangle.setX(xAxisShift + start);
+        selectionRectangle.setWidth(end - start);
+        selectionRectangle.setUserData(new Object[]{ startIndex, endIndex });
+      } else {
+        initSelectionX = xAxisShift + start;
+        initSelectionWidth = end - start;
+        initSelectionData = new Object[]{ startIndex, endIndex };
+      }
+    }
   }
   
-  private void notifyListeners(int startIndex, int endIndex) {
+  private void notifyListeners(int startIndex, int endIndex, boolean drag) {
     List<Integer> selectedTimeFrames = new ArrayList();
     Object[] listeners = listenerList.getListenerList();
     for (int i = 0; i < listeners.length; i = i+2) {
       if (listeners[i] == SelectionEventListener.class) {
-        ((SelectionEventListener) listeners[i+1]).timeFrameSelected(startIndex, endIndex);
+        ((SelectionEventListener) listeners[i+1]).timeFrameSelected(startIndex, endIndex, drag);
       }
     }
   }
@@ -122,7 +142,7 @@ public class AgentPlot {
                 }
               });
             }
-          }, 100);
+          }, 0);
     });
     
     this.scattterChart.heightProperty().addListener((ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) -> {      
@@ -137,7 +157,7 @@ public class AgentPlot {
                 }
               });
             }
-          }, 100);
+          }, 0);
     });
     
     if(data.size() > 0) {
@@ -159,7 +179,7 @@ public class AgentPlot {
               }
             });
           }
-        }, 100);
+        }, 0);
     
     initMouseListeners();
   }
@@ -302,14 +322,14 @@ public class AgentPlot {
       }
 
       selectionRectangle = RectangleBuilder.create()
-              .x(0)
+              .x(initSelectionX)
               .y(minY + yAxisShift - (height / 2))
               .height(maxY + (height / 2) - 5)
-              .width(0)
+              .width(initSelectionWidth)
               .fill(Color.web("0x222222"))
               .opacity(0.3)
               .id("selection")
-              .userData(new Object[]{ 0, 0 })
+              .userData(initSelectionData)
               .build();    
       rootPane.getChildren().add(selectionRectangle);
       
@@ -322,7 +342,7 @@ public class AgentPlot {
       createLegend(roles);
     }
   }
-  
+    
   private void createLegend(List<Double> roles) {
       Legend legend = (Legend)scattterChart.lookup(".chart-legend");
       legend.getStylesheets().add("jfreechart/plot.css");
@@ -419,12 +439,9 @@ public class AgentPlot {
     node.setOnMousePressed((MouseEvent event) -> {
       System.out.printf("MOUSE_PRESSED \n");
 
-      double xChartShift = getSceneXShift(node);
-      double yChartShift = getSceneYShift(node);
-
-      selectionPoint = new Point2D(event.getX() + xChartShift, event.getY() + yChartShift);
+      selectionPoint = new Point2D(event.getX(), event.getY());
       
-      notifyListeners(0, 0);
+      notifyListeners(0, 0, false);
     });
 
     node.setOnMouseDragged((MouseEvent event) -> {
@@ -435,12 +452,12 @@ public class AgentPlot {
       double xAxisShift = getSceneXShift(xAxis);
       double yAxisShift = getSceneYShift(yAxis);
 
-      Rectangle selection = getSelectionRectangle(event.getX(), event.getY(), xChartShift, yChartShift, xAxis.getWidth() + xAxisShift - xChartShift, yAxis.getHeight() + yAxisShift- yChartShift);
+      Rectangle selection = getSelectionRectangle(event.getX(), event.getY(), 0, 0, xAxis.getWidth(), yAxis.getHeight());
             
       int start = xAxis.getValueForDisplay(selection.getX() - xAxisShift).intValue();
       int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xAxisShift).intValue();
       
-      notifyListeners(start, end);
+      notifyListeners(start, end, true);
       
       selectionRectangle.setX(selection.getX());
       selectionRectangle.setWidth(selection.getWidth());
@@ -454,12 +471,12 @@ public class AgentPlot {
       double xAxisShift = getSceneXShift(xAxis);
       double yAxisShift = getSceneYShift(yAxis);
 
-      Rectangle selection = getSelectionRectangle(event.getX(), event.getY(), xChartShift, yChartShift, xAxis.getWidth() + xAxisShift - xChartShift, yAxis.getHeight() + yAxisShift- yChartShift);
+      Rectangle selection = getSelectionRectangle(event.getX(), event.getY(), 0, 0, xAxis.getWidth(), yAxis.getHeight());
       
       int start = xAxis.getValueForDisplay(selection.getX() - xAxisShift).intValue();
       int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xAxisShift).intValue();
       
-      notifyListeners(start, end);
+      notifyListeners(start, end, false);
     });
   }
   

@@ -12,12 +12,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.EventHandler;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ButtonType;
@@ -30,14 +29,11 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.LineTo;
-import javafx.scene.shape.MoveTo;
-import javafx.scene.shape.Path;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Pair;
 import static jfreechart.Parser.MAX_TURTLES;
 
-public class FieldCanvas extends Pane {
+public class FieldCanvas extends Pane implements Chart{
   private static final double FIELDWIDTH = 11.880000;
   private static final double FIELDLENGTH = 17.880000;
   private static final double PENALTYAREAWIDTH = 6.370000;
@@ -83,16 +79,35 @@ public class FieldCanvas extends Pane {
     });
   }
   
+  @Override
   public void updateData(List<TimeFrame> data) {
     this.data = data;
     selection = new ArrayList();
     this.requestLayout();
   }
   
-  public void selectFrames(int startIndex, int endIndex) {
-    this.selection = data.subList(startIndex, endIndex);
-        
-    this.requestLayout();
+  @Override
+  public void selectFrames(int startIndex, int endIndex, boolean drag) {
+    if(data.size() > 0) {
+      this.selection = data.subList(startIndex, endIndex);
+
+      this.requestLayout();
+    }
+  }
+  
+  @Override
+  public Node getNode() {
+    return this;
+  }
+  
+  @Override
+  public String getName() {
+    return "Field";
+  }
+
+  @Override
+  public void addSelectionEventListener(SelectionEventListener listener) {
+    listenerList.add(SelectionEventListener.class, listener);
   }
   
   @Override
@@ -312,6 +327,33 @@ public class FieldCanvas extends Pane {
     }
   }
   
+  private void drawField(GraphicsContext g) {
+    g.setFill(Color.GREEN);
+    g.setStroke(Color.GREEN);
+    g.fillRect(field.getX(), field.getY(), field.getWidth(), field.getHeight());
+    
+    g.setFill(Color.WHITE);
+    g.setStroke(Color.WHITE);
+    
+    double width_center = (FIELDWIDTH / 2);
+    double height_center = (FIELDLENGTH / 2);
+    
+    drawFillRectangleInField(g, width_center - (GOALWIDTH / 2), -GOALDEPTH, GOALWIDTH, GOALDEPTH);
+    drawFillRectangleInField(g, width_center - (GOALWIDTH / 2), FIELDLENGTH, GOALWIDTH, GOALDEPTH);
+    
+    drawRectangleInField(g, width_center - (GOALAREAWIDTH / 2), 0, GOALAREAWIDTH, GOALAREALENGTH);
+    drawRectangleInField(g, width_center - (GOALAREAWIDTH / 2), FIELDLENGTH - GOALAREALENGTH, GOALAREAWIDTH, GOALAREALENGTH);
+    
+    drawRectangleInField(g, width_center - (PENALTYAREAWIDTH / 2), 0, PENALTYAREAWIDTH, PENALTYAREALENGTH);
+    drawRectangleInField(g, width_center - (PENALTYAREAWIDTH / 2), FIELDLENGTH - PENALTYAREALENGTH, PENALTYAREAWIDTH, PENALTYAREALENGTH);
+    
+    drawFillOvalInField(g, width_center - 0.2, PENALTYSPOT - 0.2, 0.4, 0.4);
+    drawFillOvalInField(g, width_center - 0.2, FIELDLENGTH - PENALTYSPOT - 0.2, 0.4, 0.4);    
+    
+    drawFillRectangleInField(g, 0, height_center - 0.02, FIELDWIDTH, 0.04);
+    drawOvalInField(g, width_center - 1.5, height_center - 1.5, 3, 3);
+  }
+  
   private double[] averagePoint(List<double[]> positions) {
     double x = 0;
     double y = 0;
@@ -405,32 +447,5 @@ public class FieldCanvas extends Pane {
     }
     
     return new Rectangle(0, 0, rectWidth, rectHeight);
-  }
-
-  private void drawField(GraphicsContext g) {
-    g.setFill(Color.GREEN);
-    g.setStroke(Color.GREEN);
-    g.fillRect(field.getX(), field.getY(), field.getWidth(), field.getHeight());
-    
-    g.setFill(Color.WHITE);
-    g.setStroke(Color.WHITE);
-    
-    double width_center = (FIELDWIDTH / 2);
-    double height_center = (FIELDLENGTH / 2);
-    
-    drawFillRectangleInField(g, width_center - (GOALWIDTH / 2), -GOALDEPTH, GOALWIDTH, GOALDEPTH);
-    drawFillRectangleInField(g, width_center - (GOALWIDTH / 2), FIELDLENGTH, GOALWIDTH, GOALDEPTH);
-    
-    drawRectangleInField(g, width_center - (GOALAREAWIDTH / 2), 0, GOALAREAWIDTH, GOALAREALENGTH);
-    drawRectangleInField(g, width_center - (GOALAREAWIDTH / 2), FIELDLENGTH - GOALAREALENGTH, GOALAREAWIDTH, GOALAREALENGTH);
-    
-    drawRectangleInField(g, width_center - (PENALTYAREAWIDTH / 2), 0, PENALTYAREAWIDTH, PENALTYAREALENGTH);
-    drawRectangleInField(g, width_center - (PENALTYAREAWIDTH / 2), FIELDLENGTH - PENALTYAREALENGTH, PENALTYAREAWIDTH, PENALTYAREALENGTH);
-    
-    drawFillOvalInField(g, width_center - 0.2, PENALTYSPOT - 0.2, 0.4, 0.4);
-    drawFillOvalInField(g, width_center - 0.2, FIELDLENGTH - PENALTYSPOT - 0.2, 0.4, 0.4);    
-    
-    drawFillRectangleInField(g, 0, height_center - 0.02, FIELDWIDTH, 0.04);
-    drawOvalInField(g, width_center - 1.5, height_center - 1.5, 3, 3);
   }
 }
