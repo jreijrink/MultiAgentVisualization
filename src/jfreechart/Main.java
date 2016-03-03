@@ -8,9 +8,8 @@ package jfreechart;
 import java.io.File;
 import javafx.scene.image.Image;
 import java.util.ArrayList;
-import java.util.EventListener;
 import java.util.List;
-import java.util.Random;
+import java.util.Timer;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
@@ -20,10 +19,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
@@ -71,6 +66,7 @@ public class Main extends Application {
 
     root.setTop(menuBar);
 
+    
     Menu fileMenu = new Menu("File");
     MenuItem openMenu = new MenuItem("Open");
     openMenu.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_DOWN));
@@ -95,6 +91,31 @@ public class Main extends Application {
       }
     });
     fileMenu.getItems().add(openMenu);
+    
+    root.widthProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+    
+      Timer timer = new java.util.Timer();
+      timer.schedule( 
+        new java.util.TimerTask() {
+          @Override
+          public void run() {
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                  menuBar.autosize();
+                  menuBar.requestLayout();
+                  timer.cancel();
+                  timer.purge();
+                }
+              });
+            }
+          }, 100);
+    });
+
+    root.heightProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+      menuBar.autosize();
+      menuBar.requestLayout();
+    });
     
     Menu elementMenu = new Menu("Elements");
     
@@ -158,10 +179,10 @@ public class Main extends Application {
     LinePlot line = new LinePlot(scene, new int[]{0}, "cpu0Load", 0, new ArrayList());
     addChart(dockPane, DockPos.TOP, line);
     
-    AgentPlot agent = new AgentPlot(scene, new int[]{ 0, 1, 2, 3, 4 }, new ArrayList());
+    AgentPlot agent = new AgentPlot(scene, new int[]{ 0, 1, 2, 3, 4, 5 }, new ArrayList());
     addChart(dockPane, DockPos.TOP, agent);
     
-    FieldCanvas field = new FieldCanvas(new ArrayList(), new int[]{0, 1, 2, 3, 4 }, "pose");
+    FieldCanvas field = new FieldCanvas(new ArrayList(), new int[]{0, 1, 2, 3, 4, 5 }, "pose");
     addChart(dockPane, DockPos.RIGHT, field);
     
     return dockPane;

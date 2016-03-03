@@ -7,7 +7,6 @@ package jfreechart;
 
 import java.awt.Point;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,8 +16,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Dialog;
@@ -29,8 +26,17 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
+import javafx.scene.shape.LineTo;
+import javafx.scene.shape.MoveTo;
+import javafx.scene.shape.Path;
 import javafx.scene.shape.Rectangle;
+import javafx.scene.shape.RectangleBuilder;
+import javafx.scene.text.Text;
+import javafx.scene.transform.Scale;
+import javafx.scene.transform.Translate;
 import javafx.util.Pair;
+import static jfreechart.Parser.MAX_OPPONENTS;
 import static jfreechart.Parser.MAX_TURTLES;
 
 public class FieldCanvas extends Pane implements Chart{
@@ -50,48 +56,63 @@ public class FieldCanvas extends Pane implements Chart{
   private int[] selectedRobots;
   private String selectedParameter;
   
-  private Canvas canvas;
+  private Circle shape_ball;
+  private Pair<Rectangle, Text>[] shape_opponents = new Pair[MAX_OPPONENTS];
+  private Pair<Rectangle, Text>[] shape_turtles = new Pair[MAX_TURTLES];
+  private Rectangle shape_field;
+  private Rectangle shape_goal1;
+  private Rectangle shape_goal2;
+  private Rectangle shape_goalarea1;
+  private Rectangle shape_goalarea2;
+  private Rectangle shape_penalty1;
+  private Rectangle shape_penalty2;
+  private Circle shape_penaltyspot1;
+  private Circle shape_penaltyspot2;
+  private Rectangle shape_fieldcenter;
+  private Circle shape_fieldcenteroval;
+  
+  private double initial_width;
+  private double initial_height;
   
   public FieldCanvas(List<TimeFrame> data,  int[] defaultRobots, String defaultParameter) {
     this.data = data;
     this.selectedRobots = defaultRobots;
     this.selectedParameter = defaultParameter;
+    this.getStylesheets().add("jfreechart/plot.css");
     
     selection = new ArrayList();
-
-    setStyle("-fx-background-color: white;");
-    
-    canvas = new Canvas(getWidth(), getHeight()); 
-    getChildren().add(canvas);
-
+          
     widthProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-      canvas.setWidth(newValue.intValue());
       field = getField();
+      setClipping();
     });
 
     heightProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-      canvas.setHeight(newValue.intValue());
-      field = getField();
+      field = getField();    
+      setClipping();
     });
-    
+            
     this.setOnMouseClicked((MouseEvent event) -> {
       showparameterDialog();
     });
+    
+    initField();
+    drawField();
+    
   }
-  
+    
   @Override
   public void updateData(List<TimeFrame> data) {
     this.data = data;
     selection = new ArrayList();
-    this.requestLayout();
+    drawMovingShapes();
   }
   
   @Override
   public void selectFrames(int startIndex, int endIndex, boolean drag) {
     if(data.size() > 0) {
       this.selection = data.subList(startIndex, endIndex);
-
-      this.requestLayout();
+      drawMovingShapes();
     }
   }
   
@@ -112,23 +133,37 @@ public class FieldCanvas extends Pane implements Chart{
   
   @Override
   protected void layoutChildren() {
-    super.layoutChildren(); 
-
-    GraphicsContext gc = canvas.getGraphicsContext2D(); 
-    gc.save();
-    gc.clearRect(0, 0, getWidth(), getHeight());
-   
-    drawField(gc);
-    
-    drawHistoryLines(gc);
-    
-    drawOpponents(gc);
-    
-    drawturtles(gc);
-    
-    drawBall(gc);
+    super.layoutChildren();
+        
+    resizePanel();
   }
 
+  private void initField() {    
+    int width = 500;
+    int height = 500;
+    
+    double fieldRatio = (double)FIELDLENGTH / (double)FIELDWIDTH;
+    double canvasRatio = (double)height / (double)width;
+    
+    int rectHeight = height;
+    int rectWidth = width;
+    if(fieldRatio > canvasRatio) {
+      rectWidth = (int)((double)height / fieldRatio);
+    } else {
+      rectHeight = (int)((double)width * fieldRatio);
+    }
+    
+    field = new Rectangle(0, 0, rectWidth, rectHeight);
+      
+    initial_width= rectWidth;
+    initial_height= rectHeight;
+  }
+  
+  private void setClipping() {
+    Rectangle clip = new Rectangle(0, 0, Math.max(500, this.getWidth()), Math.max(500, this.getHeight()));
+    this.setClip(clip);    
+  }
+  
   private void showparameterDialog() {
     GridPane grid = new GridPane();
     grid.setHgap(10);
@@ -190,12 +225,36 @@ public class FieldCanvas extends Pane implements Chart{
     if(result.isPresent() && result.get() != null && result.get().getValue().length > 0 && result.get().getValue() != selectedRobots) {
       selectedRobots = result.get().getValue();
       selectedParameter = result.get().getKey();
-      requestLayout();
+      drawMovingShapes();
+    }
+  }
+      
+  private void drawMovingShapes() {
+    if(field != null) {
+      removePaths();
+
+      drawHistoryLines();
+
+      drawOpponents(); 
+
+      drawturtles();
+
+      drawBall();
+
+      resizePanel();
     }
   }
   
-  private void drawturtles(GraphicsContext g) {
-    if(selection.size() > 0) {
+  private void drawturtles() {
+
+    for(int i = 0; i < shape_turtles.length; i++) { 
+      if(shape_turtles[i] != null) {          
+        shape_turtles[i].getKey().setVisible(false);
+        shape_turtles[i].getValue().setVisible(false);
+      }          
+    }
+    
+    if(selection.size() > 0) {            
       for(Turtle turtle : selection.get(selection.size() - 1).getTurtles()) {
         ParameterMap paremeters = turtle.getParameters();
         if(paremeters.getValue("robotInField")[0][0] > 0) {
@@ -203,25 +262,59 @@ public class FieldCanvas extends Pane implements Chart{
           Point turtlePos = getPosition(field, position[0][0], position[0][1]);
           double orientation =  position[0][2];
           
-          g.save(); 
-          g.setStroke(Color.BLACK);
-          g.setFill(Color.BLACK);
-          g.translate(turtlePos.getX(), turtlePos.getY()); 
-          g.rotate(Math.toDegrees(orientation));
-          g.fillRect(-10, -10, 20, 20);
-          g.setStroke(Color.WHITE);
-          g.setFill(Color.WHITE);
-          g.strokeText(String.valueOf(turtle.getID() + 1), -5, 5);
-          g.restore();          
+          int index = turtle.getID();
+
+          if(shape_turtles[index] == null) {            
+            
+            
+              Rectangle turtleRect = RectangleBuilder.create()
+                      .x(turtlePos.getX() - 10)
+                      .y(turtlePos.getY() - 10)
+                      .height(20)
+                      .width(20)
+                      .styleClass(String.format("default-color%d-agent", (int)index))
+                      .build();
+                            
+              turtleRect.setRotate(Math.toDegrees(orientation));
+              Text turtleText = new Text(turtlePos.getX() - 5, turtlePos.getY() + 5, String.valueOf(index + 1));
+              turtleText.setFill(Color.WHITE);
+              turtleText.setRotate(Math.toDegrees(orientation));
+
+              shape_turtles[index] = new Pair(turtleRect, turtleText);
+              this.getChildren().add(turtleRect);
+              this.getChildren().add(turtleText);
+          } else {
+            if(turtlePos.getX() != 0 || turtlePos.getY() != 0) {
+              shape_turtles[index].getKey().setX(turtlePos.getX() - 10);
+              shape_turtles[index].getKey().setY(turtlePos.getY() - 10);
+              shape_turtles[index].getKey().setRotate(Math.toDegrees(orientation));
+              
+              shape_turtles[index].getValue().setX(turtlePos.getX() - 5);
+              shape_turtles[index].getValue().setY(turtlePos.getY() + 5);
+              shape_turtles[index].getValue().setRotate(Math.toDegrees(orientation));
+              
+              shape_turtles[index].getKey().setVisible(true);
+              shape_turtles[index].getValue().setVisible(true);
+            } else {
+              shape_turtles[index].getKey().setVisible(false);
+              shape_turtles[index].getValue().setVisible(false);
+            }
+          }
         }
       }
     }
   }
   
-  private void drawOpponents(GraphicsContext g) {
+  private void drawOpponents() {
+    Map<Integer, List<double[]>> opponentsPositions = new HashMap();
     
-    Map<String, List<double[]>> opponentsPositions = new HashMap();
-    
+    for(int i = 0; i < shape_opponents.length; i++) { 
+      if(shape_opponents[i] != null) {          
+        shape_opponents[i].getKey().setVisible(false);
+        shape_opponents[i].getValue().setVisible(false);
+      }          
+    }
+
     if(selection.size() > 0) {
       for(Turtle turtle : selection.get(selection.size() - 1).getTurtles()) {
         ParameterMap paremeters = turtle.getParameters();
@@ -229,8 +322,8 @@ public class FieldCanvas extends Pane implements Chart{
           double[][] opponents = paremeters.getValue("opponent");
           double[][] opponentLabels = paremeters.getValue("opponentlabelnumber");
           for(int i = 0; i < opponents.length; i++) {
-            if(opponents[i][0] != 0 || opponents[i][1] != 0) {
-              String label = String.valueOf((int)opponentLabels[i][0] + 1);
+            if(opponents[i][0] != 0 && opponents[i][1] != 0 && opponents[i][0] != -32 && opponents[i][1] != -32) {
+              int label = (int)opponentLabels[i][0];
               if(!opponentsPositions.containsKey(label)) {
                 opponentsPositions.put(label, new ArrayList());
               }
@@ -239,23 +332,44 @@ public class FieldCanvas extends Pane implements Chart{
           }
         }
       }
-    }
-    
-    for(String key : opponentsPositions.keySet()) {
-      double[] position = averagePoint(opponentsPositions.get(key));
-      
-      Point opponentPos = getPosition(field, position[0], position[1]);
-      g.setStroke(Color.PINK);
-      g.setFill(Color.PINK);
-      g.fillRect(opponentPos.getX() - 10, opponentPos.getY() - 10, 20, 20);
-      g.setStroke(Color.BLACK);
-      g.setFill(Color.BLACK);
-      g.strokeText(key, opponentPos.getX() - 5, opponentPos.getY() + 5);
+
+      for(int index : opponentsPositions.keySet()) {
+
+        double[] position = averagePoint(opponentsPositions.get(index));
+        Point opponentPos = getPosition(field, position[0], position[1]);
+
+        if(shape_opponents[index] == null) {            
+            Rectangle opponent = new Rectangle(opponentPos.getX() - 10, opponentPos.getY() - 10, 20, 20);
+            opponent.setFill(Color.DARKSLATEGREY);
+            Text opponentText = new Text(opponentPos.getX() - 5, opponentPos.getY() + 5, String.valueOf(index + 1));
+            opponentText.setFill(Color.WHITE);
+
+            shape_opponents[index] = new Pair(opponent, opponentText);
+            this.getChildren().add(opponent);
+            this.getChildren().add(opponentText);
+        } else {
+          if(opponentPos.getX() != 0 || opponentPos.getY() != 0) {
+            shape_opponents[index].getKey().setX(opponentPos.getX() - 10);
+            shape_opponents[index].getKey().setY(opponentPos.getY() - 10);
+            
+            shape_opponents[index].getValue().setX(opponentPos.getX() - 5);
+            shape_opponents[index].getValue().setY(opponentPos.getY() + 5);
+            
+            shape_opponents[index].getKey().setVisible(true);
+            shape_opponents[index].getValue().setVisible(true);
+          }
+        }
+      }
     }
   }
   
-  private void drawBall(GraphicsContext g) {
+  private void drawBall() {
     List<double[]> ballPositions = new ArrayList();
+
+    if(shape_ball != null) {
+      shape_ball.setVisible(false);
+    }
+
     if(selection.size() > 0) {
       for(Turtle turtle : selection.get(selection.size() - 1).getTurtles()) {
         ParameterMap paremeters = turtle.getParameters();
@@ -266,24 +380,102 @@ public class FieldCanvas extends Pane implements Chart{
           }
         }
       }
-    }
     
-    if(ballPositions.size() > 0 ) {
-      double[] ball = averagePoint(ballPositions);    
-      Point ballPos = getPosition(field, ball[0], ball[1]);
-      g.setStroke(Color.ORANGE);
-      g.setFill(Color.ORANGE);
-      g.fillOval(ballPos.getX() - 10, ballPos.getY() - 10, 20, 20);
+      if(ballPositions.size() > 0 ) {
+        double[] ball = averagePoint(ballPositions);    
+        Point ballPos = getPosition(field, ball[0], ball[1]);
+
+        if(shape_ball == null) {        
+          shape_ball = new Circle(ballPos.getX(), ballPos.getY(), 5, Color.ORANGE);
+          this.getChildren().add(shape_ball);
+        } else {
+          shape_ball.setVisible(true);
+          shape_ball.setCenterX(ballPos.getX());
+          shape_ball.setCenterY(ballPos.getY());
+        }
+      }
+    }
+  }
+    
+  private void drawField() {    
+    double width_center = (FIELDWIDTH / 2);
+    double height_center = (FIELDLENGTH / 2);
+    
+    if(shape_field == null) {      
+      shape_field = new Rectangle(field.getX(), field.getY(), field.getWidth(), field.getHeight());
+      shape_field.setFill(Color.GREEN);
+      shape_field.setStroke(Color.GREEN);
+      
+      Rectangle position = translateToField(width_center - (GOALWIDTH / 2), -GOALDEPTH, GOALWIDTH, GOALDEPTH);
+      shape_goal1 = new Rectangle(position.getX(), position.getY(), position.getWidth(), position.getHeight());
+      shape_goal1.setFill(Color.TRANSPARENT);
+      shape_goal1.setStroke(Color.WHITE);
+      
+      position = translateToField(width_center - (GOALWIDTH / 2), FIELDLENGTH, GOALWIDTH, GOALDEPTH);
+      shape_goal2 = new Rectangle(position.getX(), position.getY(), position.getWidth(), position.getHeight());
+      shape_goal2.setFill(Color.TRANSPARENT);
+      shape_goal2.setStroke(Color.WHITE);
+
+      position = translateToField(width_center - (GOALAREAWIDTH / 2), 0, GOALAREAWIDTH, GOALAREALENGTH);
+      shape_goalarea1 = new Rectangle(position.getX(), position.getY(), position.getWidth(), position.getHeight());
+      shape_goalarea1.setFill(Color.TRANSPARENT);
+      shape_goalarea1.setStroke(Color.WHITE);
+      
+      position = translateToField(width_center - (GOALAREAWIDTH / 2), FIELDLENGTH - GOALAREALENGTH, GOALAREAWIDTH, GOALAREALENGTH);
+      shape_goalarea2 = new Rectangle(position.getX(), position.getY(), position.getWidth(), position.getHeight());
+      shape_goalarea2.setFill(Color.TRANSPARENT);
+      shape_goalarea2.setStroke(Color.WHITE);
+
+      position = translateToField(width_center - (PENALTYAREAWIDTH / 2), 0, PENALTYAREAWIDTH, PENALTYAREALENGTH);
+      shape_penalty1 = new Rectangle(position.getX(), position.getY(), position.getWidth(), position.getHeight());
+      shape_penalty1.setFill(Color.TRANSPARENT);
+      shape_penalty1.setStroke(Color.WHITE);
+      
+      position = translateToField(width_center - (PENALTYAREAWIDTH / 2), FIELDLENGTH - PENALTYAREALENGTH, PENALTYAREAWIDTH, PENALTYAREALENGTH);
+      shape_penalty2 = new Rectangle(position.getX(), position.getY(), position.getWidth(), position.getHeight());
+      shape_penalty2.setFill(Color.TRANSPARENT);
+      shape_penalty2.setStroke(Color.WHITE);
+
+      position = translateToField(width_center, PENALTYSPOT, 0.2, 0.2);
+      shape_penaltyspot1 = new Circle(position.getX(), position.getY(), position.getWidth());
+      shape_penaltyspot1.setFill(Color.WHITE);
+      shape_penaltyspot1.setStroke(Color.WHITE);
+
+      position = translateToField(width_center, FIELDLENGTH - PENALTYSPOT, 0.2, 0.2);    
+      shape_penaltyspot2 = new Circle(position.getX(), position.getY(), position.getWidth());
+      shape_penaltyspot2.setFill(Color.WHITE);
+      shape_penaltyspot2.setStroke(Color.WHITE);
+
+      position = translateToField(0, height_center - 0.02, FIELDWIDTH, 0.04);
+      shape_fieldcenter = new Rectangle(position.getX(), position.getY(), position.getWidth(), position.getHeight());
+      shape_fieldcenter.setFill(Color.TRANSPARENT);
+      shape_fieldcenter.setStroke(Color.WHITE);
+
+      position = translateToField(width_center, height_center, 1.5, 1.5);
+      shape_fieldcenteroval = new Circle(position.getX(), position.getY(), position.getWidth());
+      shape_fieldcenteroval.setFill(Color.TRANSPARENT);
+      shape_fieldcenteroval.setStroke(Color.WHITE);
+
+      this.getChildren().add(shape_field);
+      this.getChildren().add(shape_goal1);
+      this.getChildren().add(shape_goal2);
+      this.getChildren().add(shape_goalarea1);
+      this.getChildren().add(shape_goalarea2);
+      this.getChildren().add(shape_penalty1);
+      this.getChildren().add(shape_penalty2);      
+      this.getChildren().add(shape_penaltyspot1);      
+      this.getChildren().add(shape_penaltyspot2);      
+      this.getChildren().add(shape_fieldcenter);      
+      this.getChildren().add(shape_fieldcenteroval);      
     }
   }
   
-  private void drawHistoryLines(GraphicsContext g) {
-    if(selection.size() > 0) {
-      List<List<Point>> paths = new ArrayList();
-      
+  private void drawHistoryLines() {
+    if(selection.size() > 0 && this.paths.isEmpty()) {
+      List<Pair<Integer, List<Point>>> paths = new ArrayList();
+
       for(int turtleIndex : selectedRobots) {
-        
-        
+
         ParameterMap initalCount = selection.get(0).getTurtles().get(turtleIndex).getParameters();
         int size = initalCount.getValue(selectedParameter).length;
         List<Point>[] newPaths = new List[size];
@@ -292,66 +484,68 @@ public class FieldCanvas extends Pane implements Chart{
         }
 
         for(int frameIndex = 0; frameIndex < selection.size(); frameIndex++) {
-          
+
           Turtle turle = selection.get(frameIndex).getTurtles().get(turtleIndex);
           ParameterMap paremeters = turle.getParameters();
           double[][] value = paremeters.getValue(selectedParameter);
-          
+
           for(int i = 0; i < value.length; i++) {
-            if(value[i][0] != 0 || value[i][1] != 0) {
+            if(value[i][0] != 0 && value[i][1] != 0 && value[i][0] != -32 && value[i][1] != -32) {
               Point position = getPosition(field, value[i][0], value[i][1]);
               newPaths[i].add(position);
             }
           }
         }
-        
-        paths.addAll(Arrays.asList(newPaths));
-      }
-      
-      g.setStroke(Color.LIGHTGRAY);
-      g.setLineWidth(4);
 
-      for(List<Point> path : paths) {
-        if(path.size() > 0) {
-          g.beginPath();
-          g.moveTo(path.get(0).x, path.get(0).y);
-          for(Point point : path) {
-            g.lineTo(point.x, point.y);
-          }
-          g.stroke();
-          g.closePath();
+        for(List<Point> path : newPaths) {
+          paths.add(new Pair(turtleIndex,path));
         }
       }
-      
-      g.setLineWidth(1);
+
+      for(Pair<Integer, List<Point>> points : paths) {
+        if(points.getValue().size() > 0) {
+
+          Path path = new Path();
+          path.getStyleClass().add(String.format("default-color%d-agent-line", (int)points.getKey()));
+          path.setStrokeWidth(2);
+
+          MoveTo moveTo = new MoveTo(points.getValue().get(0).x, points.getValue().get(0).y);
+          path.getElements().add(moveTo); 
+
+          for(Point point : points.getValue()) {
+            LineTo lineTo = new LineTo(point.x, point.y);
+            path.getElements().add(lineTo);
+          }
+
+          this.paths.add(path);
+          this.getChildren().add(11, path);
+        }
+      }
     }
   }
   
-  private void drawField(GraphicsContext g) {
-    g.setFill(Color.GREEN);
-    g.setStroke(Color.GREEN);
-    g.fillRect(field.getX(), field.getY(), field.getWidth(), field.getHeight());
-    
-    g.setFill(Color.WHITE);
-    g.setStroke(Color.WHITE);
-    
-    double width_center = (FIELDWIDTH / 2);
-    double height_center = (FIELDLENGTH / 2);
-    
-    drawFillRectangleInField(g, width_center - (GOALWIDTH / 2), -GOALDEPTH, GOALWIDTH, GOALDEPTH);
-    drawFillRectangleInField(g, width_center - (GOALWIDTH / 2), FIELDLENGTH, GOALWIDTH, GOALDEPTH);
-    
-    drawRectangleInField(g, width_center - (GOALAREAWIDTH / 2), 0, GOALAREAWIDTH, GOALAREALENGTH);
-    drawRectangleInField(g, width_center - (GOALAREAWIDTH / 2), FIELDLENGTH - GOALAREALENGTH, GOALAREAWIDTH, GOALAREALENGTH);
-    
-    drawRectangleInField(g, width_center - (PENALTYAREAWIDTH / 2), 0, PENALTYAREAWIDTH, PENALTYAREALENGTH);
-    drawRectangleInField(g, width_center - (PENALTYAREAWIDTH / 2), FIELDLENGTH - PENALTYAREALENGTH, PENALTYAREAWIDTH, PENALTYAREALENGTH);
-    
-    drawFillOvalInField(g, width_center - 0.2, PENALTYSPOT - 0.2, 0.4, 0.4);
-    drawFillOvalInField(g, width_center - 0.2, FIELDLENGTH - PENALTYSPOT - 0.2, 0.4, 0.4);    
-    
-    drawFillRectangleInField(g, 0, height_center - 0.02, FIELDWIDTH, 0.04);
-    drawOvalInField(g, width_center - 1.5, height_center - 1.5, 3, 3);
+  private void resizePanel() {      
+      if(field != null) {
+        double cx = this.getBoundsInParent().getMinX();
+        double cy = this.getBoundsInParent().getMinY();
+
+        double scaleX = field.getWidth()/ initial_width;
+        double scaleY = field.getHeight() / initial_height;
+
+        this.getTransforms().clear();
+        this.getTransforms().add(new Translate(-cx, -cy));
+        this.getTransforms().add(new Scale(scaleX, scaleY, cx, cy));
+        this.getTransforms().add(new Translate(cx, cy));      
+      }
+  }
+  
+  private List<Path> paths = new ArrayList();
+  
+  private void removePaths() {
+    for(Path path : paths) {
+      this.getChildren().remove(path);
+    }
+    paths.clear();
   }
   
   private double[] averagePoint(List<double[]> positions) {
@@ -371,11 +565,11 @@ public class FieldCanvas extends Pane implements Chart{
   
   private Point getPosition(Rectangle field, double center_x, double center_y) {
     
-    double field_center_x = (double)field.getWidth() / 2;
-    double field_center_y = (double)field.getHeight() / 2;
+    double field_center_x = (double)initial_width / 2;
+    double field_center_y = (double)initial_height / 2;
     
-    double widthRatio = (double)field.getWidth()  / (double)FIELDWIDTH;
-    double heightRatio = (double)field.getHeight() / (double)FIELDLENGTH;
+    double widthRatio = (double)initial_width  / (double)FIELDWIDTH;
+    double heightRatio = (double)initial_height / (double)FIELDLENGTH;
     
     double center_x_in_field = center_x * widthRatio;
     double center_y_in_field = center_y * heightRatio;
@@ -383,7 +577,7 @@ public class FieldCanvas extends Pane implements Chart{
     return new Point((int)(field_center_x + center_x_in_field), (int)(field_center_y + center_y_in_field));
   }
   
-  private void drawFillRectangleInField(GraphicsContext g, double x, double y, double width, double height) {
+  private Rectangle translateToField(double x, double y, double width, double height) {
     double widthRatio = (double)field.getWidth() / (double)FIELDWIDTH;
     double heightRatio = (double)field.getHeight() / (double)FIELDLENGTH;
     
@@ -392,48 +586,12 @@ public class FieldCanvas extends Pane implements Chart{
     double width_in_field = width * widthRatio;
     double height_in_field = height * heightRatio;
     
-    g.fillRect((int)x_in_field, (int)y_in_field, (int)width_in_field, (int)height_in_field);
+    return new Rectangle(x_in_field, y_in_field, width_in_field, height_in_field);
   }
-  
-  private void drawRectangleInField(GraphicsContext g, double x, double y, double width, double height) {
-    double widthRatio = (double)field.getWidth() / (double)FIELDWIDTH;
-    double heightRatio = (double)field.getHeight() / (double)FIELDLENGTH;
     
-    double x_in_field = x * widthRatio;
-    double y_in_field = y * heightRatio;
-    double width_in_field = width * widthRatio;
-    double height_in_field = height * heightRatio;
-    
-    g.strokeRect((int)x_in_field, (int)y_in_field, (int)width_in_field, (int)height_in_field);
-  }
-  
-  private void drawFillOvalInField(GraphicsContext g, double x, double y, double width, double height) {
-    double widthRatio = (double)field.getWidth() / (double)FIELDWIDTH;
-    double heightRatio = (double)field.getHeight() / (double)FIELDLENGTH;
-    
-    double x_in_field = x * widthRatio;
-    double y_in_field = y * heightRatio;
-    double width_in_field = width * widthRatio;
-    double height_in_field = height * heightRatio;
-    
-    g.fillOval((int)x_in_field, (int)y_in_field, (int)width_in_field, (int)height_in_field);
-  }
-  
-  private void drawOvalInField(GraphicsContext g, double x, double y, double width, double height) {
-    double widthRatio = (double)field.getWidth() / (double)FIELDWIDTH;
-    double heightRatio = (double)field.getHeight() / (double)FIELDLENGTH;
-    
-    double x_in_field = x * widthRatio;
-    double y_in_field = y * heightRatio;
-    double width_in_field = width * widthRatio;
-    double height_in_field = height * heightRatio;
-    
-    g.strokeOval((int)x_in_field, (int)y_in_field, (int)width_in_field, (int)height_in_field);
-  }
-  
   private Rectangle getField() {
-    int height = (int)this.getHeight();
     int width = (int)this.getWidth();
+    int height = (int)this.getHeight();
     
     double fieldRatio = (double)FIELDLENGTH / (double)FIELDWIDTH;
     double canvasRatio = (double)height / (double)width;

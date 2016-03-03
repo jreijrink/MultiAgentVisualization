@@ -2,20 +2,16 @@ package jfreechart;
 
 import com.sun.javafx.charts.Legend;
 import com.sun.javafx.charts.Legend.LegendItem;
-import java.security.KeyPair;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.Timer;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.css.CssMetaData;
-import javafx.css.Styleable;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
@@ -34,8 +30,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.RectangleBuilder;
-import javafx.util.Pair;
-import javax.swing.event.EventListenerList;
 
 public class AgentPlot implements Chart {
   
@@ -130,8 +124,9 @@ public class AgentPlot implements Chart {
     
     this.scattterChart = new ScatterChart<>(xAxis, yAxis);
     
-    this.scattterChart.widthProperty().addListener((ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) -> {
-      new java.util.Timer().schedule( 
+    xAxis.widthProperty().addListener((ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) -> {
+      Timer timer = new java.util.Timer();
+      timer.schedule( 
         new java.util.TimerTask() {
           @Override
           public void run() {
@@ -139,14 +134,17 @@ public class AgentPlot implements Chart {
                 @Override
                 public void run() {
                   resizePlot();
+                  timer.cancel();
+                  timer.purge();
                 }
               });
             }
           }, 0);
     });
     
-    this.scattterChart.heightProperty().addListener((ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) -> {      
-      new java.util.Timer().schedule( 
+    yAxis.heightProperty().addListener((ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) -> {      
+      Timer timer = new java.util.Timer();
+      timer.schedule( 
         new java.util.TimerTask() {
           @Override
           public void run() {
@@ -154,6 +152,8 @@ public class AgentPlot implements Chart {
                 @Override
                 public void run() {
                   resizePlot();
+                  timer.cancel();
+                  timer.purge();
                 }
               });
             }
@@ -168,14 +168,17 @@ public class AgentPlot implements Chart {
     rootPane.getChildren().clear();
     rootPane.setCenter(this.scattterChart);
 
-    new java.util.Timer().schedule( 
-      new java.util.TimerTask() {
+      Timer timer = new java.util.Timer();
+      timer.schedule( 
+        new java.util.TimerTask() {
         @Override
         public void run() {
           Platform.runLater(new Runnable() {
               @Override
               public void run() {
                 plotData();
+                timer.cancel();
+                timer.purge();
               }
             });
           }
@@ -186,7 +189,7 @@ public class AgentPlot implements Chart {
   
   private void initMouseListeners() {
     
-      CategoryAxis yAxis = (CategoryAxis) scattterChart.getYAxis();
+    CategoryAxis yAxis = (CategoryAxis) scattterChart.getYAxis();
     
     yAxis.setOnMouseEntered((MouseEvent event) -> {
         scene.setCursor(Cursor.HAND); //Change cursor to hand      
@@ -447,12 +450,10 @@ public class AgentPlot implements Chart {
     node.setOnMouseDragged((MouseEvent event) -> {
       System.out.printf("MOUSE_DRAGGED \n");      
 
-      double xChartShift = getSceneXShift(node);
-      double yChartShift = getSceneYShift(node);
       double xAxisShift = getSceneXShift(xAxis);
       double yAxisShift = getSceneYShift(yAxis);
-
-      Rectangle selection = getSelectionRectangle(event.getX(), event.getY(), 0, 0, xAxis.getWidth(), yAxis.getHeight());
+      
+      Rectangle selection = getSelectionRectangle(event.getX(), event.getY(), xAxisShift, yAxisShift, xAxis.getWidth(), yAxis.getHeight());
             
       int start = xAxis.getValueForDisplay(selection.getX() - xAxisShift).intValue();
       int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xAxisShift).intValue();
@@ -464,14 +465,12 @@ public class AgentPlot implements Chart {
     });
     
     node.setOnMouseReleased((MouseEvent event) -> {
-      System.out.printf("MOUSE_RELEASED \n");      
+      System.out.printf("MOUSE_RELEASED \n");
 
-      double xChartShift = getSceneXShift(node);
-      double yChartShift = getSceneYShift(node);
       double xAxisShift = getSceneXShift(xAxis);
       double yAxisShift = getSceneYShift(yAxis);
 
-      Rectangle selection = getSelectionRectangle(event.getX(), event.getY(), 0, 0, xAxis.getWidth(), yAxis.getHeight());
+      Rectangle selection = getSelectionRectangle(event.getX(), event.getY(), xAxisShift, yAxisShift, xAxis.getWidth(), yAxis.getHeight());
       
       int start = xAxis.getValueForDisplay(selection.getX() - xAxisShift).intValue();
       int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xAxisShift).intValue();
@@ -483,16 +482,16 @@ public class AgentPlot implements Chart {
   private Rectangle getSelectionRectangle(double mouseX, double mouseY, double xShift, double yShift, double chartWidth, double chartHeight) {
     
     //Bound the rectangle to be only within the chart
-    mouseX = Math.max(mouseX, 0);
-    mouseX = Math.min(mouseX, chartWidth);    
-    mouseY = Math.max(mouseY, 0);
-    mouseY = Math.min(mouseY, chartHeight);
+    mouseX = Math.max(mouseX, xShift);
+    mouseX = Math.min(mouseX, chartWidth + xShift);    
+    mouseY = Math.max(mouseY, yShift);
+    mouseY = Math.min(mouseY, chartHeight + yShift);
     
-    double width = mouseX - selectionPoint.getX() + xShift;    
-    double height = mouseY - selectionPoint.getY() + yShift;
+    double width = mouseX - selectionPoint.getX();
+    double height = mouseY - selectionPoint.getY();
     double x = Math.max(0, selectionPoint.getX() + Math.min(width, 0));
     double y = selectionPoint.getY() + Math.min(height, 0);
-    
+      
     return new Rectangle(x, y, Math.abs(width), Math.abs(height));
   }
   

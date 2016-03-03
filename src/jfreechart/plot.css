@@ -39,6 +39,22 @@
 .default-color5.chart-series-line  { -fx-stroke: #ffd92f; }
 .default-color6.chart-series-line  { -fx-stroke: #e5c494; }
 
+.default-color0-agent { -fx-fill: #66c2a5 !important; }
+.default-color1-agent { -fx-fill: #fc8d62 !important; }
+.default-color2-agent { -fx-fill: #8da0cb !important; }
+.default-color3-agent { -fx-fill: #e78ac3 !important; }
+.default-color4-agent { -fx-fill: #a6d854 !important; }
+.default-color5-agent { -fx-fill: #ffd92f !important; }
+.default-color6-agent { -fx-fill: #e5c494 !important; }
+
+.default-color0-agent-line  { -fx-stroke: #66c2a5; }
+.default-color1-agent-line  { -fx-stroke: #fc8d62; }
+.default-color2-agent-line  { -fx-stroke: #8da0cb; }
+.default-color3-agent-line  { -fx-stroke: #e78ac3; }
+.default-color4-agent-line  { -fx-stroke: #a6d854; }
+.default-color5-agent-line  { -fx-stroke: #ffd92f; }
+.default-color6-agent-line  { -fx-stroke: #e5c494; }
+
 .default-color0-selected-chart-symbol { -fx-background-color: #307962 !important; }
 .default-color1-selected-chart-symbol { -fx-background-color: #db3f04 !important; }
 .default-color2-selected-chart-symbol { -fx-background-color: #445c94 !important; }
