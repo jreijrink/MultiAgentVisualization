@@ -30,6 +30,13 @@ public interface DockNodeEventListenerInterface {
   public void dockNodeClosed(DockNodeEvent e);
 
   /**
+   * Fired when node settings is selected
+   *
+   * @param e Event object
+   */
+  public void dockNodeSettings(DockNodeEvent e);
+
+  /**
    * Fired when node is maximized
    *
    * @param e Event object

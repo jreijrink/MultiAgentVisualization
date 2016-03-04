@@ -169,3 +169,7 @@
 .dock-close-button {
   -fx-graphic: url(close.png);
 }
+
+.dock-settings-button {
+  -fx-graphic: url(settings.png);
+}

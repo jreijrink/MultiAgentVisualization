@@ -1,4 +1,4 @@
-package jfreechart;
+package jfreechart.object;
 
 import java.util.ArrayList;
 import java.util.List;

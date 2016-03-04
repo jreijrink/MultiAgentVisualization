@@ -1,4 +1,4 @@
-package jfreechart;
+package jfreechart.chart;
 
 import com.sun.javafx.charts.Legend;
 import com.sun.javafx.charts.Legend.LegendItem;
@@ -12,8 +12,8 @@ import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
-import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.chart.CategoryAxis;
@@ -21,22 +21,31 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
-import javafx.scene.control.SelectionMode;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.RectangleBuilder;
+import static jfreechart.chart.Chart.getCheckbox;
+import static jfreechart.chart.Chart.getTurtleListView;
+import jfreechart.listener.SelectionEventListener;
+import jfreechart.object.StringValuePair;
+import jfreechart.object.TimeFrame;
+import jfreechart.object.Turtle;
 
 public class AgentPlot implements Chart {
   
   private Scene scene;
   private int[] selectedTurtles;
   private List<TimeFrame> data;
-    
+  private boolean liveUpdate;
+  
   private BorderPane rootPane; 
   private ScatterChart<Number,String> scattterChart;
   
@@ -47,13 +56,21 @@ public class AgentPlot implements Chart {
   private double initSelectionWidth = 0;
   private Object[] initSelectionData = new Object[]{ 0, 0 };
   
-  public AgentPlot(Scene scene, int[] selectedTurtles, List<TimeFrame> data) {
+  private int selectedStartIndex;
+  private int selectedEndIndex;
+  
+  public AgentPlot(Scene scene, int[] selectedTurtles, List<TimeFrame> data, boolean liveUpdate) {
     this.scene = scene;
     this.selectedTurtles = selectedTurtles;
     this.data = data;
+    this.liveUpdate = liveUpdate;
     this.rootPane = new BorderPane();
     this.rootPane.getStylesheets().add("jfreechart/plot.css");
     initialize();
+  }
+  
+  public AgentPlot(Scene scene) {
+    this(scene, new int[]{ 0, 1, 2, 3, 4, 5, 6 }, new ArrayList(), false);
   }
   
   @Override
@@ -79,7 +96,11 @@ public class AgentPlot implements Chart {
   
   @Override
   public void selectFrames(int startIndex, int endIndex, boolean drag) {
-    if(!drag && data.size() > 0) {
+    if((!drag || liveUpdate) && data.size() > 0) {
+      
+      selectedStartIndex = startIndex;
+      selectedEndIndex = endIndex;
+      
       NumberAxis xAxis = (NumberAxis) scattterChart.getXAxis();
       double xAxisShift = getSceneXShift(xAxis);
       double start = xAxis.getDisplayPosition(startIndex);
@@ -177,73 +198,61 @@ public class AgentPlot implements Chart {
               @Override
               public void run() {
                 plotData();
+                selectFrames(selectedStartIndex, selectedEndIndex, false);
                 timer.cancel();
                 timer.purge();
               }
             });
           }
         }, 0);
-    
-    initMouseListeners();
   }
   
-  private void initMouseListeners() {
+  @Override
+  public void showParameterDialog() {
+    GridPane grid = new GridPane();
+    grid.setHgap(10);
+    grid.setVgap(10);
+    grid.setPadding(new Insets(10, 10, 10, 10));
     
-    CategoryAxis yAxis = (CategoryAxis) scattterChart.getYAxis();
+    Dialog<Boolean> dialog = new Dialog();
+    dialog.setTitle("Agentplot options");
+    dialog.setHeaderText("Choose agentplot options");
+    dialog.setContentText("Choose agentplot options:");
+
+    dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+    CheckBox liveCheckbox = getCheckbox("Live update", liveUpdate);
     
-    yAxis.setOnMouseEntered((MouseEvent event) -> {
-        scene.setCursor(Cursor.HAND); //Change cursor to hand      
-    });    
-    yAxis.setOnMouseExited((MouseEvent event) -> {
-        scene.setCursor(Cursor.DEFAULT); //Change cursor to default
-    });
-    yAxis.setOnMouseClicked((MouseEvent event) -> {
-      Dialog<int[]> dialog = new Dialog();
-      dialog.setTitle("Turtle Choise Dialog");
-      dialog.setHeaderText("Choose turtles");
+    ListView listView = getTurtleListView(selectedTurtles); 
+    
+    grid.add(liveCheckbox, 0, 0);
+    
+    grid.add(new Label("Turtles"), 0, 1);
+    grid.add(listView, 0, 2);
 
-      dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+    dialog.getDialogPane().setContent(grid);
+    listView.setPrefHeight(200);
 
-      ListView<StringValuePair<String, Integer>> listView = new ListView();              
-      ObservableList<StringValuePair<String, Integer>> list = FXCollections.observableArrayList();
-      listView.setItems(list);
-      list.add(new StringValuePair("Turtle 1", 0));
-      list.add(new StringValuePair("Turtle 2", 1));
-      list.add(new StringValuePair("Turtle 3", 2));
-      list.add(new StringValuePair("Turtle 4", 3));
-      list.add(new StringValuePair("Turtle 5", 4));
-      list.add(new StringValuePair("Turtle 6", 5));
-      list.add(new StringValuePair("Turtle 7", 6));
-
-      listView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-      for(int selection : selectedTurtles) {
-        listView.getSelectionModel().select(selection);
-      }
-
-      dialog.getDialogPane().setContent(listView);
-      listView.setPrefHeight(200);
-
-      dialog.setResultConverter(dialogButton -> {
-        if(dialogButton == ButtonType.OK) {
-          ObservableList<StringValuePair<String, Integer>> selectedItems = listView.getSelectionModel().getSelectedItems();
-          int[] results = new int[selectedItems.size()];
-
-          for(int i = 0; i < selectedItems.size(); i++) {
-            results[i] = selectedItems.get(i).getValue();
-          }
-
-          return results;
+    dialog.setResultConverter(dialogButton -> {
+      if(dialogButton == ButtonType.OK) {
+        ObservableList<StringValuePair<String, Integer>> selectedItems = listView.getSelectionModel().getSelectedItems();
+        selectedTurtles = new int[selectedItems.size()];
+        for(int i = 0; i < selectedItems.size(); i++) {
+          selectedTurtles[i] = selectedItems.get(i).getValue();
         }
-        return null;
-      });
+        
+        liveUpdate = liveCheckbox.isSelected();
 
-      Optional<int[]> result = dialog.showAndWait();
-
-      if(result.isPresent() && result.get() != null && result.get().length > 0 && result.get() != selectedTurtles) {
-        selectedTurtles = result.get();
-        initialize();
+        return true;
       }
-    });    
+      return null;
+    });
+
+    Optional<Boolean> result = dialog.showAndWait();
+
+    if(result.isPresent() && result.get() != null) {
+      initialize();
+    }
   }
   
   private Collection getData() {

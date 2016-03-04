@@ -1,4 +1,4 @@
-package jfreechart;
+package jfreechart.chart;
 
 import com.sun.javafx.charts.Legend;
 import java.util.ArrayList;
@@ -15,12 +15,13 @@ import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.chart.XYChart.Data;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
@@ -35,15 +36,25 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.RectangleBuilder;
 import javafx.util.Pair;
 import javax.swing.event.EventListenerList;
+import jfreechart.object.ParameterMap;
+import jfreechart.listener.SelectionEventListener;
+import jfreechart.object.StringValuePair;
+import jfreechart.object.TimeFrame;
 import static jfreechart.Parser.MAX_TURTLES;
+import static jfreechart.chart.Chart.getCheckbox;
+import static jfreechart.chart.Chart.getTurtleListView;
 
-public class ScatterPlot implements Chart {
+public class LinePlot implements Chart {
+  
+  protected EventListenerList listenerList = new EventListenerList();
+  
   private Scene scene;
   private int[] selectedTurtles;
   private String yParameter;
   private int yParameterIndex;
   private List<TimeFrame> data;
   private List<Point2D>[] dataMap;
+  private boolean liveUpdate;
   
   private double minValueX;
   private double maxValueX;
@@ -54,9 +65,12 @@ public class ScatterPlot implements Chart {
   private BorderPane rootPane; 
   private Point2D selectionPoint;
   private Rectangle selectionRectangle;
-  private ScatterChart<Number,Number> scatterChart;
+  private LineChart<Number,Number> lineChart;
   
-  public ScatterPlot(Scene scene, int[] selectedTurtles, String yParameter, int yParameterIndex, List<TimeFrame> data) {
+  private int selectedStartIndex;
+  private int selectedEndIndex;
+  
+  public LinePlot(Scene scene, int[] selectedTurtles, String yParameter, int yParameterIndex, List<TimeFrame> data,  boolean liveUpdate) {
     this.scene = scene;
     this.selectedTurtles = selectedTurtles;
     this.yParameter = yParameter;
@@ -67,6 +81,10 @@ public class ScatterPlot implements Chart {
     initialize();
   }
   
+  public LinePlot(Scene scene) {
+    this(scene, new int[]{ 0 }, "batteryVoltage", 0, new ArrayList(), false);
+  }
+  
   @Override
   public Node getNode() {
     return rootPane;
@@ -74,7 +92,7 @@ public class ScatterPlot implements Chart {
   
   @Override
   public String getName() {
-    return "ScatterPlot";
+    return "LinePlot";
   }
   
   @Override
@@ -90,8 +108,12 @@ public class ScatterPlot implements Chart {
   
   @Override
   public void selectFrames(int startIndex, int endIndex, boolean drag) {
-    if(!drag && data.size() > 0) {
-      ScatterChart<Number,Number> scattterChart = (ScatterChart<Number,Number>)rootPane.getCenter();
+    if((!drag || liveUpdate) && data.size() > 0) {
+      
+      selectedStartIndex = startIndex;
+      selectedEndIndex = endIndex;
+      
+      LineChart<Number,Number> lineChart = (LineChart<Number,Number>)rootPane.getCenter();
 
       clearSelection();
 
@@ -106,7 +128,7 @@ public class ScatterPlot implements Chart {
           points.add(point);
         }
 
-        ObservableList<Series<Number, Number>> series = scatterChart.getData();
+        ObservableList<Series<Number, Number>> series = lineChart.getData();
         Series<Number,Number> serie = series.get(selected);
         ObservableList<Data<Number, Number>> datas = serie.getData();
         for(Data<Number, Number> data : datas) {
@@ -133,6 +155,90 @@ public class ScatterPlot implements Chart {
     }
   }
   
+  @Override
+  public void showParameterDialog() {
+    GridPane grid = new GridPane();
+    grid.setHgap(10);
+    grid.setVgap(10);
+    grid.setPadding(new Insets(10, 10, 10, 10));
+    
+    Dialog<Boolean> dialog = new Dialog();
+    dialog.setTitle("Lineplot options");
+    dialog.setHeaderText("Choose lineplot options");
+    dialog.setContentText("Choose lineplot options:");
+    
+    dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+    CheckBox liveCheckbox = getCheckbox("Live update", liveUpdate);
+    
+    ListView listView = getTurtleListView(selectedTurtles); 
+    
+    ChoiceBox<String> parameterChoiceBox = new ChoiceBox();
+    ChoiceBox<String> indexChoiceBox = new ChoiceBox();
+    
+    if(data.size() > 0) {
+      ParameterMap parameters = data.get(0).getTurtles().get(0).getParameters();
+
+      List<String> choices = parameters.getKeys();
+      ObservableList<String> options = FXCollections.observableArrayList();
+      for(String choise : choices) {
+        options.add(choise);
+      }
+
+      parameterChoiceBox.setItems(options);
+      parameterChoiceBox.getSelectionModel().select(yParameter);
+
+      ObservableList<String> selectedOptions = getParameterIndices(parameters, yParameter);
+      indexChoiceBox.setItems(selectedOptions);
+      indexChoiceBox.getSelectionModel().select(yParameterIndex);
+
+      parameterChoiceBox.getSelectionModel().selectedIndexProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+        ObservableList<String> indexOptions = getParameterIndices(parameters, choices.get(newValue.intValue()));
+        indexChoiceBox.setItems(indexOptions);
+        indexChoiceBox.getSelectionModel().select(0);
+      });
+    }
+    
+    grid.add(liveCheckbox, 0, 0);
+    
+    grid.add(new Label("Parameter:"), 0, 1);
+    grid.add(parameterChoiceBox, 0, 2);
+    grid.add(new Label("Index:"), 0, 3);
+    grid.add(indexChoiceBox, 0, 4);
+
+    grid.add(new Label("Turtles"), 0, 5);
+    grid.add(listView, 0, 6);
+    
+    dialog.getDialogPane().setContent(grid);
+    listView.setPrefHeight(200);
+        
+    dialog.setResultConverter(dialogButton -> {
+      if(dialogButton == ButtonType.OK) {
+        ObservableList<StringValuePair<String, Integer>> selectedItems = listView.getSelectionModel().getSelectedItems();
+        selectedTurtles = new int[selectedItems.size()];
+        for(int i = 0; i < selectedItems.size(); i++) {
+          selectedTurtles[i] = selectedItems.get(i).getValue();
+        }
+                
+        if(parameterChoiceBox.getSelectionModel().getSelectedItem() != null) {
+          yParameter = parameterChoiceBox.getSelectionModel().getSelectedItem();
+          yParameterIndex = indexChoiceBox.getSelectionModel().getSelectedIndex();
+        }
+        
+        liveUpdate = liveCheckbox.isSelected();
+
+        return true;
+      }
+      return null;
+    });
+
+    Optional<Boolean> result = dialog.showAndWait();
+
+    if(result.isPresent() && result.get() != null) {
+      initialize();
+    }
+  }
+  
   private void notifyListeners(int startIndex, int endIndex, boolean drag) {
     List<Integer> selectedTimeFrames = new ArrayList();
     Object[] listeners = listenerList.getListenerList();
@@ -144,7 +250,7 @@ public class ScatterPlot implements Chart {
   }
   
   private void clearSelection() {    
-    NumberAxis yAxis = (NumberAxis) scatterChart.getYAxis();
+    NumberAxis yAxis = (NumberAxis) lineChart.getYAxis();
     double yAxisShift = getSceneYShift(yAxis);
   
     selectionRectangle.setX(0);
@@ -160,6 +266,8 @@ public class ScatterPlot implements Chart {
       getMinMaxValue();
       createChart();
       setMouseListeners();
+      
+      selectFrames(selectedStartIndex, selectedEndIndex, false);
     }
   }
   
@@ -169,7 +277,7 @@ public class ScatterPlot implements Chart {
     final NumberAxis xAxis = getAxis(this.minValueX, this.maxValueX);
     final NumberAxis yAxis = getAxis(this.minValueY, this.maxValueY);
     
-    this.scatterChart = new ScatterChart<>(xAxis,yAxis);
+    this.lineChart = new LineChart<>(xAxis,yAxis);
     
     if(data.size() > 0) {
       ParameterMap parameters = data.get(0).getTurtles().get(0).getParameters();
@@ -179,7 +287,7 @@ public class ScatterPlot implements Chart {
 
       yAxis.setLabel(this.yParameter + " " + selectedYIndex);
 
-      this.scatterChart.getData().addAll(getData());
+      this.lineChart.getData().addAll(getData());
     }
     
     System.out.printf("Completed chart\n");
@@ -187,79 +295,8 @@ public class ScatterPlot implements Chart {
     rootPane.getChildren().clear();
     
     System.out.printf("CLEARED \n");
-    rootPane.setCenter(this.scatterChart);
+    rootPane.setCenter(this.lineChart);
     System.out.printf("SET CENTER \n");
-  }
-  
-  private EventHandler<MouseEvent> createParameterHandler() {    
-    EventHandler<MouseEvent> handler;
-    handler = new EventHandler<MouseEvent>() {        
-      public void handle(MouseEvent event) {
-        System.out.printf("AXIS_PRESSED \n");
-        
-        ParameterMap parameters = data.get(0).getTurtles().get(0).getParameters();
-                
-        GridPane grid = new GridPane();
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(20, 150, 10, 10));
-        
-        List<String> choices = parameters.getKeys();
-        ObservableList<String> options = FXCollections.observableArrayList();
-        for(String choise : choices) {
-          options.add(choise);
-        }
-        
-        Dialog<Pair<String, Integer>> parameterDialog = new Dialog();
-        parameterDialog.setTitle("Parameter Choice Dialog");
-        parameterDialog.setHeaderText("Parameter Choice Dialog");
-        parameterDialog.setContentText("Choose parameter:");
-        parameterDialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-        
-        ChoiceBox<String> parameterChoiceBox = new ChoiceBox();
-        parameterChoiceBox.setItems(options);
-        parameterChoiceBox.getSelectionModel().select(yParameter);
-        
-        ChoiceBox<String> indexChoiceBox = new ChoiceBox();
-        ObservableList<String> selectedOptions = getParameterIndices(parameters, yParameter);
-        indexChoiceBox.setItems(selectedOptions);
-        indexChoiceBox.getSelectionModel().select(yParameterIndex);
-        
-        parameterChoiceBox.getSelectionModel().selectedIndexProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-          ObservableList<String> indexOptions = getParameterIndices(parameters, choices.get(newValue.intValue()));
-          indexChoiceBox.setItems(indexOptions);
-          indexChoiceBox.getSelectionModel().select(0);
-        });        
-        
-        grid.add(new Label("Parameter:"), 0, 0);
-        grid.add(parameterChoiceBox, 1, 0);
-        grid.add(new Label("Index:"), 0, 1);
-        grid.add(indexChoiceBox, 1, 1);
-
-        parameterDialog.getDialogPane().setContent(grid);
-
-        parameterDialog.setResultConverter(dialogButton -> {
-          if(dialogButton == ButtonType.OK) {
-            String selectedParameter = parameterChoiceBox.getSelectionModel().getSelectedItem();
-            int selectedIndex = indexChoiceBox.getSelectionModel().getSelectedIndex();
-            return new Pair(selectedParameter, selectedIndex);
-          }
-          return null;
-        });
-
-        Optional<Pair<String, Integer>> result = parameterDialog.showAndWait();
-        
-        if (result.isPresent() && result.get() != null){
-          if(!result.get().getKey().equals(yParameter) || !result.get().getValue().equals(yParameterIndex)) {
-            yParameter = result.get().getKey();
-            yParameterIndex = result.get().getValue();
-            initialize();
-          }
-        }
-      }
-    };
-    
-    return handler;
   }
   
   private ObservableList<String> getParameterIndices(ParameterMap parameters, String selection) {
@@ -273,96 +310,14 @@ public class ScatterPlot implements Chart {
     return indexOptions;
   }
   
-  private void setMouseListeners() {
-
-    System.out.printf("START LISTEN \n");
-    
-    ScatterChart<Number,Number> scattterChart = (ScatterChart<Number,Number>)rootPane.getCenter();
+  private void setMouseListeners() {    
+    LineChart<Number,Number> scattterChart = (LineChart<Number,Number>)rootPane.getCenter();
     
     NumberAxis xAxis = (NumberAxis) scattterChart.getXAxis();
     NumberAxis yAxis = (NumberAxis) scattterChart.getYAxis();
 
-    yAxis.setOnMouseEntered((MouseEvent event) -> {
-        scene.setCursor(Cursor.HAND); //Change cursor to hand      
-    });    
-    yAxis.setOnMouseExited((MouseEvent event) -> {
-        scene.setCursor(Cursor.DEFAULT); //Change cursor to default
-    });
-    yAxis.setOnMouseClicked(createParameterHandler());
-    
-    scatterChart.widthProperty().addListener((ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) -> {
-      //notifyListeners(0, 0);
-    });
-    scatterChart.heightProperty().addListener((ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) -> {
-      //notifyListeners(0, 0);
-    });
-    
-    for(Series series : scatterChart.getData()) {
+    for(Series series : lineChart.getData()) {
       for (Node n : series.getChart().getChildrenUnmodifiable()) {
-        
-        if (n instanceof Legend)
-        { 
-          final Legend legend = (Legend) n;
-          
-          legend.setOnMouseEntered((MouseEvent event) -> {
-              scene.setCursor(Cursor.HAND); //Change cursor to hand      
-          });
-
-          legend.setOnMouseExited((MouseEvent event) -> {
-              scene.setCursor(Cursor.DEFAULT); //Change cursor to default
-          });
-          
-          legend.setOnMouseClicked((MouseEvent event) -> {
-            System.out.printf("LEGEND_PRESSED \n");
-            
-            Dialog<int[]> dialog = new Dialog();
-            dialog.setTitle("Turtle Choise Dialog");
-            dialog.setHeaderText("Choose turtles");
-
-            dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-            ListView<StringValuePair<String, Integer>> listView = new ListView();              
-            ObservableList<StringValuePair<String, Integer>> list = FXCollections.observableArrayList();
-            listView.setItems(list);
-            list.add(new StringValuePair("Turtle 1", 0));
-            list.add(new StringValuePair("Turtle 2", 1));
-            list.add(new StringValuePair("Turtle 3", 2));
-            list.add(new StringValuePair("Turtle 4", 3));
-            list.add(new StringValuePair("Turtle 5", 4));
-            list.add(new StringValuePair("Turtle 6", 5));
-            list.add(new StringValuePair("Turtle 7", 6));
-
-            listView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-            for(int selection : selectedTurtles) {
-              listView.getSelectionModel().select(selection);
-            }
-
-            dialog.getDialogPane().setContent(listView);
-            listView.setPrefHeight(200);
-
-            dialog.setResultConverter(dialogButton -> {
-              if(dialogButton == ButtonType.OK) {
-                ObservableList<StringValuePair<String, Integer>> selectedItems = listView.getSelectionModel().getSelectedItems();
-                int[] results = new int[selectedItems.size()];
-
-                for(int i = 0; i < selectedItems.size(); i++) {
-                  results[i] = selectedItems.get(i).getValue();
-                }
-
-                return results;
-              }
-              return null;
-            });
-
-            Optional<int[]> result = dialog.showAndWait();
-
-            if(result.isPresent() && result.get() != null && result.get().length > 0 && result.get() != selectedTurtles) {
-              selectedTurtles = result.get();
-              initialize();
-            }
-          });
-        }
-        
         if(n.getStyleClass().contains("chart-content")) {          
 
           final Pane chart = (Pane) n;
@@ -389,12 +344,10 @@ public class ScatterPlot implements Chart {
             .id("selection")
             .build();    
     rootPane.getChildren().add(selectionRectangle);
-    
-    System.out.printf("END LISTEN \n");
   }
   
   private void createRectangleSelectionEvents(Node node, NumberAxis xAxis, NumberAxis yAxis) {
-    ScatterChart<Number,Number> scattterChart = (ScatterChart<Number,Number>)rootPane.getCenter();
+    LineChart<Number,Number> lineChart = (LineChart<Number,Number>)rootPane.getCenter();
     
     node.setOnMousePressed((MouseEvent event) -> {
       System.out.printf("MOUSE_PRESSED \n");
@@ -606,7 +559,7 @@ public class ScatterPlot implements Chart {
     for(int turtle = 0; turtle < MAX_TURTLES; turtle++) {
       map[turtle] = new ArrayList();
       for(int i = 0; i < data.size(); i++) {
-          List<jfreechart.Turtle> turtles = data.get(i).getTurtles();
+          List<jfreechart.object.Turtle> turtles = data.get(i).getTurtles();
           double yValue = turtles.get(turtle).getParameters().getValue(yParameter)[ySelectedRowCol[0]][ySelectedRowCol[1]];
 
           map[turtle].add(new Point2D(i, yValue));
@@ -648,7 +601,7 @@ public class ScatterPlot implements Chart {
     do {  
         shift += node.getLayoutX();  
         node = node.getParent(); 
-    } while (node != null && node.getClass() != ScatterChart.class); 
+    } while (node != null && node.getClass() != LineChart.class); 
     return shift; 
   }
   
@@ -657,7 +610,7 @@ public class ScatterPlot implements Chart {
     do {  
         shift += node.getLayoutY();
         node = node.getParent(); 
-    } while (node != null && node.getClass() != ScatterChart.class); 
+    } while (node != null && node.getClass() != LineChart.class); 
     return shift; 
   }
 }

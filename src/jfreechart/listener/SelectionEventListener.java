@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package jfreechart;
+package jfreechart.listener;
 
 import java.util.EventListener;
 import java.util.List;

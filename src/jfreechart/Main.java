@@ -5,6 +5,12 @@
  */
 package jfreechart;
 
+import jfreechart.object.TimeFrame;
+import jfreechart.chart.Chart;
+import jfreechart.chart.ScatterPlot;
+import jfreechart.chart.LinePlot;
+import jfreechart.chart.FieldCanvas;
+import jfreechart.chart.AgentPlot;
 import java.io.File;
 import javafx.scene.image.Image;
 import java.util.ArrayList;
@@ -123,7 +129,7 @@ public class Main extends Application {
     newScatterMenu.setOnAction(new EventHandler() {
       @Override
       public void handle(Event t) {
-        ScatterPlot plot = new ScatterPlot(scene, new int[]{ 0 }, "batteryVoltage", 0, new ArrayList());
+        ScatterPlot plot = new ScatterPlot(scene);
         addChart(dockPane, null, plot);
       }
     });
@@ -133,7 +139,7 @@ public class Main extends Application {
     newLineMenu.setOnAction(new EventHandler() {
       @Override
       public void handle(Event t) {
-        LinePlot plot = new LinePlot(scene, new int[]{ 0 }, "batteryVoltage", 0, new ArrayList());
+        LinePlot plot = new LinePlot(scene);
         addChart(dockPane, null, plot);
       }
     });
@@ -143,7 +149,7 @@ public class Main extends Application {
     newAgentMenu.setOnAction(new EventHandler() {
       @Override
       public void handle(Event t) {
-        AgentPlot plot = new AgentPlot(scene, new int[]{ 0, 1, 2, 3, 4 }, new ArrayList());
+        AgentPlot plot = new AgentPlot(scene);
         addChart(dockPane, null, plot);
       }
     });
@@ -153,7 +159,7 @@ public class Main extends Application {
     newFieldMenu.setOnAction(new EventHandler() {
       @Override
       public void handle(Event t) {
-        FieldCanvas field = new FieldCanvas(new ArrayList(), new int[]{0, 1, 2, 3, 4 }, "pose");
+        FieldCanvas field = new FieldCanvas();
         addChart(dockPane, null, field);
       }
     });
@@ -173,16 +179,16 @@ public class Main extends Application {
   
   private DockPane createDefaultLayout(Scene scene) {
     
-    ScatterPlot scatter = new ScatterPlot(scene, new int[]{0}, "batteryVoltage", 0, new ArrayList());
+    ScatterPlot scatter = new ScatterPlot(scene);
     addChart(dockPane, DockPos.TOP, scatter);
     
-    LinePlot line = new LinePlot(scene, new int[]{0}, "cpu0Load", 0, new ArrayList());
+    LinePlot line = new LinePlot(scene);
     addChart(dockPane, DockPos.TOP, line);
     
-    AgentPlot agent = new AgentPlot(scene, new int[]{ 0, 1, 2, 3, 4, 5 }, new ArrayList());
+    AgentPlot agent = new AgentPlot(scene);
     addChart(dockPane, DockPos.TOP, agent);
     
-    FieldCanvas field = new FieldCanvas(new ArrayList(), new int[]{0, 1, 2, 3, 4, 5 }, "pose");
+    FieldCanvas field = new FieldCanvas();
     addChart(dockPane, DockPos.RIGHT, field);
     
     return dockPane;
@@ -194,6 +200,13 @@ public class Main extends Application {
         Chart chart = (Chart)e.getSource().getUserData();
         charts.remove(chart);
       }
+
+      @Override
+      public void dockNodeSettings(DockNodeEvent e) {
+        Chart chart = (Chart)e.getSource().getUserData();
+        chart.showParameterDialog();
+      }
+      
       @Override public void dockNodeMaximized(DockNodeEvent e) {}
       @Override public void dockNodeWindowed(DockNodeEvent e) {}
       @Override public void dockNodeMinimized(DockNodeEvent e) {}
@@ -226,6 +239,7 @@ public class Main extends Application {
     DockNode chartDock = nodeManager.getDockNode(chart.getNode(), chart.getName(), new ImageView(dockImage));
     chartDock.setUserData(chart);
     chartDock.setPrefSize(500, 500);
+    
     
     if(position == null)
       chartDock.floatNode(dockPane, true);

@@ -1,4 +1,4 @@
-package jfreechart;
+package jfreechart.object;
 
 import javafx.util.Pair;
 

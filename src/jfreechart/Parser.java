@@ -1,5 +1,6 @@
 package jfreechart;
 
+import jfreechart.object.TimeFrame;
 import com.jmatio.io.MatFileReader;
 import com.jmatio.types.MLDouble;
 import com.jmatio.types.MLStructure;

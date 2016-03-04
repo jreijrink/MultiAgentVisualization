@@ -1,4 +1,4 @@
-package jfreechart;
+package jfreechart.chart;
 
 import java.awt.Point;
 import javafx.scene.canvas.GraphicsContext;

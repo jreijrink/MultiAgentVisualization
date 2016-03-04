@@ -204,6 +204,13 @@ public class NodeManager {
 			}
 
 			@Override
+			public void dockNodeSettings(DockNodeEvent e) {
+				for (DockNodeEventListenerInterface listener : listeners) {
+					listener.dockNodeSettings(e);
+				}
+			}
+            
+			@Override
 			public void dockNodeDocked(DockNodeEvent e) {
 				for (DockNodeEventListenerInterface listener : listeners) {
 					listener.dockNodeDocked(e);

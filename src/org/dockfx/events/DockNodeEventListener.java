@@ -89,4 +89,7 @@ public class DockNodeEventListener implements DockNodeEventListenerInterface {
    */
   public void dockNodeDefocused(DockNodeEvent e) {}
 
+  @Override
+  public void dockNodeSettings(DockNodeEvent e) {}
+
 }

@@ -331,6 +331,16 @@ public class DockNode extends VBox implements EventHandler<MouseEvent> {
 	}
 
 	/**
+	 * Fires DockNode close event.
+	 */
+	private void fireSettingsEvent() {
+		DockNodeEvent e = new DockNodeEvent(this);
+		for (DockNodeEventListenerInterface listener : listeners) {
+			listener.dockNodeSettings(e);
+		}
+	}
+
+	/**
 	 * Fires DockNode maximize event
 	 */
 	private void fireMaximizeEvent() {
@@ -1104,7 +1114,11 @@ public class DockNode extends VBox implements EventHandler<MouseEvent> {
 		}
 		fireCloseEvent();
 	}
-
+    
+	public void settings() {
+		fireSettingsEvent();
+	}
+    
 	/**
 	 * Returns true if this node has parent is scene graph structure.
 	 *
