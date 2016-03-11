@@ -1,17 +1,11 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package jfreechart;
 
-import jfreechart.object.TimeFrame;
 import jfreechart.chart.Chart;
-import jfreechart.chart.ScatterPlot;
-import jfreechart.chart.LinePlot;
+import jfreechart.chart.XYBaseChart;
 import jfreechart.chart.FieldCanvas;
-import jfreechart.chart.AgentPlot;
+import jfreechart.chart.AgentChart;
 import java.io.File;
+import java.io.IOException;
 import javafx.scene.image.Image;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +15,7 @@ import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -29,9 +24,15 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
+import jfreechart.chart.XYBaseChart.ChartType;
+import jfreechart.object.Turtle;
+import jfreechart.settings.ui.FXMLConfigurationController;
+import jfreechart.settings.ui.FXMLValueController;
 import org.dockfx.DockNode;
 import org.dockfx.DockPane;
 import org.dockfx.DockPos;
@@ -41,7 +42,7 @@ import org.dockfx.events.DockNodeEventListenerInterface;
 
 public class Main extends Application {
   private List<Chart> charts;
-  private List<TimeFrame> data;
+  private List<Turtle> data;
   private DockPane dockPane;
   private NodeManager nodeManager;
   private int startIndex;
@@ -66,12 +67,24 @@ public class Main extends Application {
         
     root.setCenter(dockPane);
     
+    createMenu(stage, scene, root);
+    
+    createDefaultLayout(scene);
+    
+    Application.setUserAgentStylesheet(Application.STYLESHEET_MODENA);
+    DockPane.initializeDefaultUserAgentStylesheet();
+
+    scene.getStylesheets().add("jfreechart/plot.css");
+    stage.setScene(scene);
+    stage.show();
+  }
+  
+  private void  createMenu(Stage stage, Scene scene, BorderPane root) {
     MenuBar menuBar = new MenuBar();
     menuBar.setUseSystemMenuBar(true);
     menuBar.prefWidthProperty().bind(stage.widthProperty());
 
     root.setTop(menuBar);
-
     
     Menu fileMenu = new Menu("File");
     MenuItem openMenu = new MenuItem("Open");
@@ -88,7 +101,7 @@ public class Main extends Application {
         if (file != null) {
           try {
             Parser parser = new Parser();
-            List<TimeFrame> result = parser.parse(file.getAbsolutePath());
+            List<Turtle> result = parser.parse(file.getAbsolutePath());
             updateLayout(result);
           } catch (Exception ex) {
             ex.printStackTrace();
@@ -125,32 +138,32 @@ public class Main extends Application {
     
     Menu elementMenu = new Menu("Elements");
     
-    MenuItem newScatterMenu = new MenuItem("Add scatterplot");
+    MenuItem newScatterMenu = new MenuItem("Add scatterchart");
     newScatterMenu.setOnAction(new EventHandler() {
       @Override
       public void handle(Event t) {
-        ScatterPlot plot = new ScatterPlot(scene);
-        addChart(dockPane, null, plot);
+        XYBaseChart chart = new XYBaseChart(scene, ChartType.Scatter);
+        addChart(dockPane, null, chart);
       }
     });
     elementMenu.getItems().add(newScatterMenu);
     
-    MenuItem newLineMenu = new MenuItem("Add lineplot");
+    MenuItem newLineMenu = new MenuItem("Add linechart");
     newLineMenu.setOnAction(new EventHandler() {
       @Override
       public void handle(Event t) {
-        LinePlot plot = new LinePlot(scene);
-        addChart(dockPane, null, plot);
+        XYBaseChart chart = new XYBaseChart(scene, ChartType.Line);
+        addChart(dockPane, null, chart);
       }
     });
     elementMenu.getItems().add(newLineMenu);
     
-    MenuItem newAgentMenu = new MenuItem("Add agentplot");
+    MenuItem newAgentMenu = new MenuItem("Add agentchart");
     newAgentMenu.setOnAction(new EventHandler() {
       @Override
       public void handle(Event t) {
-        AgentPlot plot = new AgentPlot(scene);
-        addChart(dockPane, null, plot);
+        AgentChart chart = new AgentChart(scene);
+        addChart(dockPane, null, chart);
       }
     });
     elementMenu.getItems().add(newAgentMenu);
@@ -164,28 +177,74 @@ public class Main extends Application {
       }
     });
     elementMenu.getItems().add(newFieldMenu);
-            
-    menuBar.getMenus().addAll(fileMenu, elementMenu);
-
-    createDefaultLayout(scene);
     
-    Application.setUserAgentStylesheet(Application.STYLESHEET_MODENA);
-    DockPane.initializeDefaultUserAgentStylesheet();
+    Menu settingsMenu = new Menu("Settings");
+    MenuItem mappingMenu = new MenuItem("Datamapping");
+    mappingMenu.setAccelerator(new KeyCodeCombination(KeyCode.M, KeyCombination.CONTROL_DOWN));
+    mappingMenu.setOnAction(new EventHandler() {
+      @Override
+      public void handle(Event t) {
+        try {
+          FXMLLoader loader = new FXMLLoader(FXMLValueController.class.getResource("FXMLParameters.fxml"));
+          AnchorPane page = (AnchorPane) loader.load();
+          Stage dialogStage = new Stage();
+          dialogStage.setTitle("Datamapping");
+          dialogStage.initModality(Modality.WINDOW_MODAL);
+          dialogStage.initOwner(stage);
+          Scene scene = new Scene(page);
+          dialogStage.setScene(scene);
 
-    scene.getStylesheets().add("jfreechart/plot.css");
-    stage.setScene(scene);
-    stage.show();
+          dialogStage.setResizable(false);
+          dialogStage.showAndWait();
+          
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+    });
+    settingsMenu.getItems().add(mappingMenu);
+    
+    MenuItem configurationMenu = new MenuItem("Configuration");
+    configurationMenu.setAccelerator(new KeyCodeCombination(KeyCode.C, KeyCombination.CONTROL_DOWN));
+    configurationMenu.setOnAction(new EventHandler() {
+      @Override
+      public void handle(Event t) {
+        try {
+          FXMLLoader loader = new FXMLLoader(FXMLConfigurationController.class.getResource("FXMLConfiguration.fxml"));
+          AnchorPane page = (AnchorPane) loader.load();
+          Stage dialogStage = new Stage();
+          dialogStage.setTitle("Configuration");
+          dialogStage.initModality(Modality.WINDOW_MODAL);
+          dialogStage.initOwner(stage);
+
+          FXMLConfigurationController controller = loader.getController();
+          controller.setDialogStage(dialogStage);
+
+          Scene scene = new Scene(page);
+          dialogStage.setScene(scene);
+
+          dialogStage.setResizable(false);
+          dialogStage.showAndWait();
+          
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+    });
+    settingsMenu.getItems().add(configurationMenu);
+    
+    menuBar.getMenus().addAll(fileMenu, elementMenu, settingsMenu);    
   }
   
   private DockPane createDefaultLayout(Scene scene) {
     
-    ScatterPlot scatter = new ScatterPlot(scene);
+    XYBaseChart scatter = new XYBaseChart(scene, ChartType.Scatter);
     addChart(dockPane, DockPos.TOP, scatter);
-    
-    LinePlot line = new LinePlot(scene);
+        
+    XYBaseChart line = new XYBaseChart(scene, ChartType.Line);
     addChart(dockPane, DockPos.TOP, line);
-    
-    AgentPlot agent = new AgentPlot(scene);
+        
+    AgentChart agent = new AgentChart(scene);
     addChart(dockPane, DockPos.TOP, agent);
     
     FieldCanvas field = new FieldCanvas();
@@ -247,7 +306,7 @@ public class Main extends Application {
       chartDock.dock(dockPane, position);
   }
   
-  private void updateLayout(List<TimeFrame> data) {
+  private void updateLayout(List<Turtle> data) {
     this.data = data;
     
     for (Chart chart : this.charts) {

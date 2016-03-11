@@ -14,16 +14,16 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javax.swing.event.EventListenerList;
-import static jfreechart.Parser.MAX_TURTLES;
 import jfreechart.listener.SelectionEventListener;
 import jfreechart.object.StringValuePair;
-import jfreechart.object.TimeFrame;
+import jfreechart.object.Turtle;
+import jfreechart.settings.Configuration;
 
 public interface Chart extends EventListener {
   
   EventListenerList listenerList = new EventListenerList();
   
-  public void updateData(List<TimeFrame> data);
+  public void updateData(List<Turtle> data);
   
   public String getName();
   public Node getNode();
@@ -32,13 +32,26 @@ public interface Chart extends EventListener {
   public void selectFrames(int startIndex, int endIndex, boolean drag);
   
   public void showParameterDialog();
+
+  static double getScale(double range) {
+    double leftDigits = range;
+    int dividings = 0;
+    while(leftDigits >= 100) {
+      leftDigits = Math.round(leftDigits / 10);
+      dividings += 1;
+    }
+    double scale = Math.round(leftDigits / 10);
+    double result = scale * Math.pow(10, dividings);    
+    return result;
+  }
   
   
   static ListView getTurtleListView(int[] selected) {
+    Configuration configuration = new Configuration();
     ListView<StringValuePair<String, Integer>> turtleListView = new ListView();              
     ObservableList<StringValuePair<String, Integer>> turtleList = FXCollections.observableArrayList();
     turtleListView.setItems(turtleList);
-    for(int i = 0; i < MAX_TURTLES; i++) {
+    for(int i = 0; i < configuration.MaxTurtles; i++) {
       turtleList.add(new StringValuePair(String.format("Turtle %d", i+1), i));
     }
 

@@ -1,3 +1,4 @@
+/*
 package jfreechart.object;
 
 import java.util.ArrayList;
@@ -26,3 +27,4 @@ public class TimeFrame {
     return String.format("Timeframe: %d", frameID);
   }
 }
+*/

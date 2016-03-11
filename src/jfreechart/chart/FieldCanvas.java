@@ -22,15 +22,11 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
-import javafx.scene.shape.FillRule;
 import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.RectangleBuilder;
-import javafx.scene.shape.StrokeLineCap;
-import javafx.scene.shape.StrokeLineJoin;
-import javafx.scene.shape.StrokeType;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
@@ -38,14 +34,15 @@ import javafx.util.Pair;
 import jfreechart.object.ParameterMap;
 import jfreechart.listener.SelectionEventListener;
 import jfreechart.object.StringValuePair;
-import jfreechart.object.TimeFrame;
 import jfreechart.object.Turtle;
-import static jfreechart.Parser.MAX_OPPONENTS;
-import static jfreechart.Parser.MAX_TURTLES;
 import static jfreechart.chart.Chart.getCheckbox;
 import static jfreechart.chart.Chart.getTurtleListView;
+import jfreechart.object.Parameter;
+import jfreechart.object.Range;
+import jfreechart.settings.Configuration;
 
 public class FieldCanvas extends Pane implements Chart{
+  /*
   private static final double FIELDWIDTH = 11.880000;
   private static final double FIELDLENGTH = 17.880000;
   private static final double PENALTYAREAWIDTH = 6.370000;
@@ -55,9 +52,10 @@ public class FieldCanvas extends Pane implements Chart{
   private static final double PENALTYSPOT = 2.870000;
   private static final double GOALWIDTH = 2.000000;
   private static final double GOALDEPTH = 0.575000;
-
-  private List<TimeFrame> data;
-  private List<TimeFrame> selection;
+  */
+  
+  private List<Turtle> data;
+  private Range selection;
   private Rectangle field;
   private boolean liveUpdate;
   private int[] selectedTurtles;
@@ -67,9 +65,9 @@ public class FieldCanvas extends Pane implements Chart{
   private int[] selectedOpponents;
   private boolean opponentsHistory;
   
-  private final Circle[] shape_ball = new Circle[MAX_TURTLES];
-  private final Pair<Rectangle, Text>[][] shape_opponents = new Pair[MAX_TURTLES][MAX_OPPONENTS];
-  private final Pair<Rectangle, Text>[] shape_turtles = new Pair[MAX_TURTLES];
+  private final Circle[] shape_ball;
+  private final Pair<Rectangle, Text>[][] shape_opponents;
+  private final Pair<Rectangle, Text>[] shape_turtles;
   private Rectangle shape_field;
   private Rectangle shape_goal1;
   private Rectangle shape_goal2;
@@ -85,7 +83,10 @@ public class FieldCanvas extends Pane implements Chart{
   private double initial_width;
   private double initial_height;
   
-  public FieldCanvas(List<TimeFrame> data, boolean liveUpdate, int[] selectedTurtles, boolean turtleHistory, int[] selectedBall, boolean ballHistory, int[] selectedOpponents, boolean opponentsHistory) {
+  private ParameterMap parameterMap;
+  private Configuration configuration;
+  
+  public FieldCanvas(List<Turtle> data, boolean liveUpdate, int[] selectedTurtles, boolean turtleHistory, int[] selectedBall, boolean ballHistory, int[] selectedOpponents, boolean opponentsHistory) {
     this.data = data;
     
     this.liveUpdate = liveUpdate;
@@ -96,10 +97,15 @@ public class FieldCanvas extends Pane implements Chart{
     this.selectedOpponents = selectedOpponents;
     this.opponentsHistory = opponentsHistory;
     
-    this.getStylesheets().add("jfreechart/plot.css");
+    this.configuration = new Configuration();
+    this.parameterMap = new ParameterMap();
     
-    selection = new ArrayList();
-          
+    this.shape_ball = new Circle[this.configuration.MaxTurtles];
+    this.shape_opponents = new Pair[this.configuration.MaxTurtles][this.configuration.MaxOpponents];
+    this.shape_turtles = new Pair[this.configuration.MaxTurtles];
+  
+    this.getStylesheets().add("jfreechart/plot.css");
+              
     widthProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
       field = getField();
       setClipping();
@@ -119,17 +125,19 @@ public class FieldCanvas extends Pane implements Chart{
   }
   
   @Override
-  public void updateData(List<TimeFrame> data) {
+  public void updateData(List<Turtle> data) {
     this.data = data;
-    selection = new ArrayList();
+   this.selection = null;
     drawMovingShapes();
   }
   
   @Override
   public void selectFrames(int startIndex, int endIndex, boolean drag) {
     if((!drag || liveUpdate) && data.size() > 0) {
-      this.selection = data.subList(startIndex, endIndex);
+      this.selection = new Range(startIndex, endIndex);
       drawMovingShapes();
+    } else {
+      this.selection = null;
     }
   }
   
@@ -159,7 +167,7 @@ public class FieldCanvas extends Pane implements Chart{
     int width = 500;
     int height = 500;
     
-    double fieldRatio = (double)FIELDLENGTH / (double)FIELDWIDTH;
+    double fieldRatio = (double)this.configuration.FieldLength / (double)this.configuration.FieldWidth;
     double canvasRatio = (double)height / (double)width;
     
     int rectHeight = height;
@@ -286,56 +294,65 @@ public class FieldCanvas extends Pane implements Chart{
       }
     }
     
-    if(selection.size() > 0) {
-      List<Turtle> turtles = selection.get(selection.size() - 1).getTurtles();
-      //for(Turtle turtle : selection.get(selection.size() - 1).getTurtles()) {
-      for(int selectedTurtle : selectedTurtles) {
-        Turtle turtle  = turtles.get(selectedTurtle);
-        ParameterMap paremeters = turtle.getParameters();
-        if(paremeters.getValue("robotInField")[0][0] > 0) {
-          double[][] position = paremeters.getValue("pose");
-          Point turtlePos = getPosition(field, position[0][0], position[0][1]);
-          double orientation =  position[0][2];
-          
-          int index = turtle.getID();
+    if(selection != null) {
+      try {
+        for(int selectedTurtle : selectedTurtles) {
+          Turtle turtle  = data.get(selectedTurtle);
 
-          if(shape_turtles[index] == null) {            
-            
-            
-              Rectangle turtleRect = RectangleBuilder.create()
-                      .x(turtlePos.getX() - 10)
-                      .y(turtlePos.getY() - 10)
-                      .height(20)
-                      .width(20)
-                      .styleClass(String.format("default-color%d-agent", (int)index))
-                      .build();
-                            
-              turtleRect.setRotate(Math.toDegrees(orientation));
-              Text turtleText = new Text(turtlePos.getX() - 5, turtlePos.getY() + 5, String.valueOf(index + 1));
-              turtleText.setFill(Color.WHITE);
-              turtleText.setRotate(Math.toDegrees(orientation));
+          double[] inFieldValues = turtle.GetValues(this.configuration.RobotInField, 0, this.configuration.RobotInFieldIndex, selection.GetMin(), selection.GetMax());
+          double[] poseXValues = turtle.GetValues(this.configuration.Pose, 0, this.configuration.PoseX, selection.GetMin(), selection.GetMax());
+          double[] poseYValues = turtle.GetValues(this.configuration.Pose, 0, this.configuration.PoseY, selection.GetMin(), selection.GetMax());
+          double[] poseRotValues = turtle.GetValues(this.configuration.Pose, 0, this.configuration.PoseRot, selection.GetMin(), selection.GetMax());
 
-              shape_turtles[index] = new Pair(turtleRect, turtleText);
-              this.getChildren().add(turtleRect);
-              this.getChildren().add(turtleText);
-          } else {
-            if(turtlePos.getX() != 0 || turtlePos.getY() != 0) {
-              shape_turtles[index].getKey().setX(turtlePos.getX() - 10);
-              shape_turtles[index].getKey().setY(turtlePos.getY() - 10);
-              shape_turtles[index].getKey().setRotate(Math.toDegrees(orientation));
-              
-              shape_turtles[index].getValue().setX(turtlePos.getX() - 5);
-              shape_turtles[index].getValue().setY(turtlePos.getY() + 5);
-              shape_turtles[index].getValue().setRotate(Math.toDegrees(orientation));
-              
-              shape_turtles[index].getKey().setVisible(true);
-              shape_turtles[index].getValue().setVisible(true);
-            } else {
-              shape_turtles[index].getKey().setVisible(false);
-              shape_turtles[index].getValue().setVisible(false);
+          for(int i = 0; i < inFieldValues.length; i ++) {
+
+            if(inFieldValues[i] > 0) {            
+              Point turtlePos = getPosition(field, poseXValues[i], poseYValues[i]);
+              double orientation =  poseRotValues[i];
+
+              int index = turtle.getID();
+
+              if(shape_turtles[index] == null) {            
+
+
+                  Rectangle turtleRect = RectangleBuilder.create()
+                          .x(turtlePos.getX() - 10)
+                          .y(turtlePos.getY() - 10)
+                          .height(20)
+                          .width(20)
+                          .styleClass(String.format("default-color%d-agent", (int)index))
+                          .build();
+
+                  turtleRect.setRotate(Math.toDegrees(orientation));
+                  Text turtleText = new Text(turtlePos.getX() - 5, turtlePos.getY() + 5, String.valueOf(index + 1));
+                  turtleText.setFill(Color.WHITE);
+                  turtleText.setRotate(Math.toDegrees(orientation));
+
+                  shape_turtles[index] = new Pair(turtleRect, turtleText);
+                  this.getChildren().add(turtleRect);
+                  this.getChildren().add(turtleText);
+              } else {
+                if(turtlePos.getX() != 0 || turtlePos.getY() != 0) {
+                  shape_turtles[index].getKey().setX(turtlePos.getX() - 10);
+                  shape_turtles[index].getKey().setY(turtlePos.getY() - 10);
+                  shape_turtles[index].getKey().setRotate(Math.toDegrees(orientation));
+
+                  shape_turtles[index].getValue().setX(turtlePos.getX() - 5);
+                  shape_turtles[index].getValue().setY(turtlePos.getY() + 5);
+                  shape_turtles[index].getValue().setRotate(Math.toDegrees(orientation));
+
+                  shape_turtles[index].getKey().setVisible(true);
+                  shape_turtles[index].getValue().setVisible(true);
+                } else {
+                  shape_turtles[index].getKey().setVisible(false);
+                  shape_turtles[index].getValue().setVisible(false);
+                }
+              }
             }
           }
         }
+      } catch(Exception ex) {
+        ex.printStackTrace();        
       }
     }
   }
@@ -351,46 +368,50 @@ public class FieldCanvas extends Pane implements Chart{
       }
     }
 
-    if(selection.size() > 0) {
-      
-      List<Turtle> turtles = selection.get(selection.size() - 1).getTurtles();
-      for(int selectedTurtle : selectedOpponents) {        
-        Turtle turtle  = turtles.get(selectedTurtle);
-           
-        ParameterMap paremeters = turtle.getParameters();
-        double[][] opponents = paremeters.getValue("opponent");
-        double[][] opponentLabels = paremeters.getValue("opponentlabelnumber");
+    if(selection != null) {
+      try {
+        for(int selectedTurtle : selectedOpponents) {        
+          Turtle turtle  = data.get(selectedTurtle);
 
-        for(int i = 0; i < opponents.length; i++) {
-          
-          if(opponents[i][0] != 0 && opponents[i][1] != 0 && opponents[i][0] >= -32 && opponents[i][1] >= -32) {
-            int label = (int)opponentLabels[i][0];
-            Point opponentPos = getPosition(field, opponents[i][0], opponents[i][1]);
-            
-            if(shape_opponents[selectedTurtle][i] == null) {            
-                Rectangle opponent = new Rectangle(opponentPos.getX() - 10, opponentPos.getY() - 10, 20, 20);
-                opponent.setFill(Color.DARKSLATEGREY);
-                opponent.getStyleClass().add(String.format("default-color%d-opponent", (int)selectedTurtle));
-                Text opponentText = new Text(opponentPos.getX() - 5, opponentPos.getY() + 5, String.valueOf(label));
-                opponentText.getStyleClass().add(String.format("default-color%d-opponent-text", (int)selectedTurtle));
-                
-                shape_opponents[selectedTurtle][i] = new Pair(opponent, opponentText);
-                this.getChildren().add(opponent);
-                this.getChildren().add(opponentText);
-            } else {
-              if(opponentPos.getX() != 0 || opponentPos.getY() != 0) {
-                shape_opponents[selectedTurtle][i].getKey().setX(opponentPos.getX() - 10);
-                shape_opponents[selectedTurtle][i].getKey().setY(opponentPos.getY() - 10);
+          Parameter parameter = this.parameterMap.GetParameter(this.configuration.Opponent);
 
-                shape_opponents[selectedTurtle][i].getValue().setX(opponentPos.getX() - 5);
-                shape_opponents[selectedTurtle][i].getValue().setY(opponentPos.getY() + 5);
+          for(int i = 0; i < parameter.getCount(); i++) {
 
-                shape_opponents[selectedTurtle][i].getKey().setVisible(true);
-                shape_opponents[selectedTurtle][i].getValue().setVisible(true);
+            double[] opponentXValues = turtle.GetValues(this.configuration.Opponent, i, this.configuration.OpponentX, selection.GetMin(), selection.GetMax());
+            double[] opponentYValues = turtle.GetValues(this.configuration.Opponent, i, this.configuration.OpponentY, selection.GetMin(), selection.GetMax());
+            double[] opponentlabelValues = turtle.GetValues(this.configuration.Opponentlabelnumber, i, this.configuration.OpponentlabelnumberIndex, selection.GetMin(), selection.GetMax());
+
+            for(int valueIndex = 0; valueIndex < opponentXValues.length; valueIndex++) {
+              int label = (int)opponentlabelValues[valueIndex];
+              Point opponentPos = getPosition(field, opponentXValues[valueIndex], opponentYValues[valueIndex]);
+
+              if(shape_opponents[selectedTurtle][i] == null) {            
+                  Rectangle opponent = new Rectangle(opponentPos.getX() - 10, opponentPos.getY() - 10, 20, 20);
+                  opponent.setFill(Color.DARKSLATEGREY);
+                  opponent.getStyleClass().add(String.format("default-color%d-opponent", (int)selectedTurtle));
+                  Text opponentText = new Text(opponentPos.getX() - 5, opponentPos.getY() + 5, String.valueOf(label));
+                  opponentText.getStyleClass().add(String.format("default-color%d-opponent-text", (int)selectedTurtle));
+
+                  shape_opponents[selectedTurtle][i] = new Pair(opponent, opponentText);
+                  this.getChildren().add(opponent);
+                  this.getChildren().add(opponentText);
+              } else {
+                if(opponentPos.getX() != 0 || opponentPos.getY() != 0) {
+                  shape_opponents[selectedTurtle][i].getKey().setX(opponentPos.getX() - 10);
+                  shape_opponents[selectedTurtle][i].getKey().setY(opponentPos.getY() - 10);
+
+                  shape_opponents[selectedTurtle][i].getValue().setX(opponentPos.getX() - 5);
+                  shape_opponents[selectedTurtle][i].getValue().setY(opponentPos.getY() + 5);
+
+                  shape_opponents[selectedTurtle][i].getKey().setVisible(true);
+                  shape_opponents[selectedTurtle][i].getValue().setVisible(true);
+                }
               }
-            }
+            }        
           }
-        }        
+        }
+      } catch(Exception ex) {
+        ex.printStackTrace();        
       }
     }
   }
@@ -403,7 +424,8 @@ public class FieldCanvas extends Pane implements Chart{
       }          
     }
 
-    if(selection.size() > 0) {
+    if(selection != null) {
+      /*
       List<Turtle> turtles = selection.get(selection.size() - 1).getTurtles();
       for(int selectedTurtle : selectedBall) {        
         Turtle turtle  = turtles.get(selectedTurtle);
@@ -425,59 +447,60 @@ public class FieldCanvas extends Pane implements Chart{
           }
         }
       }
+      */
     }
   }
     
   private void drawField() {    
-    double width_center = (FIELDWIDTH / 2);
-    double height_center = (FIELDLENGTH / 2);
+    double width_center = (this.configuration.FieldWidth / 2);
+    double height_center = (this.configuration.FieldLength / 2);
     
     if(shape_field == null) {      
       shape_field = new Rectangle(field.getX(), field.getY(), field.getWidth(), field.getHeight());
       shape_field.setFill(Color.GREEN);
       shape_field.setStroke(Color.GREEN);
       
-      Rectangle position = translateToField(width_center - (GOALWIDTH / 2), -GOALDEPTH, GOALWIDTH, GOALDEPTH);
+      Rectangle position = translateToField(width_center - (this.configuration.GoalWidth / 2), -this.configuration.GoalDepth, this.configuration.GoalWidth, this.configuration.GoalDepth);
       shape_goal1 = new Rectangle(position.getX(), position.getY(), position.getWidth(), position.getHeight());
       shape_goal1.setFill(Color.TRANSPARENT);
       shape_goal1.setStroke(Color.WHITE);
       
-      position = translateToField(width_center - (GOALWIDTH / 2), FIELDLENGTH, GOALWIDTH, GOALDEPTH);
+      position = translateToField(width_center - (this.configuration.GoalWidth / 2), this.configuration.FieldLength, this.configuration.GoalWidth, this.configuration.GoalDepth);
       shape_goal2 = new Rectangle(position.getX(), position.getY(), position.getWidth(), position.getHeight());
       shape_goal2.setFill(Color.TRANSPARENT);
       shape_goal2.setStroke(Color.WHITE);
 
-      position = translateToField(width_center - (GOALAREAWIDTH / 2), 0, GOALAREAWIDTH, GOALAREALENGTH);
+      position = translateToField(width_center - (this.configuration.GoalAreaWidth / 2), 0, this.configuration.GoalAreaWidth, this.configuration.GoalAreaLength);
       shape_goalarea1 = new Rectangle(position.getX(), position.getY(), position.getWidth(), position.getHeight());
       shape_goalarea1.setFill(Color.TRANSPARENT);
       shape_goalarea1.setStroke(Color.WHITE);
       
-      position = translateToField(width_center - (GOALAREAWIDTH / 2), FIELDLENGTH - GOALAREALENGTH, GOALAREAWIDTH, GOALAREALENGTH);
+      position = translateToField(width_center - (this.configuration.GoalAreaWidth / 2), this.configuration.FieldLength - this.configuration.GoalAreaLength, this.configuration.GoalAreaWidth, this.configuration.GoalAreaLength);
       shape_goalarea2 = new Rectangle(position.getX(), position.getY(), position.getWidth(), position.getHeight());
       shape_goalarea2.setFill(Color.TRANSPARENT);
       shape_goalarea2.setStroke(Color.WHITE);
 
-      position = translateToField(width_center - (PENALTYAREAWIDTH / 2), 0, PENALTYAREAWIDTH, PENALTYAREALENGTH);
+      position = translateToField(width_center - (this.configuration.PenaltyWidth / 2), 0, this.configuration.PenaltyWidth, this.configuration.PenaltyLength);
       shape_penalty1 = new Rectangle(position.getX(), position.getY(), position.getWidth(), position.getHeight());
       shape_penalty1.setFill(Color.TRANSPARENT);
       shape_penalty1.setStroke(Color.WHITE);
       
-      position = translateToField(width_center - (PENALTYAREAWIDTH / 2), FIELDLENGTH - PENALTYAREALENGTH, PENALTYAREAWIDTH, PENALTYAREALENGTH);
+      position = translateToField(width_center - (this.configuration.PenaltyWidth / 2), this.configuration.FieldLength - this.configuration.PenaltyLength, this.configuration.PenaltyWidth, this.configuration.PenaltyLength);
       shape_penalty2 = new Rectangle(position.getX(), position.getY(), position.getWidth(), position.getHeight());
       shape_penalty2.setFill(Color.TRANSPARENT);
       shape_penalty2.setStroke(Color.WHITE);
 
-      position = translateToField(width_center, PENALTYSPOT, 0.2, 0.2);
+      position = translateToField(width_center, this.configuration.PenaltySpot, 0.2, 0.2);
       shape_penaltyspot1 = new Circle(position.getX(), position.getY(), position.getWidth());
       shape_penaltyspot1.setFill(Color.WHITE);
       shape_penaltyspot1.setStroke(Color.WHITE);
 
-      position = translateToField(width_center, FIELDLENGTH - PENALTYSPOT, 0.2, 0.2);    
+      position = translateToField(width_center, this.configuration.FieldLength - this.configuration.PenaltySpot, 0.2, 0.2);    
       shape_penaltyspot2 = new Circle(position.getX(), position.getY(), position.getWidth());
       shape_penaltyspot2.setFill(Color.WHITE);
       shape_penaltyspot2.setStroke(Color.WHITE);
 
-      position = translateToField(0, height_center - 0.02, FIELDWIDTH, 0.04);
+      position = translateToField(0, height_center - 0.02, this.configuration.FieldWidth, 0.04);
       shape_fieldcenter = new Rectangle(position.getX(), position.getY(), position.getWidth(), position.getHeight());
       shape_fieldcenter.setFill(Color.TRANSPARENT);
       shape_fieldcenter.setStroke(Color.WHITE);
@@ -520,7 +543,8 @@ public class FieldCanvas extends Pane implements Chart{
   }
   
   private void addPaths(int[] selected, String parameter, String style) {
-    if(selection.size() > 0) {
+    /*
+    if(selection != null) {
       List<Pair<Integer, List<Point>>> paths = new ArrayList();
 
       for(int turtleIndex : selected) {
@@ -571,6 +595,7 @@ public class FieldCanvas extends Pane implements Chart{
         }
       }
     }
+    */
   }
   
   private void resizePanel() {      
@@ -617,8 +642,8 @@ public class FieldCanvas extends Pane implements Chart{
     double field_center_x = (double)initial_width / 2;
     double field_center_y = (double)initial_height / 2;
     
-    double widthRatio = (double)initial_width  / (double)FIELDWIDTH;
-    double heightRatio = (double)initial_height / (double)FIELDLENGTH;
+    double widthRatio = (double)initial_width  / (double)this.configuration.FieldWidth;
+    double heightRatio = (double)initial_height / (double)this.configuration.FieldLength;
     
     double center_x_in_field = center_x * widthRatio;
     double center_y_in_field = center_y * heightRatio;
@@ -627,8 +652,8 @@ public class FieldCanvas extends Pane implements Chart{
   }
   
   private Rectangle translateToField(double x, double y, double width, double height) {
-    double widthRatio = (double)field.getWidth() / (double)FIELDWIDTH;
-    double heightRatio = (double)field.getHeight() / (double)FIELDLENGTH;
+    double widthRatio = (double)field.getWidth() / (double)this.configuration.FieldWidth;
+    double heightRatio = (double)field.getHeight() / (double)this.configuration.FieldLength;
     
     double x_in_field = x * widthRatio;
     double y_in_field = y * heightRatio;
@@ -642,7 +667,7 @@ public class FieldCanvas extends Pane implements Chart{
     int width = (int)this.getWidth();
     int height = (int)this.getHeight();
     
-    double fieldRatio = (double)FIELDLENGTH / (double)FIELDWIDTH;
+    double fieldRatio = (double)this.configuration.FieldLength / (double)this.configuration.FieldWidth;
     double canvasRatio = (double)height / (double)width;
     
     int rectHeight = height;

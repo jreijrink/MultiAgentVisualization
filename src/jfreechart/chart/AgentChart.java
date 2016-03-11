@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Timer;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -22,6 +23,7 @@ import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -33,18 +35,29 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.RectangleBuilder;
 import static jfreechart.chart.Chart.getCheckbox;
+import static jfreechart.chart.Chart.getScale;
 import static jfreechart.chart.Chart.getTurtleListView;
 import jfreechart.listener.SelectionEventListener;
+import jfreechart.object.Category;
+import jfreechart.object.Parameter;
+import jfreechart.object.ParameterMap;
 import jfreechart.object.StringValuePair;
-import jfreechart.object.TimeFrame;
 import jfreechart.object.Turtle;
+import jfreechart.object.Type;
+import jfreechart.object.Value;
+import jfreechart.settings.Configuration;
 
-public class AgentPlot implements Chart {
+public class AgentChart implements Chart {
   
   private Scene scene;
   private int[] selectedTurtles;
-  private List<TimeFrame> data;
+  private String yParameter;
+  private int yParameterIndex;
+  private String yParameterValue;
+  private List<Turtle> data;
   private boolean liveUpdate;
+  
+  private ParameterMap parameterMap;
   
   private BorderPane rootPane; 
   private ScatterChart<Number,String> scattterChart;
@@ -59,18 +72,42 @@ public class AgentPlot implements Chart {
   private int selectedStartIndex;
   private int selectedEndIndex;
   
-  public AgentPlot(Scene scene, int[] selectedTurtles, List<TimeFrame> data, boolean liveUpdate) {
+  public AgentChart(Scene scene, int[] selectedTurtles, String yParameter, int yParameterIndex, String yParameterValue, List<Turtle> data, boolean liveUpdate) {
     this.scene = scene;
     this.selectedTurtles = selectedTurtles;
+    this.yParameter = yParameter;
+    this.yParameterIndex = yParameterIndex;
+    this.yParameterValue = yParameterValue;
     this.data = data;
     this.liveUpdate = liveUpdate;
     this.rootPane = new BorderPane();
     this.rootPane.getStylesheets().add("jfreechart/plot.css");
+    this.parameterMap = new ParameterMap();
+    
     initialize();
   }
   
-  public AgentPlot(Scene scene) {
-    this(scene, new int[]{ 0, 1, 2, 3, 4, 5, 6 }, new ArrayList(), false);
+  public AgentChart(Scene scene) {
+    this.scene = scene;
+    
+    this.parameterMap = new ParameterMap();
+    this.selectedTurtles = new int[] { 0 };
+    this.yParameterIndex = 0;
+    this.data = new ArrayList();
+    this.liveUpdate = true;
+    
+    if(this.parameterMap.GetParametersOfType(Type.Categorical).size() > 0) {
+    Parameter firstParameter = this.parameterMap.GetParametersOfType(Type.Categorical).get(0);
+      this.yParameter = firstParameter.getName();
+      if(firstParameter.getValues().size() > 0) {
+        this.yParameterValue = firstParameter.getValues().get(0).getName();
+      }
+    }
+    
+    this.rootPane = new BorderPane();
+    this.rootPane.getStylesheets().add("jfreechart/plot.css");
+    
+    initialize();
   }
   
   @Override
@@ -80,7 +117,7 @@ public class AgentPlot implements Chart {
   
   @Override
   public String getName() {
-    return "AgentPlot";
+    return "AgentChart";
   }
   
   @Override
@@ -89,7 +126,7 @@ public class AgentPlot implements Chart {
   }
   
   @Override
-  public void updateData(List<TimeFrame> data) {
+  public void updateData(List<Turtle> data) {
     this.data = data;
     initialize();
   }
@@ -129,9 +166,8 @@ public class AgentPlot implements Chart {
   }
   
   private void initialize() {
-    if(data.size() > 0) {
-      createChart();
-    }
+    this.parameterMap = new ParameterMap();
+    createChart();
   }
   
   private void createChart() {
@@ -139,9 +175,14 @@ public class AgentPlot implements Chart {
     for(int turtle : selectedTurtles) {
       categories.add(String.format("Turtle %d", turtle + 1));
     }
+    CategoryAxis yAxis = new CategoryAxis(categories);
     
-    final NumberAxis xAxis = new NumberAxis(0, data.size(), data.size() / 5);
-    final CategoryAxis yAxis = new CategoryAxis(categories);
+    NumberAxis xAxis = new NumberAxis();
+    try {
+        int timeframes = this.data.get(0).GetAllValues(yParameter, yParameterIndex, yParameterValue).length;
+        double scale = getScale(timeframes);
+        xAxis = new NumberAxis(0, timeframes, scale);
+    } catch(Exception ex) { }
     
     this.scattterChart = new ScatterChart<>(xAxis, yAxis);
     
@@ -154,7 +195,7 @@ public class AgentPlot implements Chart {
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
-                  resizePlot();
+                  resizeChart();
                   timer.cancel();
                   timer.purge();
                 }
@@ -172,7 +213,7 @@ public class AgentPlot implements Chart {
             Platform.runLater(new Runnable() {
                 @Override
                 public void run() {
-                  resizePlot();
+                  resizeChart();
                   timer.cancel();
                   timer.purge();
                 }
@@ -215,9 +256,9 @@ public class AgentPlot implements Chart {
     grid.setPadding(new Insets(10, 10, 10, 10));
     
     Dialog<Boolean> dialog = new Dialog();
-    dialog.setTitle("Agentplot options");
-    dialog.setHeaderText("Choose agentplot options");
-    dialog.setContentText("Choose agentplot options:");
+    dialog.setTitle("AgentChart options");
+    dialog.setHeaderText("Choose agentchart options");
+    dialog.setContentText("Choose agentchart options:");
 
     dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
@@ -225,20 +266,92 @@ public class AgentPlot implements Chart {
     
     ListView listView = getTurtleListView(selectedTurtles); 
     
+    ChoiceBox<String> parameterChoiceBox = new ChoiceBox();
+    ChoiceBox<Integer> indexChoiceBox = new ChoiceBox();
+    ChoiceBox<String> valueChoiceBox = new ChoiceBox();
+
+    List<Parameter> choices = parameterMap.GetParametersOfType(Type.Categorical);
+    ObservableList<String> options = FXCollections.observableArrayList();
+    for(Parameter choise : choices) {
+      options.add(choise.getName());
+    }
+
+    parameterChoiceBox.setItems(options);
+    if(options.contains(yParameter)) {
+      parameterChoiceBox.getSelectionModel().select(yParameter);
+      Parameter parameter = parameterMap.GetParameter(yParameter);
+      
+      int count = parameter.getCount();
+      ObservableList<Integer> indexOptions = FXCollections.observableArrayList();
+      for(int index = 0; index < count; index++) {
+        indexOptions.add(index);
+      }      
+      indexChoiceBox.setItems(indexOptions);
+      if(indexOptions.contains(yParameterIndex)) {
+        indexChoiceBox.getSelectionModel().select(yParameterIndex);
+      }
+      
+      List<Value> values = parameter.getValues();
+      ObservableList<String> valueOptions = FXCollections.observableArrayList();
+      for(Value value : values) {
+        valueOptions.add(value.getName());
+      }
+      valueChoiceBox.setItems(valueOptions);
+      if(valueOptions.contains(yParameterValue)) {
+        valueChoiceBox.getSelectionModel().select(yParameterValue);
+      }
+    }
+
+    parameterChoiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
+      @Override
+      public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+        Parameter parameter = parameterMap.GetParameter(newValue.toString());
+        
+        int count = parameter.getCount();
+        ObservableList<Integer> indexOptions = FXCollections.observableArrayList();
+        for(int index = 0; index < count; index++) {
+          indexOptions.add(index);
+        }      
+        indexChoiceBox.setItems(indexOptions);
+        indexChoiceBox.getSelectionModel().select(0);
+
+        List<Value> values = parameter.getValues();
+        ObservableList<String> valueOptions = FXCollections.observableArrayList();
+        for(Value value : values) {
+          valueOptions.add(value.getName());
+        }
+        valueChoiceBox.setItems(valueOptions);
+        valueChoiceBox.getSelectionModel().select(0);
+      }
+    });
+    
     grid.add(liveCheckbox, 0, 0);
     
-    grid.add(new Label("Turtles"), 0, 1);
-    grid.add(listView, 0, 2);
+    grid.add(new Label("Parameter:"), 0, 1);
+    grid.add(parameterChoiceBox, 0, 2);
+    grid.add(new Label("Index:"), 0, 3);
+    grid.add(indexChoiceBox, 0, 4);
+    grid.add(new Label("Value:"), 0, 5);
+    grid.add(valueChoiceBox, 0, 6);
 
+    grid.add(new Label("Turtles"), 0, 7);
+    grid.add(listView, 0, 8);
+    
     dialog.getDialogPane().setContent(grid);
     listView.setPrefHeight(200);
-
+        
     dialog.setResultConverter(dialogButton -> {
       if(dialogButton == ButtonType.OK) {
         ObservableList<StringValuePair<String, Integer>> selectedItems = listView.getSelectionModel().getSelectedItems();
         selectedTurtles = new int[selectedItems.size()];
         for(int i = 0; i < selectedItems.size(); i++) {
           selectedTurtles[i] = selectedItems.get(i).getValue();
+        }
+        
+        if(parameterChoiceBox.getSelectionModel().getSelectedItem() != null) {
+          yParameter = parameterChoiceBox.getSelectionModel().getSelectedItem();
+          yParameterIndex = indexChoiceBox.getSelectionModel().getSelectedItem();
+          yParameterValue = valueChoiceBox.getSelectionModel().getSelectedItem();
         }
         
         liveUpdate = liveCheckbox.isSelected();
@@ -272,7 +385,7 @@ public class AgentPlot implements Chart {
     this.rootPane.getChildren().removeAll(pointChildren);
     
     if(data.size() > 0) {
-      int turtles = data.get(0).getTurtles().size();
+      int turtles = data.size();
 
       double minY = Double.MAX_VALUE;
       double maxY = Double.MIN_VALUE;  
@@ -284,51 +397,46 @@ public class AgentPlot implements Chart {
       double yAxisShift = getSceneYShift(yAxis);
 
       double height = getRowHeigt();
+            
+      Parameter parameter = this.parameterMap.GetParameter(yParameter);
+      Value value = parameter.getValue(yParameterValue);
       
-      List<Double> roles = new ArrayList();
-      
-      //for(int turtleIndex =  0; turtleIndex < turtles; turtleIndex++) {  
       for(int turtleIndex : selectedTurtles) {
         
-        double currentRole = Double.MIN_VALUE;
+        double currentCategory = Double.MIN_VALUE;
         int currentFrame = 0;
         double currentPosition = xAxis.getDisplayPosition(0);
         
-        for(int frameIndex = 0; frameIndex < data.size(); frameIndex++) {
-          Turtle turtle = data.get(frameIndex).getTurtles().get(turtleIndex);
+        Turtle turtle = data.get(turtleIndex);
+        double[] categoricalValues = turtle.GetAllValues(yParameter, yParameterIndex, yParameterValue);
+        
+        for(int timeFrame = 0; timeFrame < categoricalValues.length; timeFrame++) {
+          double category = categoricalValues[timeFrame];
+          
+          if(currentCategory == Double.MIN_VALUE)
+            currentCategory = category;
 
-          double[][] values = turtle.getParameters().getValue("roleId");
-          if(values.length > 0 && values[0].length > 0) {
-            double roleid = values[0][0];
-            if(currentRole == Double.MIN_VALUE)
-              currentRole = roleid;
-                        
-            if(roleid != currentRole || frameIndex >= data.size() - 1) {
-              double xPosition = xAxis.getDisplayPosition(turtle.timeFrame);
-              double yPosition = yAxis.getDisplayPosition(String.format("Turtle %d", turtleIndex + 1));
+          if(category != currentCategory || timeFrame >= categoricalValues.length - 1) {
+            double xPosition = xAxis.getDisplayPosition(timeFrame);
+            double yPosition = yAxis.getDisplayPosition(String.format("Turtle %d", turtleIndex + 1));
 
-              maxY = Math.max(maxY, yPosition);
-              minY = Math.min(minY, yPosition);
-              
-              Rectangle selectionPoint = RectangleBuilder.create()
-                      .x(currentPosition + xAxisShift)
-                      .y(yPosition + yAxisShift - (height / 2))
-                      .height(height)
-                      .width(xPosition - currentPosition)
-                      .userData(new Object[]{ String.format("Turtle %d", turtleIndex + 1), currentFrame, turtle.timeFrame })
-                      .styleClass(String.format("default-color%d-status-symbol", (int)currentRole))
-                      .build();
+            maxY = Math.max(maxY, yPosition);
+            minY = Math.min(minY, yPosition);
 
-              if(!roles.contains(roleid)) {
-                roles.add(roleid);
-              }
+            Rectangle categoryBlock = RectangleBuilder.create()
+                    .x(currentPosition + xAxisShift)
+                    .y(yPosition + yAxisShift - (height / 2))
+                    .height(height)
+                    .width(xPosition - currentPosition)
+                    .userData(new Object[]{ String.format("Turtle %d", turtleIndex + 1), currentFrame, timeFrame })
+                    .styleClass(String.format("default-color%d-status-symbol", value.getCategoryIndex((int)currentCategory)))
+                    .build();
 
-               this.rootPane.getChildren().add(selectionPoint);
-               
-               currentPosition = xPosition;
-               currentFrame = turtle.timeFrame;
-               currentRole = roleid;
-            }
+             this.rootPane.getChildren().add(categoryBlock);
+
+             currentPosition = xPosition;
+             currentFrame = timeFrame;
+             currentCategory = category;
           }
         }
       }
@@ -347,30 +455,33 @@ public class AgentPlot implements Chart {
       
       for(Node child : this.rootPane.getChildren()) {
         if(child.getClass() == Rectangle.class) {
-          createRectangleSelectionEvents(child, rootPane, xAxis, yAxis);
+          createRectangleSelectionEvents(child, xAxis, yAxis);
         }
+        
       }
       
-      createLegend(roles);
+      createLegend();
     }
   }
     
-  private void createLegend(List<Double> roles) {
+  private void createLegend() {
+      Parameter parameter = this.parameterMap.GetParameter(yParameter);
+      Value value = parameter.getValue(yParameterValue);
+      List<Category> categories = value.getCategories();
+      
       Legend legend = (Legend)scattterChart.lookup(".chart-legend");
       legend.getStylesheets().add("jfreechart/plot.css");
-    
-      Collections.sort(roles);
-      
+          
       List<LegendItem> items = new ArrayList();
       
-      for(double role : roles) {
+      for(int index = 0; index < categories.size(); index++) {
           Rectangle legendPoint = RectangleBuilder.create()
                   .height(10)
                   .width(10)
                   .build();
         
-        LegendItem item = new Legend.LegendItem(String.format("State %d", (int)role), legendPoint);
-        item.getSymbol().getStyleClass().add(String.format("default-color%d-status-symbol", (int)role));
+        LegendItem item = new Legend.LegendItem(categories.get(index).getName(), legendPoint);
+        item.getSymbol().getStyleClass().add(String.format("default-color%d-status-symbol", index));
         
         items.add(item);
       }
@@ -378,7 +489,7 @@ public class AgentPlot implements Chart {
       legend.getItems().setAll(items);
   }
   
-  private void resizePlot() {
+  private void resizeChart() {
     
     System.out.println("RESIZEAGENT");
     
@@ -445,7 +556,7 @@ public class AgentPlot implements Chart {
       return height;
   }
   
-  private void createRectangleSelectionEvents(Node node, Pane parent, NumberAxis xAxis, CategoryAxis yAxis) {
+  private void createRectangleSelectionEvents(Node node, NumberAxis xAxis, CategoryAxis yAxis) {
     ScatterChart<Number,String> scattterChart = (ScatterChart<Number,String>)rootPane.getCenter();
     
     node.setOnMousePressed((MouseEvent event) -> {

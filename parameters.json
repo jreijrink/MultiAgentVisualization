@@ -1,0 +1,1098 @@
+{
+  "parameters": [
+    {
+      "values": [
+        {
+          "unit": "meter",
+          "min": 0,
+          "max": 0,
+          "name": "x",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "meter",
+          "min": 0,
+          "max": 0,
+          "name": "y",
+          "index": 1,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "radial",
+          "min": 0,
+          "max": 0,
+          "name": "orientation",
+          "index": 2,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Turtle",
+      "count": 1,
+      "type": "Positional"
+    },
+    {
+      "values": [
+        {
+          "unit": "meter",
+          "min": 0,
+          "max": 0,
+          "name": "x",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "meter",
+          "min": 0,
+          "max": 0,
+          "name": "y",
+          "index": 1,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "meter",
+          "min": 0,
+          "max": 0,
+          "name": "z",
+          "index": 2,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Ball",
+      "count": 1,
+      "type": "Positional"
+    },
+    {
+      "values": [
+        {
+          "unit": "meter",
+          "min": 0,
+          "max": 0,
+          "name": "x",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "meter",
+          "min": 0,
+          "max": 0,
+          "name": "y",
+          "index": 1,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "meter",
+          "min": 0,
+          "max": 0,
+          "name": "z",
+          "index": 2,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Ball WM",
+      "count": 1,
+      "type": "Positional"
+    },
+    {
+      "values": [
+        {
+          "unit": "meter",
+          "min": 0,
+          "max": 0,
+          "name": "x",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "meter",
+          "min": 0,
+          "max": 0,
+          "name": "y",
+          "index": 1,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "meter",
+          "min": 0,
+          "max": 0,
+          "name": "radius",
+          "index": 2,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Obstacles",
+      "count": 10,
+      "type": "Positional"
+    },
+    {
+      "values": [
+        {
+          "unit": "meter",
+          "min": 0,
+          "max": 0,
+          "name": "x",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "meter",
+          "min": 0,
+          "max": 0,
+          "name": "y",
+          "index": 1,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "meter",
+          "min": 0,
+          "max": 0,
+          "name": "radius",
+          "index": 2,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Opponents",
+      "count": 10,
+      "type": "Positional"
+    },
+    {
+      "values": [
+        {
+          "unit": "meter",
+          "min": 0,
+          "max": 0,
+          "name": "x",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "meter",
+          "min": 0,
+          "max": 0,
+          "name": "y",
+          "index": 1,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "radial",
+          "min": 0,
+          "max": 0,
+          "name": "orientation",
+          "index": 2,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Turtle WM",
+      "count": 7,
+      "type": "Positional"
+    },
+    {
+      "values": [
+        {
+          "unit": "meter",
+          "min": 0,
+          "max": 0,
+          "name": "x",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "meter",
+          "min": 0,
+          "max": 0,
+          "name": "y",
+          "index": 1,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "radial",
+          "min": 0,
+          "max": 0,
+          "name": "orientation",
+          "index": 2,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Target",
+      "count": 1,
+      "type": "Positional"
+    },
+    {
+      "values": [
+        {
+          "unit": "meter",
+          "min": 0,
+          "max": 0,
+          "name": "x",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "meter",
+          "min": 0,
+          "max": 0,
+          "name": "y",
+          "index": 1,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Sub-target",
+      "count": 1,
+      "type": "Positional"
+    },
+    {
+      "values": [
+        {
+          "unit": "id",
+          "min": 0,
+          "max": 0,
+          "name": "skill",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Skill ID",
+      "count": 1,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "?",
+          "min": 0,
+          "max": 0,
+          "name": "CPB",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "CPB",
+      "count": 1,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "meter",
+          "min": 0,
+          "max": 0,
+          "name": "x",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "meter",
+          "min": 0,
+          "max": 0,
+          "name": "y",
+          "index": 1,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Line position recognition",
+      "count": 1,
+      "type": "Positional"
+    },
+    {
+      "values": [
+        {
+          "unit": "color",
+          "min": 0,
+          "max": 0,
+          "name": "color",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Team color",
+      "count": 1,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "blueishomegoal",
+          "min": 0,
+          "max": 0,
+          "name": "blueishomegoal",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Blue is homegoal",
+      "count": 1,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "batteryVoltage",
+          "min": 0,
+          "max": 100,
+          "name": "batteryVoltage",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": true
+        }
+      ],
+      "name": "Battery voltage",
+      "count": 1,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "emergencyStatus",
+          "min": 0,
+          "max": 0,
+          "name": "emergencyStatus",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Emergency status",
+      "count": 1,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "role",
+          "min": 0,
+          "max": 0,
+          "name": "current",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [
+            {
+              "name": "Attacker main",
+              "value": 1
+            },
+            {
+              "name": "Attackers assist",
+              "value": 2
+            },
+            {
+              "name": "Defender main",
+              "value": 3
+            },
+            {
+              "name": "Defender assist 1",
+              "value": 4
+            },
+            {
+              "name": "Defender assist 2",
+              "value": 5
+            },
+            {
+              "name": "Goalkeeper",
+              "value": 6
+            }
+          ],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "role",
+          "min": 0,
+          "max": 0,
+          "name": "previous",
+          "index": 1,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Role ID",
+      "count": 1,
+      "type": "Categorical"
+    },
+    {
+      "values": [
+        {
+          "unit": "refboxRole",
+          "min": 0,
+          "max": 0,
+          "name": "refboxRole",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Refbox role",
+      "count": 1,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "defaultRole",
+          "min": 0,
+          "max": 0,
+          "name": "defaultRole",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Default role",
+      "count": 1,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "CPBteam",
+          "min": 0,
+          "max": 0,
+          "name": "CPBteam",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "CPB team",
+      "count": 1,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "robotInField",
+          "min": 0,
+          "max": 0,
+          "name": "robotInField",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Robot in field",
+      "count": 1,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "ballFound",
+          "min": 0,
+          "max": 0,
+          "name": "ballFound",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Ball found",
+      "count": 1,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "cpu0Load",
+          "min": 0,
+          "max": 0,
+          "name": "cpu0Load",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Cpu0 load",
+      "count": 1,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "cpu1Load",
+          "min": 0,
+          "max": 0,
+          "name": "cpu1Load",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Cpu1 load",
+      "count": 1,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "cameraStatus",
+          "min": 0,
+          "max": 0,
+          "name": "cameraStatus",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Camera status",
+      "count": 1,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "restartCountMotion",
+          "min": 0,
+          "max": 0,
+          "name": "restartCountMotion",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Restart count motion",
+      "count": 1,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "restartCountVision",
+          "min": 0,
+          "max": 0,
+          "name": "restartCountVision",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Restart count vision",
+      "count": 1,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "restartCountWorldmodel",
+          "min": 0,
+          "max": 0,
+          "name": "restartCountWorldmodel",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Restart count worldmodel",
+      "count": 1,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "ball_confidence",
+          "min": 0,
+          "max": 0,
+          "name": "ball_confidence",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Ball confidence",
+      "count": 1,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "motion_status",
+          "min": 0,
+          "max": 0,
+          "name": "motion_status",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Motion status",
+      "count": 1,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "vision_status",
+          "min": 0,
+          "max": 0,
+          "name": "vision_status",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Vision status",
+      "count": 1,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "worldmodel_status",
+          "min": 0,
+          "max": 0,
+          "name": "worldmodel_status",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Worldmodel status",
+      "count": 1,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "active",
+          "min": 0,
+          "max": 0,
+          "name": "active",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Active",
+      "count": 1,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "meter",
+          "min": 0,
+          "max": 0,
+          "name": "x",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "meter",
+          "min": 0,
+          "max": 0,
+          "name": "y",
+          "index": 1,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Waypoints",
+      "count": 8,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "pathlength",
+          "min": 0,
+          "max": 0,
+          "name": "pathlength",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Path length",
+      "count": 1,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "motorTemperature",
+          "min": 0,
+          "max": 0,
+          "name": "motorTemperature",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Motor temperature",
+      "count": 3,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "meter",
+          "min": 0,
+          "max": 0,
+          "name": "x",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "meter",
+          "min": 0,
+          "max": 0,
+          "name": "y",
+          "index": 1,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "meter",
+          "min": 0,
+          "max": 0,
+          "name": "z",
+          "index": 2,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "m/s",
+          "min": 0,
+          "max": 0,
+          "name": "vx",
+          "index": 3,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "m/s",
+          "min": 0,
+          "max": 0,
+          "name": "vy",
+          "index": 4,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "m/s",
+          "min": 0,
+          "max": 0,
+          "name": "vz",
+          "index": 5,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Ball movement",
+      "count": 1,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "meter",
+          "min": 0,
+          "max": 0,
+          "name": "x",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "meter",
+          "min": 0,
+          "max": 0,
+          "name": "y",
+          "index": 1,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Sub-sub-target",
+      "count": 1,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "m/s",
+          "min": 0,
+          "max": 0,
+          "name": "vx",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "m/s",
+          "min": 0,
+          "max": 0,
+          "name": "vy",
+          "index": 1,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Opponent velocities",
+      "count": 10,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "refboxcommand",
+          "min": 0,
+          "max": 0,
+          "name": "refboxcommand",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Refbox command",
+      "count": 1,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "usedBallTurtleID",
+          "min": 0,
+          "max": 0,
+          "name": "usedBallTurtleID",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Used ball turtle ID",
+      "count": 1,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "mergedBallSource",
+          "min": 0,
+          "max": 0,
+          "name": "mergedBallSource",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Merged ball source",
+      "count": 1,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "opponentlabelnumber",
+          "min": 0,
+          "max": 0,
+          "name": "opponentlabelnumber",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Opponent label number",
+      "count": 10,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "opponentwithball",
+          "min": 0,
+          "max": 0,
+          "name": "opponentwithball",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Opponent with ball",
+      "count": 1,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "packetLossTurtles",
+          "min": 0,
+          "max": 0,
+          "name": "packetLossTurtles",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Packetloss turtles",
+      "count": 6,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "packetLossCoach",
+          "min": 0,
+          "max": 0,
+          "name": "packetLossCoach",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Packetloss coach",
+      "count": 1,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "meter",
+          "min": 0,
+          "max": 0,
+          "name": "x",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "meter",
+          "min": 0,
+          "max": 0,
+          "name": "y",
+          "index": 1,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "meter",
+          "min": 0,
+          "max": 0,
+          "name": "orientation",
+          "index": 2,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "CPB POI",
+      "count": 1,
+      "type": "Numerical"
+    },
+    {
+      "values": [
+        {
+          "unit": "muFieldNr",
+          "min": 0,
+          "max": 0,
+          "name": "muFieldNr",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        }
+      ],
+      "name": "Mufield number",
+      "count": 1,
+      "type": "Numerical"
+    }
+  ]
+}

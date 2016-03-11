@@ -1,79 +1,102 @@
 package jfreechart.object;
 
-import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import jfreechart.settings.DataMapping;
 
 public class ParameterMap {
-  private final int timeFrame;
-  private final List<SimpleEntry<String, SimpleEntry<Integer, Double>>> parameters;
+  private List<Parameter> parameters;
   
-  public ParameterMap(int timeFrame) {
-    this.timeFrame = timeFrame;
-    parameters = new ArrayList();
+  public ParameterMap() {
+    this.parameters = DataMapping.loadParameters();
   }
   
-  public void addParameter(String name, int size, int ammount) {
-    for(int i = 0; i < size * ammount; i++) {
-      parameters.add(new SimpleEntry(name, new SimpleEntry(size, 0.0)));
+  public boolean ContainsParameter(String parameterName) {
+    for(Parameter parameter : this.parameters) {
+      if(parameter.getName().equals(parameterName))
+        return true;
     }
+    return false;
   }
   
-  public void setValue(int index, double value) {
-    parameters.get(index).getValue().setValue(value);
-  }
-  
-  public int getSize() {
-    return parameters.size();
-  }
-  
-  public List<String> getKeys() {
-    List<String> keys = new ArrayList();
-    keys.add("time");
-    for(SimpleEntry<String, SimpleEntry<Integer, Double>> keyvalue : parameters) {
-      if(!keys.contains(keyvalue.getKey())) {
-        keys.add(keyvalue.getKey());
+  public boolean ParameterContainsValues(String parameterName, String valueName) {
+    for(Parameter parameter : this.parameters) {
+      if(parameter.getName().equals(parameterName)) {
+        for(Value value : parameter.getValuesCopy()) {
+          if(value.getName().equals(valueName))
+            return true;
+        }
       }
     }
-    return keys;
+    return false;
   }
   
-  public double[][] getValue(String key) {
-    if("time".equals(key))
-      return new double[][] { new double[] { (double)this.timeFrame } };
+  public Parameter GetParameter(String parameterName) {
+    for(Parameter parameter : this.parameters) {
+      if(parameter.getName().equals(parameterName))
+        return parameter;
+    }
+    return null;
+  }
+  
+  public List<Parameter> GetParameters() {
+    return this.parameters;
+  }
+  
+  public List<Parameter> GetParametersOfType(Type type) {
+    List<Parameter> typeParameters = new ArrayList();
+    for(Parameter parameter : this.parameters) {
+      if(parameter.getType() == type) {
+        typeParameters.add(parameter);
+      }
+    }
+    return typeParameters;
+  }
+  
+  public List<Value> GetParametersValues(String parameterName) {
+    for(Parameter parameter : this.parameters) {
+      if(parameter.getName().equals(parameterName)) {
+        return parameter.getValuesCopy();
+      }
+    }
+    return null;
+  }
     
-    List<Double> tempvalues = new ArrayList();
+  public int GetValueIndex(String parameterName, int parameterIndex, String valueName) throws Exception {
+    if(!ContainsParameter(parameterName))
+      throw new Exception("Parameter does not exist");
+    if(!GetParameter(parameterName).containsValue(valueName))
+      throw new Exception("Value does not exist");
+    if(GetParameter(parameterName).getCount() <= parameterIndex)
+      throw new Exception("Parameter index does not exist");
     
-    int size = 1;
-    for(SimpleEntry<String, SimpleEntry<Integer, Double>> keyvalue : parameters) { 
-      if(key.equals(keyvalue.getKey())) {
-        size = keyvalue.getValue().getKey();
-        tempvalues.add(keyvalue.getValue().getValue());
+    int index = 0;
+    
+    for(Parameter parameter : this.parameters) {
+      if(parameter.getName().equals(parameterName)) {
+        int size = parameter.getValueSize();
+        index +=  (parameterIndex * size);
+        
+        for(Value value : parameter.getValues()) {
+          if(value.getName().equals(valueName)) {
+            index += value.getIndex();
+            break;
+          }
+        }        
+        break;
+      } else {
+        index += parameter.getSize();
       }
     }
     
-    double[][] values = new double[tempvalues.size() / size][size];
-    int rowIndex = 0;
-    int columnIndex = 0;
-    for(Double value : tempvalues) {
-      values[rowIndex][columnIndex] = value;
-      columnIndex++;
-      if(columnIndex >= size) {
-        columnIndex = 0;
-        rowIndex++;
-      }
-    }
-    
-    return values;
+    return index;
   }
   
-  public String getStringValue(String key) {
-    double[][] values = getValue(key);
-    String[] stringValue = new String[values.length];
-    for(int i = 0; i < values.length; i++) {
-      stringValue[i] = Arrays.toString(values[i]);
+  public int GetMappingSize() {
+    int size = 0;    
+    for(Parameter parameter : this.parameters) {
+      size += parameter.getSize();
     }
-    return Arrays.toString(stringValue);
+    return size;    
   }
 }
