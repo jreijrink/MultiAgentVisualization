@@ -32,6 +32,7 @@ import javafx.stage.Stage;
 import jfreechart.chart.XYBaseChart.ChartType;
 import jfreechart.object.Turtle;
 import jfreechart.settings.ui.FXMLConfigurationController;
+import jfreechart.settings.ui.FXMLParametersController;
 import jfreechart.settings.ui.FXMLValueController;
 import org.dockfx.DockNode;
 import org.dockfx.DockPane;
@@ -185,7 +186,7 @@ public class Main extends Application {
       @Override
       public void handle(Event t) {
         try {
-          FXMLLoader loader = new FXMLLoader(FXMLValueController.class.getResource("FXMLParameters.fxml"));
+          FXMLLoader loader = new FXMLLoader(FXMLParametersController.class.getResource("FXMLParameters.fxml"));
           AnchorPane page = (AnchorPane) loader.load();
           Stage dialogStage = new Stage();
           dialogStage.setTitle("Datamapping");
@@ -195,6 +196,10 @@ public class Main extends Application {
           dialogStage.setScene(scene);
 
           dialogStage.setResizable(false);
+    
+          FXMLParametersController controller = loader.getController();
+          controller.setDialogStage(dialogStage);    
+    
           dialogStage.showAndWait();
           
         } catch (IOException e) {

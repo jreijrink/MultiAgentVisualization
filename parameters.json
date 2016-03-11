@@ -292,33 +292,126 @@
           "unit": "id",
           "min": 0,
           "max": 0,
-          "name": "skill",
+          "name": "skill ID",
+          "index": 0,
+          "decimalmask": "1100",
+          "categories": [
+            {
+              "name": "Move",
+              "value": 0
+            },
+            {
+              "name": "Dribble",
+              "value": 1
+            },
+            {
+              "name": "Aim",
+              "value": 2
+            },
+            {
+              "name": "Kick",
+              "value": 3
+            },
+            {
+              "name": "Shield",
+              "value": 4
+            },
+            {
+              "name": "Intercept",
+              "value": 5
+            }
+          ],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "type",
+          "min": 0,
+          "max": 0,
+          "name": "shottype",
+          "index": 0,
+          "decimalmask": "0011",
+          "categories": [
+            {
+              "name": "Flat shot",
+              "value": 1
+            },
+            {
+              "name": "Dynamic lob",
+              "value": 2
+            },
+            {
+              "name": "Static lob",
+              "value": 3
+            },
+            {
+              "name": "Static pass",
+              "value": 4
+            },
+            {
+              "name": "Dynamic pass",
+              "value": 5
+            },
+            {
+              "name": "Dynamic push",
+              "value": 6
+            },
+            {
+              "name": "Penalty",
+              "value": 7
+            }
+          ],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "types",
+          "min": 0,
+          "max": 0,
+          "name": "Regular",
           "index": 0,
           "decimalmask": "",
+          "categories": [],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "type",
+          "min": 0,
+          "max": 0,
+          "name": "shottype2",
+          "index": 0,
+          "decimalmask": "0011",
           "categories": [],
           "rangeEnabled": false
         }
       ],
       "name": "Skill ID",
       "count": 1,
-      "type": "Numerical"
+      "type": "Categorical"
     },
     {
       "values": [
         {
-          "unit": "?",
+          "unit": "boolean",
           "min": 0,
           "max": 0,
           "name": "CPB",
           "index": 0,
           "decimalmask": "",
-          "categories": [],
+          "categories": [
+            {
+              "name": "false",
+              "value": 0
+            },
+            {
+              "name": "true",
+              "value": 1
+            }
+          ],
           "rangeEnabled": false
         }
       ],
       "name": "CPB",
       "count": 1,
-      "type": "Numerical"
+      "type": "Categorical"
     },
     {
       "values": [

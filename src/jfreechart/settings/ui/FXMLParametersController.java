@@ -68,7 +68,7 @@ public class FXMLParametersController implements Initializable {
   public void setIsValueSelected(boolean selected) { this.isValueSelected.set(selected); }  
   public boolean getIsValueSelected() { return this.isValueSelected.getValue(); }  
   
-  private Stage primaryStage;
+  private Stage dialogStage;
   private ObservableList<Parameter> parameters;
   private Parameter selectedParameter;
   private List<Value> selectedValues;
@@ -94,8 +94,8 @@ public class FXMLParametersController implements Initializable {
     showParameter(null);
   }
   
-  public void setStage(Stage primaryStage) {
-    this.primaryStage = primaryStage;
+  public void setDialogStage(Stage dialogStage) {
+    this.dialogStage = dialogStage;
   }
   
   @FXML
@@ -277,7 +277,7 @@ public class FXMLParametersController implements Initializable {
     Stage dialogStage = new Stage();
     dialogStage.setTitle("Value");
     dialogStage.initModality(Modality.WINDOW_MODAL);
-    dialogStage.initOwner(primaryStage);
+    dialogStage.initOwner(this.dialogStage);
     Scene scene = new Scene(page);
     dialogStage.setScene(scene);
 

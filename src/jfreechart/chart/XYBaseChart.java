@@ -181,6 +181,7 @@ public class XYBaseChart implements Chart {
     for(Parameter choise : choices) {
       options.add(choise.getName());
     }
+    options = options.sorted();
 
     parameterChoiceBox.setItems(options);
     if(options.contains(yParameter)) {
