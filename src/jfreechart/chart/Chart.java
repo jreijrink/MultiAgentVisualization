@@ -30,7 +30,7 @@ public interface Chart extends EventListener {
   
   public void addSelectionEventListener(SelectionEventListener listener);
   public void selectFrames(int startIndex, int endIndex, boolean drag);
-  
+    
   public void showParameterDialog();
 
   static double getScale(double range) {
@@ -44,8 +44,7 @@ public interface Chart extends EventListener {
     double result = scale * Math.pow(10, dividings);    
     return result;
   }
-  
-  
+    
   static ListView getTurtleListView(int[] selected) {
     Configuration configuration = new Configuration();
     ListView<StringValuePair<String, Integer>> turtleListView = new ListView();              

@@ -17,6 +17,7 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -31,9 +32,9 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import jfreechart.chart.XYBaseChart.ChartType;
 import jfreechart.object.Turtle;
+import jfreechart.settings.Configuration;
 import jfreechart.settings.ui.FXMLConfigurationController;
 import jfreechart.settings.ui.FXMLParametersController;
-import jfreechart.settings.ui.FXMLValueController;
 import org.dockfx.DockNode;
 import org.dockfx.DockPane;
 import org.dockfx.DockPos;
@@ -50,10 +51,12 @@ public class Main extends Application {
   private int endIndex;
   private boolean drag;
   
+  private File currentFile;
+  
   @Override
   public void start(Stage stage) {
     stage.setTitle("Prototype");
-
+    
     charts = new ArrayList();
     data = new ArrayList();
     
@@ -65,7 +68,7 @@ public class Main extends Application {
     this.nodeManager = new NodeManager(dockPane);
     
     setEventListener();
-        
+    
     root.setCenter(dockPane);
     
     createMenu(stage, scene, root);
@@ -74,9 +77,12 @@ public class Main extends Application {
     
     Application.setUserAgentStylesheet(Application.STYLESHEET_MODENA);
     DockPane.initializeDefaultUserAgentStylesheet();
-
+    
     scene.getStylesheets().add("jfreechart/plot.css");
     stage.setScene(scene);
+    
+    stage.getIcons().add(new Image(Main.class.getClassLoader().getResource("jfreechart/icon.png").toExternalForm()));
+    
     stage.show();
   }
   
@@ -95,19 +101,11 @@ public class Main extends Application {
       public void handle(Event t) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open MAT File");
-        File file = fileChooser.showOpenDialog(stage);
+        currentFile = fileChooser.showOpenDialog(stage);
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("MAT files (*.mat)", "*.mat");
         fileChooser.getExtensionFilters().add(extFilter);
 
-        if (file != null) {
-          try {
-            Parser parser = new Parser();
-            List<Turtle> result = parser.parse(file.getAbsolutePath());
-            updateLayout(result);
-          } catch (Exception ex) {
-            ex.printStackTrace();
-          }
-        }
+        loadData();
       }
     });
     fileMenu.getItems().add(openMenu);
@@ -202,6 +200,7 @@ public class Main extends Application {
     
           dialogStage.showAndWait();
           
+          loadData();
         } catch (IOException e) {
           e.printStackTrace();
         }
@@ -231,6 +230,7 @@ public class Main extends Application {
           dialogStage.setResizable(false);
           dialogStage.showAndWait();
           
+          loadData();
         } catch (IOException e) {
           e.printStackTrace();
         }
@@ -239,6 +239,30 @@ public class Main extends Application {
     settingsMenu.getItems().add(configurationMenu);
     
     menuBar.getMenus().addAll(fileMenu, elementMenu, settingsMenu);    
+  }
+  
+  private void loadData() {
+    if (currentFile != null && configurationComplete()) {
+      try {
+        Parser parser = new Parser();
+        List<Turtle> result = parser.parse(currentFile.getAbsolutePath());
+        updateLayout(result);
+      } catch (Exception ex) {
+        ex.printStackTrace();
+      }
+    }    
+  }
+  
+  private boolean configurationComplete() {
+    if(!(new Configuration()).complete()) {
+      Alert alert = new Alert(Alert.AlertType.WARNING);
+      alert.setTitle("Configuration error");
+      alert.setHeaderText("The configuration is incomplete!");
+      alert.setContentText("Please verify the configuration.");
+      alert.show();
+      return false;
+    }
+    return true;
   }
   
   private DockPane createDefaultLayout(Scene scene) {

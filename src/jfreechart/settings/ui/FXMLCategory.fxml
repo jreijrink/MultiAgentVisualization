@@ -11,7 +11,7 @@
 <AnchorPane id="AnchorPane" disable="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="122.00009999999747" prefWidth="280.0" visible="true" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="jfreechart.settings.ui.FXMLCategoryController">
   <children>
     <Label text="Value" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="17.0" />
-    <jfreechart.settings.ui.NumberTextField id="categoryValue" fx:id="categoryValue" prefWidth="200.0" AnchorPane.leftAnchor="66.0" AnchorPane.topAnchor="14.0" />
+    <jfreechart.settings.ui.DoubleTextField id="categoryValue" fx:id="categoryValue" prefWidth="200.0" AnchorPane.leftAnchor="66.0" AnchorPane.topAnchor="14.0" />
     <Label text="Name" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="61.0" />
     <TextField  id="categoryName" fx:id="categoryName" prefWidth="200.0" AnchorPane.leftAnchor="66.0" AnchorPane.topAnchor="58.0" />
     <Button id="saveParameter" fx:id="saveValue" defaultButton="true" mnemonicParsing="false" onAction="#saveCategoryAction" text="Save" AnchorPane.leftAnchor="212.0" AnchorPane.topAnchor="90.0" />

@@ -11,7 +11,7 @@
   "BallX": "x",
   "Pose": "Turtle",
   "Opponent": "Opponents",
-  "BallFoundIndex": "ballFound",
+  "BallFoundIndex": "ball-found",
   "PoseX": "x",
   "PenaltyWidth": 6.37,
   "PenaltyLength": 2.125,
@@ -20,10 +20,10 @@
   "FieldLength": 17.88,
   "FieldWidth": 11.88,
   "GoalWidth": 2.0,
-  "OpponentlabelnumberIndex": "opponentlabelnumber",
+  "OpponentlabelnumberIndex": "opponent-label",
   "OpponentX": "x",
   "GoalAreaWidth": 3.37,
   "Opponentlabelnumber": "Opponent label number",
-  "RobotInFieldIndex": "robotInField",
+  "RobotInFieldIndex": "robot-in-field",
   "OpponentY": "y"
 }

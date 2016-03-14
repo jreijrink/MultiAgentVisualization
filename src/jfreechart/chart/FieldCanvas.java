@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package jfreechart.chart;
 
 import java.awt.Point;
@@ -39,21 +34,10 @@ import static jfreechart.chart.Chart.getCheckbox;
 import static jfreechart.chart.Chart.getTurtleListView;
 import jfreechart.object.Parameter;
 import jfreechart.object.Range;
+import jfreechart.object.Value;
 import jfreechart.settings.Configuration;
 
-public class FieldCanvas extends Pane implements Chart{
-  /*
-  private static final double FIELDWIDTH = 11.880000;
-  private static final double FIELDLENGTH = 17.880000;
-  private static final double PENALTYAREAWIDTH = 6.370000;
-  private static final double PENALTYAREALENGTH = 2.125000;
-  private static final double GOALAREAWIDTH = 3.370000;
-  private static final double GOALAREALENGTH = 0.625000;
-  private static final double PENALTYSPOT = 2.870000;
-  private static final double GOALWIDTH = 2.000000;
-  private static final double GOALDEPTH = 0.575000;
-  */
-  
+public class FieldCanvas extends Pane implements Chart{  
   private List<Turtle> data;
   private Range selection;
   private Rectangle field;
@@ -127,7 +111,11 @@ public class FieldCanvas extends Pane implements Chart{
   @Override
   public void updateData(List<Turtle> data) {
     this.data = data;
-   this.selection = null;
+    this.selection = null;
+    
+    this.configuration = new Configuration();
+    this.parameterMap = new ParameterMap();
+    
     drawMovingShapes();
   }
   
@@ -381,30 +369,33 @@ public class FieldCanvas extends Pane implements Chart{
             double[] opponentYValues = turtle.GetValues(this.configuration.Opponent, i, this.configuration.OpponentY, selection.GetMin(), selection.GetMax());
             double[] opponentlabelValues = turtle.GetValues(this.configuration.Opponentlabelnumber, i, this.configuration.OpponentlabelnumberIndex, selection.GetMin(), selection.GetMax());
 
-            for(int valueIndex = 0; valueIndex < opponentXValues.length; valueIndex++) {
-              int label = (int)opponentlabelValues[valueIndex];
-              Point opponentPos = getPosition(field, opponentXValues[valueIndex], opponentYValues[valueIndex]);
+            for(int valueIndex = 0; valueIndex < opponentXValues.length; valueIndex++) {              
+              if(opponentXValues[valueIndex] != 0 && opponentYValues[valueIndex] != 0) {
+                int label = (int)Math.round(opponentlabelValues[valueIndex]);
+                Point opponentPos = getPosition(field, opponentXValues[valueIndex], opponentYValues[valueIndex]);
 
-              if(shape_opponents[selectedTurtle][i] == null) {            
-                  Rectangle opponent = new Rectangle(opponentPos.getX() - 10, opponentPos.getY() - 10, 20, 20);
-                  opponent.setFill(Color.DARKSLATEGREY);
-                  opponent.getStyleClass().add(String.format("default-color%d-opponent", (int)selectedTurtle));
-                  Text opponentText = new Text(opponentPos.getX() - 5, opponentPos.getY() + 5, String.valueOf(label));
-                  opponentText.getStyleClass().add(String.format("default-color%d-opponent-text", (int)selectedTurtle));
+                if(shape_opponents[selectedTurtle][i] == null) {            
+                    Rectangle opponent = new Rectangle(opponentPos.getX() - 10, opponentPos.getY() - 10, 20, 20);
+                    opponent.setFill(Color.DARKSLATEGREY);
+                    opponent.getStyleClass().add(String.format("default-color%d-opponent", (int)selectedTurtle));
+                    Text opponentText = new Text(opponentPos.getX() - 5, opponentPos.getY() + 5, String.valueOf(label));
+                    opponentText.getStyleClass().add(String.format("default-color%d-opponent-text", (int)selectedTurtle));
 
-                  shape_opponents[selectedTurtle][i] = new Pair(opponent, opponentText);
-                  this.getChildren().add(opponent);
-                  this.getChildren().add(opponentText);
-              } else {
-                if(opponentPos.getX() != 0 || opponentPos.getY() != 0) {
-                  shape_opponents[selectedTurtle][i].getKey().setX(opponentPos.getX() - 10);
-                  shape_opponents[selectedTurtle][i].getKey().setY(opponentPos.getY() - 10);
+                    shape_opponents[selectedTurtle][i] = new Pair(opponent, opponentText);
+                    this.getChildren().add(opponent);
+                    this.getChildren().add(opponentText);
+                } else {
+                  if(opponentPos.getX() != 0 || opponentPos.getY() != 0) {
+                    shape_opponents[selectedTurtle][i].getKey().setX(opponentPos.getX() - 10);
+                    shape_opponents[selectedTurtle][i].getKey().setY(opponentPos.getY() - 10);
 
-                  shape_opponents[selectedTurtle][i].getValue().setX(opponentPos.getX() - 5);
-                  shape_opponents[selectedTurtle][i].getValue().setY(opponentPos.getY() + 5);
+                    shape_opponents[selectedTurtle][i].getValue().setX(opponentPos.getX() - 5);
+                    shape_opponents[selectedTurtle][i].getValue().setY(opponentPos.getY() + 5);
+                    shape_opponents[selectedTurtle][i].getValue().setText(String.valueOf(label));
 
-                  shape_opponents[selectedTurtle][i].getKey().setVisible(true);
-                  shape_opponents[selectedTurtle][i].getValue().setVisible(true);
+                    shape_opponents[selectedTurtle][i].getKey().setVisible(true);
+                    shape_opponents[selectedTurtle][i].getValue().setVisible(true);
+                  }
                 }
               }
             }        
@@ -425,29 +416,34 @@ public class FieldCanvas extends Pane implements Chart{
     }
 
     if(selection != null) {
-      /*
-      List<Turtle> turtles = selection.get(selection.size() - 1).getTurtles();
-      for(int selectedTurtle : selectedBall) {        
-        Turtle turtle  = turtles.get(selectedTurtle);
-        
-        ParameterMap paremeters = turtle.getParameters();
-        if(paremeters.getValue("ballFound")[0][0] != 0) {
-          double[][] ball = paremeters.getValue("ball");       
-          if(ball[0][0] != 0 && ball[0][1] != 0 && ball[0][0] >= -32 && ball[0][1] >= -32) {
-            Point ballPos = getPosition(field, ball[0][0], ball[0][1]);
+      
+      try {
+        for(int selectedTurtle : selectedBall) {
+          Turtle turtle  = data.get(selectedTurtle);
 
-            if(shape_ball[selectedTurtle] == null) {        
-              shape_ball[selectedTurtle] = new Circle(ballPos.getX(), ballPos.getY(), 5, Color.ORANGE);
-              this.getChildren().add(shape_ball[selectedTurtle]);
-            } else {
-              shape_ball[selectedTurtle].setVisible(true);
-              shape_ball[selectedTurtle].setCenterX(ballPos.getX());
-              shape_ball[selectedTurtle].setCenterY(ballPos.getY());
+          double[] ballFoundValues = turtle.GetValues(this.configuration.BallFound, 0, this.configuration.BallFoundIndex, selection.GetMin(), selection.GetMax());
+          double[] ballXValues = turtle.GetValues(this.configuration.Ball, 0, this.configuration.BallX, selection.GetMin(), selection.GetMax());
+          double[] ballYValues = turtle.GetValues(this.configuration.Ball, 0, this.configuration.BallY, selection.GetMin(), selection.GetMax());
+
+          for(int i = 0; i < ballFoundValues.length; i ++) {
+
+            if(ballFoundValues[i] > 0 && ballXValues[i] != 0 && ballYValues[i] != 0) {
+              Point ballPos = getPosition(field, ballXValues[i], ballYValues[i]);
+
+              if(shape_ball[selectedTurtle] == null) {        
+                shape_ball[selectedTurtle] = new Circle(ballPos.getX(), ballPos.getY(), 5, Color.ORANGE);
+                this.getChildren().add(shape_ball[selectedTurtle]);
+              } else {
+                shape_ball[selectedTurtle].setVisible(true);
+                shape_ball[selectedTurtle].setCenterX(ballPos.getX());
+                shape_ball[selectedTurtle].setCenterY(ballPos.getY());
+              }
             }
           }
         }
+      } catch(Exception ex) {
+        ex.printStackTrace();        
       }
-      */
     }
   }
     
@@ -526,52 +522,50 @@ public class FieldCanvas extends Pane implements Chart{
   
   private void drawTurtleLines() {
     if(turtleHistory) {      
-      addPaths(selectedTurtles, "pose", "default-color%d-agent-line");
+      addPaths(selectedTurtles, this.configuration.Pose, this.configuration.PoseX, this.configuration.PoseY, "default-color%d-agent-line");
     }
   }
   
   private void drawBallLines() {
     if(ballHistory) {      
-      addPaths(selectedBall, "ball", "default-color%d-ball-line");
+      addPaths(selectedBall, this.configuration.Ball, this.configuration.BallX, this.configuration.BallY, "default-color%d-ball-line");
     }
   }
   
   private void drawOpponentLines() {
     if(opponentsHistory) {      
-      addPaths(selectedOpponents, "opponent", "default-color%d-opponent-line");
+      addPaths(selectedOpponents, this.configuration.Opponent, this.configuration.OpponentX, this.configuration.OpponentY, "default-color%d-opponent-line");
     }
   }
   
-  private void addPaths(int[] selected, String parameter, String style) {
-    /*
+  private void addPaths(int[] selected, String parameterName, String valueXName, String valueYName, String style) {
     if(selection != null) {
       List<Pair<Integer, List<Point>>> paths = new ArrayList();
 
-      for(int turtleIndex : selected) {
-        
-        ParameterMap initalCount = selection.get(0).getTurtles().get(turtleIndex).getParameters();
-        int size = initalCount.getValue(parameter).length;
-        List<Point>[] newPaths = new List[size];
-        for(int i = 0; i < size; i++) {
-          newPaths[i] = new ArrayList();
-        }
+      for(int selectedTurtle : selected) {
+        Turtle turtle  = data.get(selectedTurtle);
 
-        for(int frameIndex = 0; frameIndex < selection.size(); frameIndex++) {
-          Turtle turle = selection.get(frameIndex).getTurtles().get(turtleIndex);
-          ParameterMap paremeters = turle.getParameters();
-          
-          double[][] value = paremeters.getValue(parameter);
+        Parameter parameter = this.parameterMap.GetParameter(parameterName);
 
-          for(int i = 0; i < value.length; i++) {
-            if(value[i][0] != 0 && value[i][1] != 0 && value[i][0] >= -32 && value[i][1] >= -32) {
-              Point position = getPosition(field, value[i][0], value[i][1]);
-              newPaths[i].add(position);
+        for(int parameterIndex = 0; parameterIndex < parameter.getCount(); parameterIndex++) {
+          Value valueX = parameter.getValue(valueXName);
+          Value valueY =  parameter.getValue(valueYName);
+
+          double[] posXValues = turtle.GetValues(parameterName, parameterIndex, valueXName, selection.GetMin(), selection.GetMax());
+          double[] posYValues = turtle.GetValues(parameterName, parameterIndex, valueYName, selection.GetMin(), selection.GetMax());
+
+          List<Point> newPath = new ArrayList();
+          for(int valueIndex = 0; valueIndex < posXValues.length; valueIndex++) {
+            if(posXValues[valueIndex] != 0 && posYValues[valueIndex] != 0) {
+              if(!valueX.getRangeEnabled() ||( posXValues[valueIndex] >= valueX.getMin() && posXValues[valueIndex] <= valueX.getMax())) {
+                if(!valueY.getRangeEnabled() ||(posYValues[valueIndex] >= valueY.getMin() && posYValues[valueIndex] <= valueY.getMax())) {
+                  Point position = getPosition(field, posXValues[valueIndex], posYValues[valueIndex]);
+                  newPath.add(position);
+                }
+              }
             }
           }
-        }
-
-        for(List<Point> path : newPaths) {
-          paths.add(new Pair(turtleIndex,path));
+          paths.add(new Pair(selectedTurtle, newPath));
         }
       }
       
@@ -595,7 +589,6 @@ public class FieldCanvas extends Pane implements Chart{
         }
       }
     }
-    */
   }
   
   private void resizePanel() {      

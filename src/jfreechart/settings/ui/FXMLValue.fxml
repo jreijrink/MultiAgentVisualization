@@ -19,9 +19,9 @@
     <Label layoutX="14.0" layoutY="141.0" text="Mask" />
     <TextField id="valueMask" fx:id="valueMask" layoutX="66.0" layoutY="138.0" prefWidth="200.0" />
     <CheckBox fx:id="valueRangeEnabled" layoutX="14.0" layoutY="177.0" mnemonicParsing="false" text="Range" />
-    <jfreechart.settings.ui.NumberTextField fx:id="valueMin" disable="${ !controller.rangeEnabled }" layoutX="92.0" layoutY="175.0" prefWidth="74.0" />
+    <jfreechart.settings.ui.DoubleTextField fx:id="valueMin" disable="${ !controller.rangeEnabled }" layoutX="92.0" layoutY="175.0" prefWidth="74.0" />
     <Label layoutX="174.0" layoutY="178.0" text="-" />
-    <jfreechart.settings.ui.NumberTextField id="valuMax" fx:id="valueMax" disable="${ !controller.rangeEnabled }" layoutX="192.0" layoutY="175.0" prefWidth="74.0" />
+    <jfreechart.settings.ui.DoubleTextField id="valuMax" fx:id="valueMax" disable="${ !controller.rangeEnabled }" layoutX="192.0" layoutY="175.0" prefWidth="74.0" />
     <Label text="Categories" AnchorPane.leftAnchor="13.0" AnchorPane.topAnchor="208.0" />
     <Button id="addValue" fx:id="addCategory" disable="${ !controller.categoriesEnabled }" defaultButton="true" minWidth="30.0" mnemonicParsing="false" onAction="#addCategoryAction" prefHeight="30.0" prefWidth="30.0" text="+" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="228.0">
       <font>

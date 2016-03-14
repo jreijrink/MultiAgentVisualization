@@ -4,23 +4,23 @@
       "values": [
         {
           "unit": "meter",
-          "min": 0,
-          "max": 0,
+          "min": -32,
+          "max": 32,
           "name": "x",
           "index": 0,
           "decimalmask": "",
           "categories": [],
-          "rangeEnabled": false
+          "rangeEnabled": true
         },
         {
           "unit": "meter",
-          "min": 0,
-          "max": 0,
+          "min": -32,
+          "max": 32,
           "name": "y",
           "index": 1,
           "decimalmask": "",
           "categories": [],
-          "rangeEnabled": false
+          "rangeEnabled": true
         },
         {
           "unit": "radial",
@@ -41,23 +41,23 @@
       "values": [
         {
           "unit": "meter",
-          "min": 0,
-          "max": 0,
+          "min": -32,
+          "max": 32,
           "name": "x",
           "index": 0,
           "decimalmask": "",
           "categories": [],
-          "rangeEnabled": false
+          "rangeEnabled": true
         },
         {
           "unit": "meter",
-          "min": 0,
-          "max": 0,
+          "min": -32,
+          "max": 32,
           "name": "y",
           "index": 1,
           "decimalmask": "",
           "categories": [],
-          "rangeEnabled": false
+          "rangeEnabled": true
         },
         {
           "unit": "meter",
@@ -152,23 +152,23 @@
       "values": [
         {
           "unit": "meter",
-          "min": 0,
-          "max": 0,
+          "min": -32,
+          "max": 32,
           "name": "x",
           "index": 0,
           "decimalmask": "",
           "categories": [],
-          "rangeEnabled": false
+          "rangeEnabled": true
         },
         {
           "unit": "meter",
-          "min": 0,
-          "max": 0,
+          "min": -32,
+          "max": 32,
           "name": "y",
           "index": 1,
           "decimalmask": "",
           "categories": [],
-          "rangeEnabled": false
+          "rangeEnabled": true
         },
         {
           "unit": "meter",
@@ -361,26 +361,6 @@
             }
           ],
           "rangeEnabled": false
-        },
-        {
-          "unit": "types",
-          "min": 0,
-          "max": 0,
-          "name": "Regular",
-          "index": 0,
-          "decimalmask": "",
-          "categories": [],
-          "rangeEnabled": false
-        },
-        {
-          "unit": "type",
-          "min": 0,
-          "max": 0,
-          "name": "shottype2",
-          "index": 0,
-          "decimalmask": "0011",
-          "categories": [],
-          "rangeEnabled": false
         }
       ],
       "name": "Skill ID",
@@ -398,11 +378,11 @@
           "decimalmask": "",
           "categories": [
             {
-              "name": "false",
+              "name": "False",
               "value": 0
             },
             {
-              "name": "true",
+              "name": "True",
               "value": 1
             }
           ],
@@ -443,48 +423,66 @@
     {
       "values": [
         {
-          "unit": "color",
+          "unit": "boolean",
           "min": 0,
           "max": 0,
           "name": "color",
           "index": 0,
           "decimalmask": "",
-          "categories": [],
+          "categories": [
+            {
+              "name": "False",
+              "value": 0
+            },
+            {
+              "name": "True",
+              "value": 1
+            }
+          ],
           "rangeEnabled": false
         }
       ],
       "name": "Team color",
       "count": 1,
-      "type": "Numerical"
+      "type": "Categorical"
     },
     {
       "values": [
         {
-          "unit": "blueishomegoal",
+          "unit": "boolean",
           "min": 0,
           "max": 0,
-          "name": "blueishomegoal",
+          "name": "blue-is-homegoal",
           "index": 0,
           "decimalmask": "",
-          "categories": [],
+          "categories": [
+            {
+              "name": "False",
+              "value": 0
+            },
+            {
+              "name": "True",
+              "value": 1
+            }
+          ],
           "rangeEnabled": false
         }
       ],
       "name": "Blue is homegoal",
       "count": 1,
-      "type": "Numerical"
+      "type": "Categorical"
     },
     {
       "values": [
         {
-          "unit": "batteryVoltage",
+          "unit": "volt",
           "min": 0,
           "max": 100,
-          "name": "batteryVoltage",
+          "name": "battery-voltage",
           "index": 0,
           "decimalmask": "",
           "categories": [],
-          "rangeEnabled": true
+          "rangeEnabled": false
         }
       ],
       "name": "Battery voltage",
@@ -494,10 +492,10 @@
     {
       "values": [
         {
-          "unit": "emergencyStatus",
+          "unit": "bitfield",
           "min": 0,
           "max": 0,
-          "name": "emergencyStatus",
+          "name": "emergency-status",
           "index": 0,
           "decimalmask": "",
           "categories": [],
@@ -552,7 +550,32 @@
           "name": "previous",
           "index": 1,
           "decimalmask": "",
-          "categories": [],
+          "categories": [
+            {
+              "name": "Attacker main",
+              "value": 1
+            },
+            {
+              "name": "Attacker assist",
+              "value": 2
+            },
+            {
+              "name": "Defender main",
+              "value": 3
+            },
+            {
+              "name": "Defender assist 1",
+              "value": 4
+            },
+            {
+              "name": "Defender assist 2",
+              "value": 5
+            },
+            {
+              "name": "Goalkeeper",
+              "value": 6
+            }
+          ],
           "rangeEnabled": false
         }
       ],
@@ -563,95 +586,172 @@
     {
       "values": [
         {
-          "unit": "refboxRole",
+          "unit": "role",
           "min": 0,
           "max": 0,
-          "name": "refboxRole",
+          "name": "refbox-role",
           "index": 0,
           "decimalmask": "",
-          "categories": [],
+          "categories": [
+            {
+              "name": "Refbox 1",
+              "value": 1
+            },
+            {
+              "name": "Refbox 2",
+              "value": 2
+            },
+            {
+              "name": "Refbox 3",
+              "value": 3
+            },
+            {
+              "name": "Refbox 4",
+              "value": 4
+            },
+            {
+              "name": "Refbox 5",
+              "value": 5
+            },
+            {
+              "name": "Refbox 6",
+              "value": 6
+            }
+          ],
           "rangeEnabled": false
         }
       ],
       "name": "Refbox role",
       "count": 1,
-      "type": "Numerical"
+      "type": "Categorical"
     },
     {
       "values": [
         {
-          "unit": "defaultRole",
+          "unit": "role",
           "min": 0,
           "max": 0,
-          "name": "defaultRole",
+          "name": "default-role",
           "index": 0,
           "decimalmask": "",
-          "categories": [],
+          "categories": [
+            {
+              "name": "Attacker main",
+              "value": 1
+            },
+            {
+              "name": "Attacker assist",
+              "value": 2
+            },
+            {
+              "name": "Defender main",
+              "value": 3
+            },
+            {
+              "name": "Defender assist 1",
+              "value": 4
+            },
+            {
+              "name": "Defender assist 2",
+              "value": 5
+            },
+            {
+              "name": "Goalkeeper",
+              "value": 6
+            }
+          ],
           "rangeEnabled": false
         }
       ],
       "name": "Default role",
       "count": 1,
-      "type": "Numerical"
+      "type": "Categorical"
     },
     {
       "values": [
         {
-          "unit": "CPBteam",
+          "unit": "boolean",
           "min": 0,
           "max": 0,
-          "name": "CPBteam",
+          "name": "CPB-team",
           "index": 0,
           "decimalmask": "",
-          "categories": [],
+          "categories": [
+            {
+              "name": "False",
+              "value": 0
+            },
+            {
+              "name": "True",
+              "value": 1
+            }
+          ],
           "rangeEnabled": false
         }
       ],
       "name": "CPB team",
       "count": 1,
-      "type": "Numerical"
+      "type": "Categorical"
     },
     {
       "values": [
         {
-          "unit": "robotInField",
+          "unit": "boolean",
           "min": 0,
           "max": 0,
-          "name": "robotInField",
+          "name": "robot-in-field",
           "index": 0,
           "decimalmask": "",
-          "categories": [],
+          "categories": [
+            {
+              "name": "False",
+              "value": 0
+            },
+            {
+              "name": "True",
+              "value": 1
+            }
+          ],
           "rangeEnabled": false
         }
       ],
       "name": "Robot in field",
       "count": 1,
-      "type": "Numerical"
+      "type": "Categorical"
     },
     {
       "values": [
         {
-          "unit": "ballFound",
+          "unit": "boolean",
           "min": 0,
           "max": 0,
-          "name": "ballFound",
+          "name": "ball-found",
           "index": 0,
           "decimalmask": "",
-          "categories": [],
+          "categories": [
+            {
+              "name": "False",
+              "value": 0
+            },
+            {
+              "name": "True",
+              "value": 1
+            }
+          ],
           "rangeEnabled": false
         }
       ],
       "name": "Ball found",
       "count": 1,
-      "type": "Numerical"
+      "type": "Categorical"
     },
     {
       "values": [
         {
-          "unit": "cpu0Load",
+          "unit": "load",
           "min": 0,
           "max": 0,
-          "name": "cpu0Load",
+          "name": "cpu0-load",
           "index": 0,
           "decimalmask": "",
           "categories": [],
@@ -665,10 +765,10 @@
     {
       "values": [
         {
-          "unit": "cpu1Load",
+          "unit": "load",
           "min": 0,
           "max": 0,
-          "name": "cpu1Load",
+          "name": "cpu1-load",
           "index": 0,
           "decimalmask": "",
           "categories": [],
@@ -682,27 +782,36 @@
     {
       "values": [
         {
-          "unit": "cameraStatus",
+          "unit": "boolean",
           "min": 0,
           "max": 0,
-          "name": "cameraStatus",
+          "name": "status",
           "index": 0,
           "decimalmask": "",
-          "categories": [],
+          "categories": [
+            {
+              "name": "False",
+              "value": 0
+            },
+            {
+              "name": "True",
+              "value": 1
+            }
+          ],
           "rangeEnabled": false
         }
       ],
       "name": "Camera status",
       "count": 1,
-      "type": "Numerical"
+      "type": "Categorical"
     },
     {
       "values": [
         {
-          "unit": "restartCountMotion",
+          "unit": "count",
           "min": 0,
           "max": 0,
-          "name": "restartCountMotion",
+          "name": "restart-count",
           "index": 0,
           "decimalmask": "",
           "categories": [],
@@ -716,10 +825,10 @@
     {
       "values": [
         {
-          "unit": "restartCountVision",
+          "unit": "count",
           "min": 0,
           "max": 0,
-          "name": "restartCountVision",
+          "name": "restart-count",
           "index": 0,
           "decimalmask": "",
           "categories": [],
@@ -733,10 +842,10 @@
     {
       "values": [
         {
-          "unit": "restartCountWorldmodel",
+          "unit": "count",
           "min": 0,
           "max": 0,
-          "name": "restartCountWorldmodel",
+          "name": "restart-count",
           "index": 0,
           "decimalmask": "",
           "categories": [],
@@ -750,10 +859,10 @@
     {
       "values": [
         {
-          "unit": "ball_confidence",
+          "unit": "bitfield",
           "min": 0,
           "max": 0,
-          "name": "ball_confidence",
+          "name": "confidence",
           "index": 0,
           "decimalmask": "",
           "categories": [],
@@ -767,70 +876,106 @@
     {
       "values": [
         {
-          "unit": "motion_status",
+          "unit": "boolean",
           "min": 0,
           "max": 0,
-          "name": "motion_status",
+          "name": "status",
           "index": 0,
           "decimalmask": "",
-          "categories": [],
+          "categories": [
+            {
+              "name": "False",
+              "value": 0
+            },
+            {
+              "name": "True",
+              "value": 1
+            }
+          ],
           "rangeEnabled": false
         }
       ],
       "name": "Motion status",
       "count": 1,
-      "type": "Numerical"
+      "type": "Categorical"
     },
     {
       "values": [
         {
-          "unit": "vision_status",
+          "unit": "boolean",
           "min": 0,
           "max": 0,
-          "name": "vision_status",
+          "name": "status",
           "index": 0,
           "decimalmask": "",
-          "categories": [],
+          "categories": [
+            {
+              "name": "False",
+              "value": 0
+            },
+            {
+              "name": "True",
+              "value": 1
+            }
+          ],
           "rangeEnabled": false
         }
       ],
       "name": "Vision status",
       "count": 1,
-      "type": "Numerical"
+      "type": "Categorical"
     },
     {
       "values": [
         {
-          "unit": "worldmodel_status",
+          "unit": "boolean",
           "min": 0,
           "max": 0,
-          "name": "worldmodel_status",
+          "name": "status",
           "index": 0,
           "decimalmask": "",
-          "categories": [],
+          "categories": [
+            {
+              "name": "False",
+              "value": 0
+            },
+            {
+              "name": "True",
+              "value": 1
+            }
+          ],
           "rangeEnabled": false
         }
       ],
       "name": "Worldmodel status",
       "count": 1,
-      "type": "Numerical"
+      "type": "Categorical"
     },
     {
       "values": [
         {
-          "unit": "active",
+          "unit": "boolean",
           "min": 0,
           "max": 0,
           "name": "active",
           "index": 0,
           "decimalmask": "",
-          "categories": [],
+          "categories": [
+            {
+              "name": "False",
+              "value": 0
+            },
+            {
+              "name": "True",
+              "value": 1
+            }
+          ],
           "rangeEnabled": false
         }
       ],
       "name": "Active",
       "count": 1,
-      "type": "Numerical"
+      "type": "Categorical"
     },
     {
       "values": [
@@ -862,7 +1007,7 @@
     {
       "values": [
         {
-          "unit": "pathlength",
+          "unit": "meter",
           "min": 0,
           "max": 0,
           "name": "pathlength",
@@ -879,10 +1024,10 @@
     {
       "values": [
         {
-          "unit": "motorTemperature",
+          "unit": "degrees",
           "min": 0,
           "max": 0,
-          "name": "motorTemperature",
+          "name": "temperature",
           "index": 0,
           "decimalmask": "",
           "categories": [],
@@ -1017,95 +1162,478 @@
     {
       "values": [
         {
-          "unit": "refboxcommand",
+          "unit": "command",
           "min": 0,
           "max": 0,
-          "name": "refboxcommand",
+          "name": "all",
           "index": 0,
           "decimalmask": "",
-          "categories": [],
+          "categories": [
+            {
+              "name": "Stop",
+              "value": 83
+            },
+            {
+              "name": "Start",
+              "value": 115
+            },
+            {
+              "name": "Start first half",
+              "value": 49
+            },
+            {
+              "name": "Half time",
+              "value": 104
+            },
+            {
+              "name": "Start second half",
+              "value": 50
+            },
+            {
+              "name": "End  game",
+              "value": 101
+            },
+            {
+              "name": "Parking",
+              "value": 76
+            },
+            {
+              "name": "Cancel",
+              "value": 120
+            },
+            {
+              "name": "Goal meganta",
+              "value": 97
+            },
+            {
+              "name": "Goal cyan",
+              "value": 65
+            },
+            {
+              "name": "Subgoal magenta",
+              "value": 100
+            },
+            {
+              "name": "Subgoal cyan",
+              "value": 68
+            },
+            {
+              "name": "Kickoff magenta",
+              "value": 107
+            },
+            {
+              "name": "Kickoff cyan",
+              "value": 75
+            },
+            {
+              "name": "Feekick magenta",
+              "value": 102
+            },
+            {
+              "name": "Feekick cyan",
+              "value": 70
+            },
+            {
+              "name": "Goalkick magenta",
+              "value": 103
+            },
+            {
+              "name": "Goalkick cyan",
+              "value": 71
+            },
+            {
+              "name": "Throwin magenta",
+              "value": 116
+            },
+            {
+              "name": "Throwin cyan",
+              "value": 84
+            },
+            {
+              "name": "Corner magenta",
+              "value": 99
+            },
+            {
+              "name": "Corner cyan",
+              "value": 67
+            },
+            {
+              "name": "Penalty magenta",
+              "value": 112
+            },
+            {
+              "name": "Penalty cyan",
+              "value": 80
+            },
+            {
+              "name": "Dropped ball",
+              "value": 78
+            },
+            {
+              "name": "Repair out magenta",
+              "value": 111
+            },
+            {
+              "name": "Repair out cyan",
+              "value": 79
+            },
+            {
+              "name": "Repair in magenta",
+              "value": 105
+            },
+            {
+              "name": "Repair in cyan",
+              "value": 73
+            }
+          ],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "command",
+          "min": 0,
+          "max": 0,
+          "name": "general",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [
+            {
+              "name": "Stop",
+              "value": 83
+            },
+            {
+              "name": "Start",
+              "value": 115
+            },
+            {
+              "name": "Start first half",
+              "value": 49
+            },
+            {
+              "name": "Half time",
+              "value": 104
+            },
+            {
+              "name": "Start second half",
+              "value": 50
+            },
+            {
+              "name": "End game",
+              "value": 101
+            },
+            {
+              "name": "Parking",
+              "value": 76
+            },
+            {
+              "name": "Cancel",
+              "value": 120
+            },
+            {
+              "name": "Repair out magenta",
+              "value": 111
+            },
+            {
+              "name": "Repair out cyan",
+              "value": 79
+            },
+            {
+              "name": "Repair in magenta",
+              "value": 105
+            },
+            {
+              "name": "Repair in cyan",
+              "value": 73
+            }
+          ],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "command",
+          "min": 0,
+          "max": 0,
+          "name": "game-situations",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [
+            {
+              "name": "Goal magenta",
+              "value": 97
+            },
+            {
+              "name": "Goal cyan",
+              "value": 65
+            },
+            {
+              "name": "Subgoal magenta",
+              "value": 100
+            },
+            {
+              "name": "Subgoal cyan",
+              "value": 68
+            },
+            {
+              "name": "Kickoff magenta",
+              "value": 107
+            },
+            {
+              "name": "Kickoff cyan",
+              "value": 75
+            },
+            {
+              "name": "Freekick magenta",
+              "value": 102
+            },
+            {
+              "name": "Freekick cyan",
+              "value": 70
+            },
+            {
+              "name": "Goalkick magenta",
+              "value": 103
+            },
+            {
+              "name": "Goalkick cyan",
+              "value": 71
+            },
+            {
+              "name": "Throwin magenta",
+              "value": 116
+            },
+            {
+              "name": "Throwin cyan",
+              "value": 84
+            },
+            {
+              "name": "Corner magenta",
+              "value": 99
+            },
+            {
+              "name": "Corner cyan",
+              "value": 67
+            },
+            {
+              "name": "Penalty magenta",
+              "value": 112
+            },
+            {
+              "name": "Penalty cyan",
+              "value": 80
+            },
+            {
+              "name": "Dropped ball",
+              "value": 78
+            }
+          ],
           "rangeEnabled": false
         }
       ],
       "name": "Refbox command",
       "count": 1,
-      "type": "Numerical"
+      "type": "Categorical"
     },
     {
       "values": [
         {
-          "unit": "usedBallTurtleID",
+          "unit": "turtleID",
           "min": 0,
           "max": 0,
-          "name": "usedBallTurtleID",
+          "name": "used-ball-turtleID",
           "index": 0,
           "decimalmask": "",
-          "categories": [],
+          "categories": [
+            {
+              "name": "Turtle1",
+              "value": 1
+            },
+            {
+              "name": "Turtle2",
+              "value": 2
+            },
+            {
+              "name": "Turtle3",
+              "value": 3
+            },
+            {
+              "name": "Turtle4",
+              "value": 4
+            },
+            {
+              "name": "Turtle5",
+              "value": 5
+            },
+            {
+              "name": "Turtle6",
+              "value": 6
+            }
+          ],
           "rangeEnabled": false
         }
       ],
       "name": "Used ball turtle ID",
       "count": 1,
-      "type": "Numerical"
+      "type": "Categorical"
     },
     {
       "values": [
         {
-          "unit": "mergedBallSource",
+          "unit": "sensor",
           "min": 0,
           "max": 0,
-          "name": "mergedBallSource",
+          "name": "merged-ball-source",
           "index": 0,
           "decimalmask": "",
-          "categories": [],
+          "categories": [
+            {
+              "name": "sensor1",
+              "value": 1
+            },
+            {
+              "name": "sensor2",
+              "value": 2
+            },
+            {
+              "name": "sensor3",
+              "value": 3
+            },
+            {
+              "name": "sensor4",
+              "value": 4
+            },
+            {
+              "name": "sensor5",
+              "value": 5
+            }
+          ],
           "rangeEnabled": false
         }
       ],
       "name": "Merged ball source",
       "count": 1,
-      "type": "Numerical"
+      "type": "Categorical"
     },
     {
       "values": [
         {
-          "unit": "opponentlabelnumber",
+          "unit": "number",
           "min": 0,
           "max": 0,
-          "name": "opponentlabelnumber",
+          "name": "opponent-label",
           "index": 0,
           "decimalmask": "",
-          "categories": [],
+          "categories": [
+            {
+              "name": "label1",
+              "value": 1
+            },
+            {
+              "name": "label2",
+              "value": 2
+            },
+            {
+              "name": "label3",
+              "value": 3
+            },
+            {
+              "name": "label4",
+              "value": 4
+            },
+            {
+              "name": "label5",
+              "value": 5
+            },
+            {
+              "name": "label6",
+              "value": 6
+            },
+            {
+              "name": "label7",
+              "value": 7
+            },
+            {
+              "name": "label8",
+              "value": 8
+            },
+            {
+              "name": "label9",
+              "value": 9
+            },
+            {
+              "name": "label10",
+              "value": 10
+            }
+          ],
           "rangeEnabled": false
         }
       ],
       "name": "Opponent label number",
       "count": 10,
-      "type": "Numerical"
+      "type": "Categorical"
     },
     {
       "values": [
         {
-          "unit": "opponentwithball",
+          "unit": "label",
           "min": 0,
           "max": 0,
-          "name": "opponentwithball",
+          "name": "opponent-with-ball",
           "index": 0,
           "decimalmask": "",
-          "categories": [],
+          "categories": [
+            {
+              "name": "opponent1",
+              "value": 1
+            },
+            {
+              "name": "opponent2",
+              "value": 2
+            },
+            {
+              "name": "opponent3",
+              "value": 3
+            },
+            {
+              "name": "opponent4",
+              "value": 4
+            },
+            {
+              "name": "opponent5",
+              "value": 5
+            },
+            {
+              "name": "opponent6",
+              "value": 6
+            },
+            {
+              "name": "opponent7",
+              "value": 7
+            },
+            {
+              "name": "opponent8",
+              "value": 8
+            },
+            {
+              "name": "opponent9",
+              "value": 9
+            },
+            {
+              "name": "opponent10",
+              "value": 10
+            }
+          ],
           "rangeEnabled": false
         }
       ],
       "name": "Opponent with ball",
       "count": 1,
-      "type": "Numerical"
+      "type": "Categorical"
     },
     {
       "values": [
         {
-          "unit": "packetLossTurtles",
+          "unit": "packetloss",
           "min": 0,
           "max": 0,
-          "name": "packetLossTurtles",
+          "name": "packetloss-turtles",
           "index": 0,
           "decimalmask": "",
           "categories": [],
@@ -1119,10 +1647,10 @@
     {
       "values": [
         {
-          "unit": "packetLossCoach",
+          "unit": "packetloss",
           "min": 0,
           "max": 0,
-          "name": "packetLossCoach",
+          "name": "packetloss-coach",
           "index": 0,
           "decimalmask": "",
           "categories": [],
@@ -1173,10 +1701,10 @@
     {
       "values": [
         {
-          "unit": "muFieldNr",
+          "unit": "number",
           "min": 0,
           "max": 0,
-          "name": "muFieldNr",
+          "name": "mu-field",
           "index": 0,
           "decimalmask": "",
           "categories": [],
