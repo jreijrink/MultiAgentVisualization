@@ -307,12 +307,13 @@ public class XYBaseChart implements Chart {
     
     NumberAxis xAxis = new NumberAxis();
     try {
-        int timeframes = this.data.get(0).GetAllValues(yParameter, yParameterIndex, yParameterValue).length;
+        int timeframes = this.data.get(0).getTimeFrameCount();
         double scale = getScale(timeframes);
         xAxis = new NumberAxis(0, timeframes, scale);
     } catch(Exception ex) { }
     
-    NumberAxis yAxis = new NumberAxis();;
+    NumberAxis yAxis = new NumberAxis();
+    /*
     try {
       Value value = parameterMap.GetParameter(yParameter).getValue(yParameterValue);
       if(value.getRangeEnabled()) {
@@ -321,7 +322,8 @@ public class XYBaseChart implements Chart {
         yAxis = new NumberAxis(value.getMin(), value.getMax(), scale);      
       }
     } catch(Exception ex) { }
-    
+    */
+            
     switch(type) {
       case Scatter:
         this.XYChart = new ScatterChart<>(xAxis,yAxis);
@@ -557,17 +559,17 @@ public class XYBaseChart implements Chart {
       if(showData) {
         try {
           Turtle turtle = data.get(turtleIndex);
-          double[] values = turtle.GetAllValues(yParameter, yParameterIndex, yParameterValue);
+          List<DataPoint> values = turtle.GetAllValues(yParameter, yParameterIndex, yParameterValue);
 
           double minValue = Double.MAX_VALUE;
           double maxValue = Double.MIN_VALUE;
           
-          for(double value : values) {
-            minValue = Math.min(value, minValue);
-            maxValue = Math.max(value, maxValue);
+          for(DataPoint value : values) {
+            minValue = Math.min(value.getValue(), minValue);
+            maxValue = Math.max(value.getValue(), maxValue);
           }
           
-          double xTolerance = values.length / 500;
+          double xTolerance = values.size() / 500;
           double yTolerance = (maxValue - minValue) / 500;
 
           List<DataPoint> sortedPoints = simplifyRadialDistance(values, xTolerance, yTolerance);
@@ -578,33 +580,9 @@ public class XYBaseChart implements Chart {
             XYChart.Data element = new XYChart.Data(pos.getX(), pos.getY(), filteredPoint.getIndices());
             elements.add(element);
           }
-
-          /*
-          for(int i = 0; i < values.length; i++) {
-            XYChart.Data element = new XYChart.Data(i, values[i]);
-            elements.add(element);
-          }
-          */
         } catch(Exception ex) {
           ex.printStackTrace();
         }
-
-        /*
-        double xTolerance = (maxValueX - minValueX) / 500;
-        double yTolerance = (maxValueY - minValueY) / 500;
-        
-        System.out.printf("xTolerance: %f\n", xTolerance);
-        System.out.printf("yTolerance: %f\n", yTolerance);
-
-        List<DataPoint> sortedPoints = simplifyRadialDistance(this.dataMap[turtle], xTolerance, yTolerance);
-        
-        for (int i = 0; i < sortedPoints.size(); i++) {
-          DataPoint filteredPoint = sortedPoints.get(i);
-          Point2D pos = filteredPoint.getLocation();
-          XYChart.Data element = new XYChart.Data(pos.getX(), pos.getY(), filteredPoint.getIndices());
-          elements.add(element);
-        }
-        */
       }
       
       ObservableList<XYChart.Data> data = series.getData();
@@ -617,14 +595,16 @@ public class XYBaseChart implements Chart {
       return series;
   }
   
-  private List<DataPoint> simplifyRadialDistance(double[] data, double xTolerance, double yTolerance) {
-    System.out.printf("START SIMPLIFY, size: %d\n", data.length);
+  private List<DataPoint> simplifyRadialDistance(List<DataPoint> data, double xTolerance, double yTolerance) {
+    System.out.printf("START SIMPLIFY, size: %d\n", data.size());
     
     List<DataPoint> sortedPoints = new ArrayList();
 
-    for(int i = 0; i < data.length; i++) {
-     DataPoint point = new DataPoint(new Point2D(i, data[i]), i);
-     sortedPoints.add(point);
+    for(DataPoint point : data) {
+      if(point.inRange()) {
+        DataPoint validPoint = new DataPoint(point.getTimeframe(), point.getValue(), point.getIndices().get(0), point.inRange());
+        sortedPoints.add(validPoint);
+      }
     }
 
     Collections.sort(sortedPoints, (DataPoint p1, DataPoint p2) -> Double.compare(p1.getLocation().getX(), p2.getLocation().getX()));     

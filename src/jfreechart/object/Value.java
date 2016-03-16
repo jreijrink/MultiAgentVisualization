@@ -83,7 +83,15 @@ public class Value {
   public int getMax() {
     return this.max;
   }
-    
+  
+  public boolean insideRange(double value) {
+    if(this.rangeEnabled) {
+      if(value < this.min || value > this.max)
+        return false;
+    }
+    return true;
+  }
+  
   public void setgetCategories(List<Category> categories) {
     this.categories = categories;
   }

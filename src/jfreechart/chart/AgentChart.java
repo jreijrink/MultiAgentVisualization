@@ -179,7 +179,7 @@ public class AgentChart implements Chart {
     
     NumberAxis xAxis = new NumberAxis();
     try {
-        int timeframes = this.data.get(0).GetAllValues(yParameter, yParameterIndex, yParameterValue).length;
+        int timeframes = this.data.get(0).getTimeFrameCount();
         double scale = getScale(timeframes);
         xAxis = new NumberAxis(0, timeframes, scale);
     } catch(Exception ex) { }
@@ -409,15 +409,15 @@ public class AgentChart implements Chart {
         double currentPosition = xAxis.getDisplayPosition(0);
         
         Turtle turtle = data.get(turtleIndex);
-        double[] categoricalValues = turtle.GetAllValues(yParameter, yParameterIndex, yParameterValue);
+        List<DataPoint> categoricalValues = turtle.GetAllValues(yParameter, yParameterIndex, yParameterValue);
         
-        for(int timeFrame = 0; timeFrame < categoricalValues.length; timeFrame++) {
-          double category = categoricalValues[timeFrame];
+        for(int timeFrame = 0; timeFrame < categoricalValues.size(); timeFrame++) {
+          DataPoint category = categoricalValues.get(timeFrame);
           
           if(currentCategory == Double.MIN_VALUE)
-            currentCategory = category;
+            currentCategory = category.getLocation().getY();
 
-          if(category != currentCategory || timeFrame >= categoricalValues.length - 1) {
+          if(category.getLocation().getY() != currentCategory || timeFrame >= categoricalValues.size() - 1) {
             double xPosition = xAxis.getDisplayPosition(timeFrame);
             double yPosition = yAxis.getDisplayPosition(String.format("Turtle %d", turtleIndex + 1));
 
@@ -437,7 +437,7 @@ public class AgentChart implements Chart {
 
              currentPosition = xPosition;
              currentFrame = timeFrame;
-             currentCategory = category;
+             currentCategory = category.getLocation().getY();
           }
         }
       }
@@ -458,7 +458,6 @@ public class AgentChart implements Chart {
         if(child.getClass() == Rectangle.class) {
           createRectangleSelectionEvents(child, xAxis, yAxis);
         }
-        
       }
       
       createLegend();

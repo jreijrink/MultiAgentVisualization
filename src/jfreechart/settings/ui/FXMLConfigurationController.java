@@ -57,7 +57,7 @@ public class FXMLConfigurationController implements Initializable {
   private Stage dialogStage;
   private Configuration configuration;
   private ParameterMap parameterMap;
-  private boolean save = false;
+  private boolean changes = false;
   
   @Override
   public void initialize(URL location, ResourceBundle resources) {
@@ -170,6 +170,10 @@ public class FXMLConfigurationController implements Initializable {
     });
   }
   
+  public boolean hasChanges() {
+    return changes;
+  }
+  
   private void setValues(ChoiceBox box, Parameter parameter, Value value) {
     box.setDisable(false);
     box.getItems().setAll(parameter.getValues());
@@ -188,44 +192,46 @@ public class FXMLConfigurationController implements Initializable {
   @FXML
   private void saveConfigurationAction(ActionEvent event) {
     try {
-    configuration.MaxTurtles = Integer.valueOf(maxTurtleTextField.getText());
-    configuration.MaxOpponents = Integer.valueOf(maxOpponentsTextField.getText());
-    
-    configuration.PenaltyWidth = Double.valueOf(penaltyWidthTextField.getText());
-    configuration.PenaltyLength = Double.valueOf(penaltyLengthTextField.getText());
-    configuration.PenaltySpot = Double.valueOf(penaltySpotTextField.getText());
-    configuration.FieldWidth = Double.valueOf(fieldWidthTextField.getText());
-    configuration.FieldLength = Double.valueOf(fieldLengthTextField.getText());
-    configuration.GoalAreaWidth = Double.valueOf(goalAreaWidthTextField.getText());
-    configuration.GoalAreaLength = Double.valueOf(goalAreaLengthTextField.getText());
-    configuration.GoalWidth = Double.valueOf(goalWidthTextField.getText());
-    configuration.GoalDepth = Double.valueOf(goalDepthTextField.getText());
-    
-    configuration.Pose = ((Parameter)turtlePoseChoiceBox.getSelectionModel().getSelectedItem()).getName();
-    configuration.PoseX = ((Value)turtlePoseXChoiceBox.getSelectionModel().getSelectedItem()).getName();
-    configuration.PoseY = ((Value)turtlePoseYChoiceBox.getSelectionModel().getSelectedItem()).getName();
-    configuration.PoseRot = ((Value)turtlePoseRotChoiceBox.getSelectionModel().getSelectedItem()).getName();
-    
-    configuration.RobotInField = ((Parameter)turtleInFieldChoiceBox.getSelectionModel().getSelectedItem()).getName();
-    configuration.RobotInFieldIndex = ((Value)turtleInFieldIndexChoiceBox.getSelectionModel().getSelectedItem()).getName();
-    
-    configuration.Opponent = ((Parameter)OponnentPosesChoiceBox.getSelectionModel().getSelectedItem()).getName();
-    configuration.OpponentX = ((Value)OponnentPosesXChoiceBox.getSelectionModel().getSelectedItem()).getName();
-    configuration.OpponentY = ((Value)OponnentPosesYChoiceBox.getSelectionModel().getSelectedItem()).getName();
-    
-    configuration.Opponentlabelnumber = ((Parameter)OpponentLabelsChoiceBox.getSelectionModel().getSelectedItem()).getName();
-    configuration.OpponentlabelnumberIndex = ((Value)OpponentLabelsIndexChoiceBox.getSelectionModel().getSelectedItem()).getName();
-    
-    configuration.Ball = ((Parameter)ballPoseChoiceBox.getSelectionModel().getSelectedItem()).getName();
-    configuration.BallX = ((Value)ballPoseXChoiceBox.getSelectionModel().getSelectedItem()).getName();
-    configuration.BallY = ((Value)ballPoseYChoiceBox.getSelectionModel().getSelectedItem()).getName();
-    
-    configuration.BallFound = ((Parameter)ballFoundChoiceBox.getSelectionModel().getSelectedItem()).getName();
-    configuration.BallFoundIndex = ((Value)ballFoundIndexChoiceBox.getSelectionModel().getSelectedItem()).getName();
-        
-    configuration.Save();
-    
-    dialogStage.close();
+      configuration.MaxTurtles = Integer.valueOf(maxTurtleTextField.getText());
+      configuration.MaxOpponents = Integer.valueOf(maxOpponentsTextField.getText());
+
+      configuration.PenaltyWidth = Double.valueOf(penaltyWidthTextField.getText());
+      configuration.PenaltyLength = Double.valueOf(penaltyLengthTextField.getText());
+      configuration.PenaltySpot = Double.valueOf(penaltySpotTextField.getText());
+      configuration.FieldWidth = Double.valueOf(fieldWidthTextField.getText());
+      configuration.FieldLength = Double.valueOf(fieldLengthTextField.getText());
+      configuration.GoalAreaWidth = Double.valueOf(goalAreaWidthTextField.getText());
+      configuration.GoalAreaLength = Double.valueOf(goalAreaLengthTextField.getText());
+      configuration.GoalWidth = Double.valueOf(goalWidthTextField.getText());
+      configuration.GoalDepth = Double.valueOf(goalDepthTextField.getText());
+
+      configuration.Pose = ((Parameter)turtlePoseChoiceBox.getSelectionModel().getSelectedItem()).getName();
+      configuration.PoseX = ((Value)turtlePoseXChoiceBox.getSelectionModel().getSelectedItem()).getName();
+      configuration.PoseY = ((Value)turtlePoseYChoiceBox.getSelectionModel().getSelectedItem()).getName();
+      configuration.PoseRot = ((Value)turtlePoseRotChoiceBox.getSelectionModel().getSelectedItem()).getName();
+
+      configuration.RobotInField = ((Parameter)turtleInFieldChoiceBox.getSelectionModel().getSelectedItem()).getName();
+      configuration.RobotInFieldIndex = ((Value)turtleInFieldIndexChoiceBox.getSelectionModel().getSelectedItem()).getName();
+
+      configuration.Opponent = ((Parameter)OponnentPosesChoiceBox.getSelectionModel().getSelectedItem()).getName();
+      configuration.OpponentX = ((Value)OponnentPosesXChoiceBox.getSelectionModel().getSelectedItem()).getName();
+      configuration.OpponentY = ((Value)OponnentPosesYChoiceBox.getSelectionModel().getSelectedItem()).getName();
+
+      configuration.Opponentlabelnumber = ((Parameter)OpponentLabelsChoiceBox.getSelectionModel().getSelectedItem()).getName();
+      configuration.OpponentlabelnumberIndex = ((Value)OpponentLabelsIndexChoiceBox.getSelectionModel().getSelectedItem()).getName();
+
+      configuration.Ball = ((Parameter)ballPoseChoiceBox.getSelectionModel().getSelectedItem()).getName();
+      configuration.BallX = ((Value)ballPoseXChoiceBox.getSelectionModel().getSelectedItem()).getName();
+      configuration.BallY = ((Value)ballPoseYChoiceBox.getSelectionModel().getSelectedItem()).getName();
+
+      configuration.BallFound = ((Parameter)ballFoundChoiceBox.getSelectionModel().getSelectedItem()).getName();
+      configuration.BallFoundIndex = ((Value)ballFoundIndexChoiceBox.getSelectionModel().getSelectedItem()).getName();
+
+      configuration.Save();
+      
+      changes = true;
+      dialogStage.close();
+      
     } catch(Exception ex) {
       Alert alert = new Alert(Alert.AlertType.WARNING);
       alert.setTitle("Save failed");

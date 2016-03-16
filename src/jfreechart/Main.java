@@ -16,6 +16,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Cursor;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Menu;
@@ -105,7 +106,7 @@ public class Main extends Application {
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("MAT files (*.mat)", "*.mat");
         fileChooser.getExtensionFilters().add(extFilter);
 
-        loadData();
+        loadData(scene);
       }
     });
     fileMenu.getItems().add(openMenu);
@@ -190,8 +191,8 @@ public class Main extends Application {
           dialogStage.setTitle("Datamapping");
           dialogStage.initModality(Modality.WINDOW_MODAL);
           dialogStage.initOwner(stage);
-          Scene scene = new Scene(page);
-          dialogStage.setScene(scene);
+          Scene dialogScene = new Scene(page);
+          dialogStage.setScene(dialogScene);
 
           dialogStage.setResizable(false);
     
@@ -200,7 +201,8 @@ public class Main extends Application {
     
           dialogStage.showAndWait();
           
-          loadData();
+          if(controller.hasChanges())
+            loadData(scene);
         } catch (IOException e) {
           e.printStackTrace();
         }
@@ -224,13 +226,14 @@ public class Main extends Application {
           FXMLConfigurationController controller = loader.getController();
           controller.setDialogStage(dialogStage);
 
-          Scene scene = new Scene(page);
-          dialogStage.setScene(scene);
+          Scene dialogScene = new Scene(page);
+          dialogStage.setScene(dialogScene);
 
           dialogStage.setResizable(false);
           dialogStage.showAndWait();
           
-          loadData();
+          if(controller.hasChanges())
+            loadData(scene);
         } catch (IOException e) {
           e.printStackTrace();
         }
@@ -241,14 +244,17 @@ public class Main extends Application {
     menuBar.getMenus().addAll(fileMenu, elementMenu, settingsMenu);    
   }
   
-  private void loadData() {
+  private void loadData(Scene scene) {
     if (currentFile != null && configurationComplete()) {
       try {
+        //scene.getRoot().setCursor(Cursor.WAIT);
         Parser parser = new Parser();
         List<Turtle> result = parser.parse(currentFile.getAbsolutePath());
         updateLayout(result);
       } catch (Exception ex) {
         ex.printStackTrace();
+      } finally {
+        //scene.getRoot().setCursor(Cursor.DEFAULT);
       }
     }    
   }

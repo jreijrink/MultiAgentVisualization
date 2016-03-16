@@ -1,6 +1,10 @@
 package jfreechart.object;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import javafx.geometry.Point2D;
+import jfreechart.chart.DataPoint;
 
 public class Turtle {
   public final int turtleID;
@@ -13,30 +17,73 @@ public class Turtle {
     this.parameterMap = new ParameterMap();
   }
   
-  public double[] GetValues(String parameterName, int parameterIndex, String valueName, int startIndex, int endIndex) {
+  public DataPoint GetValue(String parameterName, int parameterIndex, String valueName, int index) {
     try {
-    int valueIndex = this.parameterMap.GetValueIndex(parameterName, parameterIndex, valueName);
-    double[] parameterData = this.data[valueIndex];
-    return applyDecimalMask(Arrays.copyOfRange(parameterData, startIndex, endIndex), parameterName, valueName);
+      Value value = this.parameterMap.GetParameter(parameterName).getValue(valueName);
+      
+      int valueIndex = this.parameterMap.GetValueIndex(parameterName, parameterIndex, valueName);
+      double[] dataset = this.data[valueIndex];
+      return processData(new double[] { dataset[index] }, value).get(0);
     } catch(Exception ex) {
       ex.printStackTrace();
-      return new double[0];
-    }
-  }
-    
-  public double[] GetAllValues(String parameterName, int parameterIndex, String valueName) {
-    try {
-    int valueIndex = this.parameterMap.GetValueIndex(parameterName, parameterIndex, valueName);
-    return applyDecimalMask(this.data[valueIndex], parameterName, valueName);
-    } catch(Exception ex) {
-      ex.printStackTrace();
-      return new double[0];
+      return null;
     }
   }
   
-  private double[] applyDecimalMask(double[] data, String parameterName, String valueName) {
-    Parameter parameter = parameterMap.GetParameter(parameterName);
-    Value value = parameter.getValue(valueName);
+  public List<DataPoint> GetValues(String parameterName, int parameterIndex, String valueName, int startIndex, int endIndex) {    
+    try {
+      Value value = this.parameterMap.GetParameter(parameterName).getValue(valueName);
+      
+      int valueIndex = this.parameterMap.GetValueIndex(parameterName, parameterIndex, valueName);
+      double[] dataset = Arrays.copyOfRange(this.data[valueIndex], startIndex, endIndex);
+      return processData(dataset, value);
+    } catch(Exception ex) {
+      ex.printStackTrace();
+      return new ArrayList();
+    }
+  }
+  
+  public List<DataPoint> GetAllValues(String parameterName, int parameterIndex, String valueName) {
+    try {
+      Value value = this.parameterMap.GetParameter(parameterName).getValue(valueName);
+      
+      int valueIndex = this.parameterMap.GetValueIndex(parameterName, parameterIndex, valueName);
+      double[] dataset = this.data[valueIndex];
+      return processData(dataset, value);
+    } catch(Exception ex) {
+      ex.printStackTrace();
+      return new ArrayList();
+    }
+  }
+  
+  public int getTimeFrameCount() {
+    return data[0].length;
+  }
+  
+  public int getID() {
+    return turtleID;
+  }
+  
+  @Override
+  public String toString() {
+    return String.format("Turtle: %d", turtleID);
+  }
+  
+  private List<DataPoint> processData(double[] data, Value value) {
+    List<DataPoint> values = new ArrayList();
+    
+    double[] result =  applyDecimalMask(data, value);
+
+    for(int i = 0; i < result.length; i++) {
+      double dataValue = result[i];
+      DataPoint point = new DataPoint(i, dataValue, i, value.insideRange(dataValue));       
+      values.add(point);
+    }
+    
+    return values;
+  }
+  
+  private double[] applyDecimalMask(double[] data, Value value) {
     
     String mask = value.getDecimalmask();
     if(mask!= null && mask.length() > 0) {      
@@ -65,14 +112,5 @@ public class Turtle {
     }
     
     return data;
-  }
-   
-  public int getID() {
-    return turtleID;
-  }
-  
-  @Override
-  public String toString() {
-    return String.format("Turtle: %d", turtleID);
   }
 }

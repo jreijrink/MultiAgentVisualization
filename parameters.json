@@ -477,12 +477,12 @@
         {
           "unit": "volt",
           "min": 0,
-          "max": 100,
+          "max": 150,
           "name": "battery-voltage",
           "index": 0,
           "decimalmask": "",
           "categories": [],
-          "rangeEnabled": false
+          "rangeEnabled": true
         }
       ],
       "name": "Battery voltage",

@@ -73,6 +73,8 @@ public class FXMLParametersController implements Initializable {
   private Parameter selectedParameter;
   private List<Value> selectedValues;
   private Value selectedValue;
+  
+  private boolean changes = false;
     
   @Override
   public void initialize(URL url, ResourceBundle rb) {
@@ -96,6 +98,10 @@ public class FXMLParametersController implements Initializable {
   
   public void setDialogStage(Stage dialogStage) {
     this.dialogStage = dialogStage;
+  }
+  
+  public boolean hasChanges() {
+    return changes;
   }
   
   @FXML
@@ -122,6 +128,7 @@ public class FXMLParametersController implements Initializable {
         parameters.add(index, prev);
         listParameters.getSelectionModel().select(current);
         DataMapping.saveParameters(parameters);
+        changes = true;
       }
     }
   }
@@ -139,6 +146,7 @@ public class FXMLParametersController implements Initializable {
         parameters.add(index + 1, current);
         listParameters.getSelectionModel().select(current);
         DataMapping.saveParameters(parameters);
+        changes = true;
       }
     }
   }
@@ -149,6 +157,7 @@ public class FXMLParametersController implements Initializable {
       parameters.remove(selectedParameter);
       DataMapping.saveParameters(parameters);
       listParameters.getSelectionModel().select(null);
+      changes = true;
     }
   }
   
@@ -163,6 +172,7 @@ public class FXMLParametersController implements Initializable {
     if(saveParameter()) {
       showParameter(selectedParameter);
       setInEditingMode(false);
+      changes = true;
     }
   }
   
