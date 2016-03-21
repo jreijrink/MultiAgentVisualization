@@ -84,9 +84,17 @@ public class Value {
     return this.max;
   }
   
-  public boolean insideRange(double value) {
+  public boolean aboveMin(double value) {
     if(this.rangeEnabled) {
-      if(value < this.min || value > this.max)
+      if(value < this.min)
+        return false;
+    }
+    return true;
+  }
+  
+  public boolean belowMax(double value) {
+    if(this.rangeEnabled) {
+      if(value > this.max)
         return false;
     }
     return true;

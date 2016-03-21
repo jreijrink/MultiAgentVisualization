@@ -126,3 +126,5 @@
 .default-color27-status-symbol { -fx-fill: #246012 !important; }
 .default-color28-status-symbol { -fx-fill: #CBB813 !important; }
 .default-color29-status-symbol { -fx-fill: #7CFE80 !important; }
+
+.default-invalid-color { -fx-fill: #FF0000 !important; }

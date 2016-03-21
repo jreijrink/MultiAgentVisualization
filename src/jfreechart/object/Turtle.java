@@ -76,7 +76,7 @@ public class Turtle {
 
     for(int i = 0; i < result.length; i++) {
       double dataValue = result[i];
-      DataPoint point = new DataPoint(i, dataValue, i, value.insideRange(dataValue));       
+      DataPoint point = new DataPoint(i, dataValue, i, value.aboveMin(dataValue), value.belowMax(dataValue));
       values.add(point);
     }
     

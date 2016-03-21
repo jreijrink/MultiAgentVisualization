@@ -8,14 +8,16 @@ public class DataPoint {
   private int timeframe;
   private double value;
   private List<Integer> indices;
-  private boolean inRange;
+  private boolean aboveMin;
+  private boolean belowMax;
   
-  public DataPoint(int timeframe, double value, int initialIndex, boolean inRange) {
+  public DataPoint(int timeframe, double value, int initialIndex, boolean aboveMin, boolean belowMax) {
     this.timeframe = timeframe;
     this.value = value;
     this.indices = new ArrayList();
     this.indices.add(initialIndex);
-    this.inRange = inRange;
+    this.aboveMin = aboveMin;
+    this.belowMax = belowMax;
   }
   
   public void addIndices(List<Integer> indices) {
@@ -38,7 +40,15 @@ public class DataPoint {
     return this.indices;
   }
   
-  public boolean inRange() {
-    return this.inRange;
+  public boolean aboveMin() {
+    return this.aboveMin;
+  }
+  
+  public boolean belowMax() {
+    return this.belowMax;
+  }
+  
+  public boolean isVisible() {
+    return (this.aboveMin && this.belowMax);
   }
 }

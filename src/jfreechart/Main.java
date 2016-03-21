@@ -3,7 +3,7 @@ package jfreechart;
 import jfreechart.chart.Chart;
 import jfreechart.chart.XYBaseChart;
 import jfreechart.chart.FieldCanvas;
-import jfreechart.chart.AgentChart;
+import jfreechart.chart.CategoricalChart;
 import java.io.File;
 import java.io.IOException;
 import javafx.scene.image.Image;
@@ -158,15 +158,15 @@ public class Main extends Application {
     });
     elementMenu.getItems().add(newLineMenu);
     
-    MenuItem newAgentMenu = new MenuItem("Add agentchart");
-    newAgentMenu.setOnAction(new EventHandler() {
+    MenuItem newCategoricalMenu = new MenuItem("Add categoricalchart");
+    newCategoricalMenu.setOnAction(new EventHandler() {
       @Override
       public void handle(Event t) {
-        AgentChart chart = new AgentChart(scene);
+        CategoricalChart chart = new CategoricalChart(scene);
         addChart(dockPane, null, chart);
       }
     });
-    elementMenu.getItems().add(newAgentMenu);
+    elementMenu.getItems().add(newCategoricalMenu);
     
     MenuItem newFieldMenu = new MenuItem("Add field");
     newFieldMenu.setOnAction(new EventHandler() {
@@ -179,7 +179,7 @@ public class Main extends Application {
     elementMenu.getItems().add(newFieldMenu);
     
     Menu settingsMenu = new Menu("Settings");
-    MenuItem mappingMenu = new MenuItem("Datamapping");
+    MenuItem mappingMenu = new MenuItem("Data mapping");
     mappingMenu.setAccelerator(new KeyCodeCombination(KeyCode.M, KeyCombination.CONTROL_DOWN));
     mappingMenu.setOnAction(new EventHandler() {
       @Override
@@ -188,7 +188,7 @@ public class Main extends Application {
           FXMLLoader loader = new FXMLLoader(FXMLParametersController.class.getResource("FXMLParameters.fxml"));
           AnchorPane page = (AnchorPane) loader.load();
           Stage dialogStage = new Stage();
-          dialogStage.setTitle("Datamapping");
+          dialogStage.setTitle("Data mapping");
           dialogStage.initModality(Modality.WINDOW_MODAL);
           dialogStage.initOwner(stage);
           Scene dialogScene = new Scene(page);
@@ -279,8 +279,8 @@ public class Main extends Application {
     XYBaseChart line = new XYBaseChart(scene, ChartType.Line);
     addChart(dockPane, DockPos.TOP, line);
         
-    AgentChart agent = new AgentChart(scene);
-    addChart(dockPane, DockPos.TOP, agent);
+    CategoricalChart categorical = new CategoricalChart(scene);
+    addChart(dockPane, DockPos.TOP, categorical);
     
     FieldCanvas field = new FieldCanvas();
     addChart(dockPane, DockPos.RIGHT, field);
@@ -327,13 +327,12 @@ public class Main extends Application {
       }
     });
     
-    
     Image dockImage = new Image(DockPane.class.getResource("docknode.png").toExternalForm());
-        
+    
     DockNode chartDock = nodeManager.getDockNode(chart.getNode(), chart.getName(), new ImageView(dockImage));
     chartDock.setUserData(chart);
     chartDock.setPrefSize(500, 500);
-    
+    chart.setDockNode(chartDock);
     
     if(position == null)
       chartDock.floatNode(dockPane, true);

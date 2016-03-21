@@ -36,6 +36,7 @@ import jfreechart.object.Parameter;
 import jfreechart.object.Range;
 import jfreechart.object.Value;
 import jfreechart.settings.Configuration;
+import org.dockfx.DockNode;
 
 public class FieldCanvas extends Pane implements Chart{  
   private List<Turtle> data;
@@ -48,6 +49,8 @@ public class FieldCanvas extends Pane implements Chart{
   private boolean ballHistory;
   private int[] selectedOpponents;
   private boolean opponentsHistory;
+  
+  private DockNode dockNode;
   
   private final Circle[] shape_ball;
   private final Pair<Rectangle, Text>[][] shape_opponents;
@@ -63,6 +66,8 @@ public class FieldCanvas extends Pane implements Chart{
   private Circle shape_penaltyspot2;
   private Rectangle shape_fieldcenter;
   private Circle shape_fieldcenteroval;
+  
+  private List<Path> paths = new ArrayList();
   
   private double initial_width;
   private double initial_height;
@@ -124,6 +129,7 @@ public class FieldCanvas extends Pane implements Chart{
     if((!drag || liveUpdate) && data.size() > 0) {
       this.selection = new Range(startIndex, endIndex);
       drawMovingShapes();
+      setDockTitle();
     } else {
       this.selection = null;
     }
@@ -142,6 +148,17 @@ public class FieldCanvas extends Pane implements Chart{
   @Override
   public void addSelectionEventListener(SelectionEventListener listener) {
     listenerList.add(SelectionEventListener.class, listener);
+  }
+  
+  @Override
+  public void setDockNode(DockNode dockNode) {
+    this.dockNode = dockNode;
+  }
+  
+  private void setDockTitle() {
+    if(this.dockNode != null) {
+      this.dockNode.setTitle(String.format("%s [%d - %d]", getName(), this.selection.GetMin(), this.selection.GetMax()));
+    }
   }
   
   @Override
@@ -292,7 +309,7 @@ public class FieldCanvas extends Pane implements Chart{
           DataPoint poseY = turtle.GetValue(this.configuration.Pose, 0, this.configuration.PoseY, selection.GetMax());
           DataPoint orientationValue = turtle.GetValue(this.configuration.Pose, 0, this.configuration.PoseRot, selection.GetMax());
 
-          if(inField.getValue() > 0) {            
+          if(inField != null && inField.getValue() > 0) {
             Point turtlePos = getPosition(field, poseX.getValue(), poseY.getValue());
             double orientation = orientationValue.getValue();
 
@@ -366,7 +383,7 @@ public class FieldCanvas extends Pane implements Chart{
             DataPoint opponentY = turtle.GetValue(this.configuration.Opponent, i, this.configuration.OpponentY, selection.GetMax());
             DataPoint opponentlabel = turtle.GetValue(this.configuration.Opponentlabelnumber, i, this.configuration.OpponentlabelnumberIndex, selection.GetMax());
  
-            if(opponentX.getValue() != 0 && opponentY.getValue() != 0) {
+            if(opponentX != null && opponentX.getValue() != 0 && opponentY.getValue() != 0) {
               int label = (int)Math.round(opponentlabel.getValue());
               Point opponentPos = getPosition(field, opponentX.getValue(), opponentY.getValue());
 
@@ -420,11 +437,11 @@ public class FieldCanvas extends Pane implements Chart{
           DataPoint ballX = turtle.GetValue(this.configuration.Ball, 0, this.configuration.BallX, selection.GetMax());
           DataPoint ballY = turtle.GetValue(this.configuration.Ball, 0, this.configuration.BallY, selection.GetMax());
 
-          if(ballFound.getValue() > 0 && ballX.getValue() != 0 && ballY.getValue() != 0) {
+          if(ballFound != null&& ballFound.getValue() > 0 && ballX.getValue() != 0 && ballY.getValue() != 0) {
             Point ballPos = getPosition(field, ballX.getValue(), ballY.getValue());
 
             if(shape_ball[selectedTurtle] == null) {        
-              shape_ball[selectedTurtle] = new Circle(ballPos.getX(), ballPos.getY(), 5, Color.ORANGE);
+              shape_ball[selectedTurtle] = new Circle(ballPos.getX(), ballPos.getY(), 7.0f, Color.ORANGE);
               this.getChildren().add(shape_ball[selectedTurtle]);
             } else {
               shape_ball[selectedTurtle].setVisible(true);
@@ -438,8 +455,8 @@ public class FieldCanvas extends Pane implements Chart{
       }
     }
   }
-    
-  private void drawField() {    
+  
+  private void drawField() {
     double width_center = (this.configuration.FieldWidth / 2);
     double height_center = (this.configuration.FieldLength / 2);
     
@@ -478,15 +495,15 @@ public class FieldCanvas extends Pane implements Chart{
       shape_penalty2.setFill(Color.TRANSPARENT);
       shape_penalty2.setStroke(Color.WHITE);
 
-      position = translateToField(width_center, this.configuration.PenaltySpot, 0.2, 0.2);
+      position = translateToField(width_center, this.configuration.PenaltySpot, 0.15, 0.15);
       shape_penaltyspot1 = new Circle(position.getX(), position.getY(), position.getWidth());
-      shape_penaltyspot1.setFill(Color.WHITE);
-      shape_penaltyspot1.setStroke(Color.WHITE);
-
-      position = translateToField(width_center, this.configuration.FieldLength - this.configuration.PenaltySpot, 0.2, 0.2);    
+      shape_penaltyspot1.setStroke(Color.rgb(154, 205, 50));
+      shape_penaltyspot1.setFill(Color.rgb(154, 205, 50));
+      
+      position = translateToField(width_center, this.configuration.FieldLength - this.configuration.PenaltySpot, 0.15, 0.15);    
       shape_penaltyspot2 = new Circle(position.getX(), position.getY(), position.getWidth());
-      shape_penaltyspot2.setFill(Color.WHITE);
-      shape_penaltyspot2.setStroke(Color.WHITE);
+      shape_penaltyspot2.setStroke(Color.rgb(154, 205, 50));
+      shape_penaltyspot2.setFill(Color.rgb(154, 205, 50));
 
       position = translateToField(0, height_center - 0.02, this.configuration.FieldWidth, 0.04);
       shape_fieldcenter = new Rectangle(position.getX(), position.getY(), position.getWidth(), position.getHeight());
@@ -513,64 +530,148 @@ public class FieldCanvas extends Pane implements Chart{
   }
   
   private void drawTurtleLines() {
-    if(turtleHistory) {      
-      addPaths(selectedTurtles, this.configuration.Pose, this.configuration.PoseX, this.configuration.PoseY, "default-color%d-agent-line");
+    if(turtleHistory && selection != null) {
+      List<Pair<Integer, List<Point>>> opponent_paths = new ArrayList();
+
+      for(int selectedTurtle : selectedTurtles) {
+        Turtle turtle  = data.get(selectedTurtle);
+
+        Parameter parameter = this.parameterMap.GetParameter(this.configuration.Pose);
+
+        for(int parameterIndex = 0; parameterIndex < parameter.getCount(); parameterIndex++) {
+
+          List<DataPoint> posXValues = turtle.GetValues(this.configuration.Pose, parameterIndex, this.configuration.PoseX, selection.GetMin(), selection.GetMax());
+          List<DataPoint> posYValues = turtle.GetValues(this.configuration.Pose, parameterIndex, this.configuration.PoseY, selection.GetMin(), selection.GetMax());          
+          
+          List<Point> newPath = new ArrayList();
+
+          for(int valueIndex = 0; valueIndex < posXValues.size(); valueIndex++) {
+            DataPoint dataX = posXValues.get(valueIndex);
+            DataPoint dataY = posYValues.get(valueIndex);
+
+            double posX = dataX.getValue();
+            double posY = dataY.getValue();
+
+            if(posX != 0 && posY != 0 && dataX.isVisible() && dataY.isVisible()) {   
+              Point position = getPosition(field, posX, posY);
+              newPath.add(position);
+            } else {
+              opponent_paths.add(new Pair(selectedTurtle, newPath));
+              newPath = new ArrayList();
+            }
+          }
+
+          opponent_paths.add(new Pair(selectedTurtle, newPath));
+        }
+      }
+
+      drawPaths(opponent_paths, "default-color%d-agent-line");
     }
   }
   
   private void drawBallLines() {
-    if(ballHistory) {      
-      addPaths(selectedBall, this.configuration.Ball, this.configuration.BallX, this.configuration.BallY, "default-color%d-ball-line");
+    if(ballHistory && selection != null) {
+      List<Pair<Integer, List<Point>>> opponent_paths = new ArrayList();
+
+      for(int selectedTurtle : selectedBall) {
+        Turtle turtle  = data.get(selectedTurtle);
+
+        Parameter parameter = this.parameterMap.GetParameter(this.configuration.Ball);
+
+        for(int parameterIndex = 0; parameterIndex < parameter.getCount(); parameterIndex++) {
+
+          List<DataPoint> posXValues = turtle.GetValues(this.configuration.Ball, parameterIndex, this.configuration.BallX, selection.GetMin(), selection.GetMax());
+          List<DataPoint> posYValues = turtle.GetValues(this.configuration.Ball, parameterIndex, this.configuration.BallY, selection.GetMin(), selection.GetMax());
+          
+          List<DataPoint> turtleXValues = turtle.GetValues(this.configuration.Pose, parameterIndex, this.configuration.PoseX, selection.GetMin(), selection.GetMax());
+          List<DataPoint> turtleYValues = turtle.GetValues(this.configuration.Pose, parameterIndex, this.configuration.PoseY, selection.GetMin(), selection.GetMax());        
+          
+          List<Point> newPath = new ArrayList();
+
+          for(int valueIndex = 0; valueIndex < posXValues.size(); valueIndex++) {
+            DataPoint dataX = posXValues.get(valueIndex);
+            DataPoint dataY = posYValues.get(valueIndex);
+
+            double posX = dataX.getValue();
+            double posY = dataY.getValue();
+            
+            double turtleX = turtleXValues.get(valueIndex).getValue();
+            double turtleY = turtleYValues.get(valueIndex).getValue();
+
+            if(posX != 0 && posY != 0 && posX != turtleX && posY != turtleY && dataX.isVisible() && dataY.isVisible()) {   
+              Point position = getPosition(field, posX, posY);
+              newPath.add(position);
+            } else {
+              opponent_paths.add(new Pair(selectedTurtle, newPath));
+              newPath = new ArrayList();
+            }
+          }
+
+          opponent_paths.add(new Pair(selectedTurtle, newPath));
+        }
+      }
+
+      drawPaths(opponent_paths, "default-color%d-ball-line");
     }
   }
   
   private void drawOpponentLines() {
-    if(opponentsHistory) {      
-      addPaths(selectedOpponents, this.configuration.Opponent, this.configuration.OpponentX, this.configuration.OpponentY, "default-color%d-opponent-line");
+    if(opponentsHistory && selection != null) {
+      List<Pair<Integer, List<Point>>> opponent_paths = new ArrayList();
+
+      for(int selectedTurtle : selectedOpponents) {
+        Turtle turtle  = data.get(selectedTurtle);
+
+        Parameter parameter = this.parameterMap.GetParameter(this.configuration.Opponent);
+
+        for(int parameterIndex = 0; parameterIndex < parameter.getCount(); parameterIndex++) {
+
+          List<DataPoint> posXValues = turtle.GetValues(this.configuration.Opponent, parameterIndex, this.configuration.OpponentX, selection.GetMin(), selection.GetMax());
+          List<DataPoint> posYValues = turtle.GetValues(this.configuration.Opponent, parameterIndex, this.configuration.OpponentY, selection.GetMin(), selection.GetMax());          
+          List<DataPoint> labelValues = turtle.GetValues(this.configuration.Opponentlabelnumber, parameterIndex, this.configuration.OpponentlabelnumberIndex, selection.GetMin(), selection.GetMax());
+
+          List<Point> newPath = new ArrayList();
+          double currentLabel = labelValues.get(0).getValue();
+
+          for(int valueIndex = 0; valueIndex < posXValues.size(); valueIndex++) {
+            DataPoint dataX = posXValues.get(valueIndex);
+            DataPoint dataY = posYValues.get(valueIndex);
+
+            double posX = dataX.getValue();
+            double posY = dataY.getValue();
+            double label = labelValues.get(valueIndex).getValue();
+
+            if(currentLabel == label && posX != 0 && posY != 0 && dataX.isVisible() && dataY.isVisible()) {   
+              Point position = getPosition(field, posX, posY);
+              newPath.add(position);
+            } else {
+              currentLabel = label;
+              opponent_paths.add(new Pair(selectedTurtle, newPath));
+              newPath = new ArrayList();
+            }
+          }
+
+          opponent_paths.add(new Pair(selectedTurtle, newPath));
+        }
+      }
+
+      drawPaths(opponent_paths, "default-color%d-opponent-line");
     }
   }
   
-  private void addPaths(int[] selected, String parameterName, String valueXName, String valueYName, String style) {
-    if(selection != null) {
-      List<Pair<Integer, List<Point>>> paths = new ArrayList();
-
-      for(int selectedTurtle : selected) {
-        Turtle turtle  = data.get(selectedTurtle);
-
-        Parameter parameter = this.parameterMap.GetParameter(parameterName);
-
-        for(int parameterIndex = 0; parameterIndex < parameter.getCount(); parameterIndex++) {
-          Value valueX = parameter.getValue(valueXName);
-          Value valueY =  parameter.getValue(valueYName);
-
-          List<DataPoint> posXValues = turtle.GetValues(parameterName, parameterIndex, valueXName, selection.GetMin(), selection.GetMax());
-          List<DataPoint> posYValues = turtle.GetValues(parameterName, parameterIndex, valueYName, selection.GetMin(), selection.GetMax());
-
-          List<Point> newPath = new ArrayList();
-          for(int valueIndex = 0; valueIndex < posXValues.size(); valueIndex++) {
-            double posX = posXValues.get(valueIndex).getValue();
-            double posY = posYValues.get(valueIndex).getValue();
-            
-            if(posX != 0 && posY != 0 && valueX.insideRange(posX) && valueY.insideRange(posY)) {
-              Point position = getPosition(field, posX, posY);
-              newPath.add(position);
-            }
-          }
-          paths.add(new Pair(selectedTurtle, newPath));
-        }
-      }
-      
+  private void drawPaths(List<Pair<Integer, List<Point>>> paths, String style) {
+    if(selection != null) {      
       for(Pair<Integer, List<Point>> points : paths) {
         if(points.getValue().size() > 0) {
-
           Path path = new Path();
           path.getStyleClass().add(String.format(style, (int)points.getKey()));
           path.setStrokeWidth(2);
-                  
+          
           MoveTo moveTo = new MoveTo(points.getValue().get(0).x, points.getValue().get(0).y);
           path.getElements().add(moveTo); 
 
-          for(Point point : points.getValue()) {
+          for(int i = 1; i < points.getValue().size(); i++) {
+            Point point = points.getValue().get(i);
             LineTo lineTo = new LineTo(point.x, point.y);
             path.getElements().add(lineTo);
           }
@@ -596,9 +697,7 @@ public class FieldCanvas extends Pane implements Chart{
         this.getTransforms().add(new Translate(cx, cy));      
       }
   }
-  
-  private List<Path> paths = new ArrayList();
-  
+    
   private void removePaths() {
     for(Path path : paths) {
       this.getChildren().remove(path);

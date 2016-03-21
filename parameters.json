@@ -4,8 +4,8 @@
       "values": [
         {
           "unit": "meter",
-          "min": -32,
-          "max": 32,
+          "min": -7,
+          "max": 7,
           "name": "x",
           "index": 0,
           "decimalmask": "",
@@ -41,8 +41,8 @@
       "values": [
         {
           "unit": "meter",
-          "min": -32,
-          "max": 32,
+          "min": -7,
+          "max": 7,
           "name": "x",
           "index": 0,
           "decimalmask": "",
@@ -115,23 +115,23 @@
       "values": [
         {
           "unit": "meter",
-          "min": 0,
-          "max": 0,
+          "min": -7,
+          "max": 7,
           "name": "x",
           "index": 0,
           "decimalmask": "",
           "categories": [],
-          "rangeEnabled": false
+          "rangeEnabled": true
         },
         {
           "unit": "meter",
-          "min": 0,
-          "max": 0,
+          "min": -32,
+          "max": 32,
           "name": "y",
           "index": 1,
           "decimalmask": "",
           "categories": [],
-          "rangeEnabled": false
+          "rangeEnabled": true
         },
         {
           "unit": "meter",
@@ -476,7 +476,7 @@
       "values": [
         {
           "unit": "volt",
-          "min": 0,
+          "min": -50,
           "max": 150,
           "name": "battery-voltage",
           "index": 0,
@@ -736,6 +736,10 @@
             {
               "name": "True",
               "value": 1
+            },
+            {
+              "name": "Communicated",
+              "value": 2
             }
           ],
           "rangeEnabled": false
@@ -1422,6 +1426,25 @@
             {
               "name": "Dropped ball",
               "value": 78
+            }
+          ],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "command",
+          "min": 0,
+          "max": 0,
+          "name": "goals",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [
+            {
+              "name": "Goal cyan",
+              "value": 65
+            },
+            {
+              "name": "Goal magenta",
+              "value": 97
             }
           ],
           "rangeEnabled": false

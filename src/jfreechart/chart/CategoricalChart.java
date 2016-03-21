@@ -4,7 +4,6 @@ import com.sun.javafx.charts.Legend;
 import com.sun.javafx.charts.Legend.LegendItem;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Timer;
@@ -30,7 +29,6 @@ import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.RectangleBuilder;
@@ -46,8 +44,9 @@ import jfreechart.object.Turtle;
 import jfreechart.object.Type;
 import jfreechart.object.Value;
 import jfreechart.settings.Configuration;
+import org.dockfx.DockNode;
 
-public class AgentChart implements Chart {
+public class CategoricalChart implements Chart {
   
   private Scene scene;
   private int[] selectedTurtles;
@@ -56,6 +55,8 @@ public class AgentChart implements Chart {
   private String yParameterValue;
   private List<Turtle> data;
   private boolean liveUpdate;
+  
+  private DockNode dockNode;
   
   private ParameterMap parameterMap;
   
@@ -72,7 +73,7 @@ public class AgentChart implements Chart {
   private int selectedStartIndex;
   private int selectedEndIndex;
   
-  public AgentChart(Scene scene, int[] selectedTurtles, String yParameter, int yParameterIndex, String yParameterValue, List<Turtle> data, boolean liveUpdate) {
+  public CategoricalChart(Scene scene, int[] selectedTurtles, String yParameter, int yParameterIndex, String yParameterValue, List<Turtle> data, boolean liveUpdate) {
     this.scene = scene;
     this.selectedTurtles = selectedTurtles;
     this.yParameter = yParameter;
@@ -87,11 +88,17 @@ public class AgentChart implements Chart {
     initialize();
   }
   
-  public AgentChart(Scene scene) {
+  public CategoricalChart(Scene scene) {
     this.scene = scene;
     
     this.parameterMap = new ParameterMap();
-    this.selectedTurtles = new int[] { 0 };
+    
+    Configuration configuration = new Configuration();
+    this.selectedTurtles = new int[configuration.MaxTurtles];
+    for(int i = 0; i < configuration.MaxTurtles; i++) {
+      this.selectedTurtles[i] = i;
+    }
+    
     this.yParameterIndex = 0;
     this.data = new ArrayList();
     this.liveUpdate = true;
@@ -117,7 +124,7 @@ public class AgentChart implements Chart {
   
   @Override
   public String getName() {
-    return "AgentChart";
+    return "CategoricalChart";
   }
   
   @Override
@@ -152,6 +159,19 @@ public class AgentChart implements Chart {
         initSelectionWidth = end - start;
         initSelectionData = new Object[]{ startIndex, endIndex };
       }
+      
+      setDockTitle();
+    }
+  }
+  
+  @Override
+  public void setDockNode(DockNode dockNode) {
+    this.dockNode = dockNode;
+  }
+  
+  private void setDockTitle() {
+    if(this.dockNode != null) {
+      this.dockNode.setTitle(String.format("%s - %s[%d] (%s) [%d - %d]", getName(), this.yParameter, this.yParameterIndex, this.yParameterValue, this.selectedStartIndex, this.selectedEndIndex));
     }
   }
   
@@ -256,9 +276,9 @@ public class AgentChart implements Chart {
     grid.setPadding(new Insets(10, 10, 10, 10));
     
     Dialog<Boolean> dialog = new Dialog();
-    dialog.setTitle("AgentChart options");
-    dialog.setHeaderText("Choose agentchart options");
-    dialog.setContentText("Choose agentchart options:");
+    dialog.setTitle("Categoricalchart options");
+    dialog.setHeaderText("Choose categoricalchart options");
+    dialog.setContentText("Choose categoricalchart options:");
 
     dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
@@ -356,6 +376,8 @@ public class AgentChart implements Chart {
         }
         
         liveUpdate = liveCheckbox.isSelected();
+        
+        setDockTitle();
 
         return true;
       }
@@ -552,6 +574,8 @@ public class AgentChart implements Chart {
         double agent1YPosition = yAxis.getDisplayPosition(categories.get(0));
         double agent2YPosition = yAxis.getDisplayPosition(categories.get(1));
         height = Math.abs(agent2YPosition - agent1YPosition);
+      } else {
+        height = height - 10;
       }
       return height;
   }
@@ -562,9 +586,17 @@ public class AgentChart implements Chart {
     node.setOnMousePressed((MouseEvent event) -> {
       System.out.printf("MOUSE_PRESSED \n");
 
+      double xAxisShift = getSceneXShift(xAxis);
+      double yAxisShift = getSceneYShift(yAxis);
+      
       selectionPoint = new Point2D(event.getX(), event.getY());
       
-      notifyListeners(0, 0, false);
+      Rectangle selection = getSelectionRectangle(event.getX(), event.getY(), xAxisShift, yAxisShift, xAxis.getWidth(), yAxis.getHeight());
+            
+      int start = xAxis.getValueForDisplay(selection.getX() - xAxisShift).intValue();
+      int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xAxisShift).intValue();
+      
+      notifyListeners(start, end, false);
     });
 
     node.setOnMouseDragged((MouseEvent event) -> {

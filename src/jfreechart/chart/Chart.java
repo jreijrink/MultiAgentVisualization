@@ -18,15 +18,17 @@ import jfreechart.listener.SelectionEventListener;
 import jfreechart.object.StringValuePair;
 import jfreechart.object.Turtle;
 import jfreechart.settings.Configuration;
+import org.dockfx.DockNode;
 
-public interface Chart extends EventListener {
-  
+public interface Chart extends EventListener {  
   EventListenerList listenerList = new EventListenerList();
   
   public void updateData(List<Turtle> data);
   
   public String getName();
   public Node getNode();
+  
+  public void setDockNode(DockNode dockNode);
   
   public void addSelectionEventListener(SelectionEventListener listener);
   public void selectFrames(int startIndex, int endIndex, boolean drag);

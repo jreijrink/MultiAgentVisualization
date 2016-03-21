@@ -15,6 +15,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
@@ -42,6 +43,8 @@ import static jfreechart.chart.Chart.getTurtleListView;
 import jfreechart.object.Parameter;
 import jfreechart.object.Turtle;
 import jfreechart.object.Value;
+import jfreechart.settings.Configuration;
+import org.dockfx.DockNode;
 
 public class XYBaseChart implements Chart {  
   public enum ChartType { Scatter, Line };
@@ -54,6 +57,8 @@ public class XYBaseChart implements Chart {
   private String yParameterValue;
   private List<Turtle> data;
   private boolean liveUpdate;
+  
+  private DockNode dockNode;
   
   private ParameterMap parameterMap;
   
@@ -86,7 +91,13 @@ public class XYBaseChart implements Chart {
     this.type = type;
     
     this.parameterMap = new ParameterMap();
-    this.selectedTurtles = new int[] { 0 };
+    
+    Configuration configuration = new Configuration();
+    this.selectedTurtles = new int[configuration.MaxTurtles];
+    for(int i = 0; i < configuration.MaxTurtles; i++) {
+      this.selectedTurtles[i] = i;
+    }
+    
     this.yParameterIndex = 0;
     this.data = new ArrayList();
     this.liveUpdate = true;
@@ -151,6 +162,19 @@ public class XYBaseChart implements Chart {
         selectionRectangle.setWidth(end - start);
         selectionRectangle.setUserData(new Object[]{ startIndex, endIndex });
       }
+      
+      setDockTitle();
+    }
+  }
+  
+  @Override
+  public void setDockNode(DockNode dockNode) {
+    this.dockNode = dockNode;
+  }
+  
+  private void setDockTitle() {
+    if(this.dockNode != null) {
+      this.dockNode.setTitle(String.format("%s - %s[%d] (%s) [%d - %d]", getName(), this.yParameter, this.yParameterIndex, this.yParameterValue, this.selectedStartIndex, this.selectedEndIndex));
     }
   }
   
@@ -263,6 +287,8 @@ public class XYBaseChart implements Chart {
         
         liveUpdate = liveCheckbox.isSelected();
 
+        setDockTitle();
+
         return true;
       }
       return null;
@@ -313,16 +339,6 @@ public class XYBaseChart implements Chart {
     } catch(Exception ex) { }
     
     NumberAxis yAxis = new NumberAxis();
-    /*
-    try {
-      Value value = parameterMap.GetParameter(yParameter).getValue(yParameterValue);
-      if(value.getRangeEnabled()) {
-        double range = value.getMax() - value.getMin();
-        double scale = getScale(range);
-        yAxis = new NumberAxis(value.getMin(), value.getMax(), scale);      
-      }
-    } catch(Exception ex) { }
-    */
             
     switch(type) {
       case Scatter:
@@ -389,6 +405,22 @@ public class XYBaseChart implements Chart {
     this.XYChart.getData().setAll(data);
     //}
     
+    Timer timer = new java.util.Timer();
+    timer.schedule( 
+      new java.util.TimerTask() {
+        @Override
+        public void run() {
+          Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+              drawInvalidData();
+              timer.cancel();
+              timer.purge();
+            }
+          });
+        }
+      }, 50);
+    
     System.out.printf("Completed chart\n");
   }
   
@@ -418,6 +450,8 @@ public class XYBaseChart implements Chart {
       selectionRectangle.setY(yAxisShift);
       selectionRectangle.setHeight(yAxis.getHeight());
     }
+    
+    drawInvalidData();
   }
   
   private void setMouseListeners() {
@@ -444,12 +478,6 @@ public class XYBaseChart implements Chart {
       }
     }
 
-    for(Node child : this.rootPane.getChildren()) {
-      if(child.getClass() == Rectangle.class) {
-        createRectangleSelectionEvents(child, xAxis, yAxis);
-      }
-    }
-
     selectionRectangle = RectangleBuilder.create()
             .x(0)
             .y(0)
@@ -461,6 +489,12 @@ public class XYBaseChart implements Chart {
             .build();
     selectionRectangle.setUserData(new Object[]{ -1, -1 });
     rootPane.getChildren().add(selectionRectangle);
+
+    for(Node child : this.rootPane.getChildren()) {
+      if(child.getClass() == Rectangle.class) {
+        createRectangleSelectionEvents(child, xAxis, yAxis);
+      }
+    }
     
     System.out.printf("END LISTEN \n");
   }
@@ -471,10 +505,17 @@ public class XYBaseChart implements Chart {
 
       double xChartShift = getSceneXShift(node);
       double yChartShift = getSceneYShift(node);
+      double xAxisShift = getSceneXShift(xAxis);
+      double yAxisShift = getSceneYShift(yAxis);
 
       selectionPoint = new Point2D(event.getX() + xChartShift, event.getY() + yChartShift);
       
-      notifyListeners(0, 0, false);
+      Rectangle selection = getSelectionRectangle(event.getX(), event.getY(), xChartShift, yChartShift, xAxis.getWidth() + xAxisShift - xChartShift, yAxis.getHeight() + yAxisShift- yChartShift);
+            
+      int start = xAxis.getValueForDisplay(selection.getX() - xAxisShift).intValue();
+      int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xAxisShift).intValue();
+      
+      notifyListeners(start, end, false);
     });
 
     node.setOnMouseDragged((MouseEvent event) -> {
@@ -592,7 +633,63 @@ public class XYBaseChart implements Chart {
       System.out.printf("Completed filling values for %d\n", turtleIndex);
       
       System.out.printf("Done for %d\n", turtleIndex);
+            
       return series;
+  }
+  
+  private void drawInvalidData() {
+      
+    List<Node> remove = new ArrayList();
+    for(Node child : this.rootPane.getChildren()) {
+      if(child.getId() != null && child.getId().equals("InvalidPoint")) {
+        remove.add(child);
+      }
+    }
+    this.rootPane.getChildren().removeAll(remove);
+    
+    if(data.size() > 0) {  
+      for(int turtleIndex : selectedTurtles) {
+        Turtle turtle = data.get(turtleIndex);
+        List<DataPoint> data = turtle.GetAllValues(yParameter, yParameterIndex, yParameterValue);
+
+        NumberAxis yAxis = (NumberAxis) XYChart.getYAxis();
+        NumberAxis xAxis = (NumberAxis) XYChart.getXAxis();
+
+        double xAxisShift = getSceneXShift(xAxis);
+        double yAxisShift = getSceneYShift(yAxis);
+
+        for(DataPoint point : data) {
+
+          if(!point.isVisible()) {
+
+            double xPosition = xAxis.getDisplayPosition(point.getTimeframe());
+
+            if(!point.aboveMin()) {
+              //Draw point at bottom     
+              Rectangle invalidBlock = RectangleBuilder.create()
+                      .x(xPosition + xAxisShift - 2)
+                      .y(yAxis.getHeight() + yAxisShift - 2)
+                      .height(4)
+                      .width(4)
+                      .id("InvalidPoint")
+                      .styleClass("default-invalid-color")
+                      .build();
+               this.rootPane.getChildren().add(invalidBlock);     
+            } else {
+              //Draw point at top 
+              Rectangle invalidBlock = RectangleBuilder.create()
+                      .x(xPosition + xAxisShift - 2)
+                      .y(yAxisShift - 2)
+                      .height(4)
+                      .width(4)
+                      .styleClass("default-invalid-color")
+                      .build();
+               this.rootPane.getChildren().add(invalidBlock);
+           }
+          }
+        }
+      }
+    }
   }
   
   private List<DataPoint> simplifyRadialDistance(List<DataPoint> data, double xTolerance, double yTolerance) {
@@ -601,8 +698,8 @@ public class XYBaseChart implements Chart {
     List<DataPoint> sortedPoints = new ArrayList();
 
     for(DataPoint point : data) {
-      if(point.inRange()) {
-        DataPoint validPoint = new DataPoint(point.getTimeframe(), point.getValue(), point.getIndices().get(0), point.inRange());
+      if(point.isVisible()) {
+        DataPoint validPoint = new DataPoint(point.getTimeframe(), point.getValue(), point.getIndices().get(0), point.aboveMin(), point.belowMax());
         sortedPoints.add(validPoint);
       }
     }
