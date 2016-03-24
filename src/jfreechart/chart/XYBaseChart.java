@@ -89,15 +89,8 @@ public class XYBaseChart implements Chart {
   public XYBaseChart(Scene scene, ChartType type) {
     this.scene = scene;
     this.type = type;
-    
     this.parameterMap = new ParameterMap();
-    
-    Configuration configuration = new Configuration();
-    this.selectedTurtles = new int[configuration.MaxTurtles];
-    for(int i = 0; i < configuration.MaxTurtles; i++) {
-      this.selectedTurtles[i] = i;
-    }
-    
+    this.selectedTurtles = new int[]{ 0 };    
     this.yParameterIndex = 0;
     this.data = new ArrayList();
     this.liveUpdate = true;
@@ -125,11 +118,11 @@ public class XYBaseChart implements Chart {
   public String getName() {
     switch(type) {
       case Scatter:
-        return "ScatterChart";
+        return "Scatter-chart";
       case Line:
-      return "LineChart";
+      return "Line-chart";
     }
-    return "XYChart";
+    return "XY-chart";
   }
   
   @Override

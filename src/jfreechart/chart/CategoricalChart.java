@@ -124,7 +124,7 @@ public class CategoricalChart implements Chart {
   
   @Override
   public String getName() {
-    return "CategoricalChart";
+    return "Categorical-chart";
   }
   
   @Override
@@ -276,9 +276,9 @@ public class CategoricalChart implements Chart {
     grid.setPadding(new Insets(10, 10, 10, 10));
     
     Dialog<Boolean> dialog = new Dialog();
-    dialog.setTitle("Categoricalchart options");
-    dialog.setHeaderText("Choose categoricalchart options");
-    dialog.setContentText("Choose categoricalchart options:");
+    dialog.setTitle("Categorical-chart options");
+    dialog.setHeaderText("Choose categorical-chart options");
+    dialog.setContentText("Choose categorical-chart options:");
 
     dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 

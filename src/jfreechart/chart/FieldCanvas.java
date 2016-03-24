@@ -20,6 +20,7 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
+import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.RectangleBuilder;
 import javafx.scene.text.Text;
@@ -54,7 +55,7 @@ public class FieldCanvas extends Pane implements Chart{
   
   private final Circle[] shape_ball;
   private final Pair<Rectangle, Text>[][] shape_opponents;
-  private final Pair<Rectangle, Text>[] shape_turtles;
+  private final Pair<Polygon, Text>[] shape_turtles;
   private Rectangle shape_field;
   private Rectangle shape_goal1;
   private Rectangle shape_goal2;
@@ -316,30 +317,29 @@ public class FieldCanvas extends Pane implements Chart{
             int index = turtle.getID();
 
             if(shape_turtles[index] == null) {            
+               
+                Polygon turtlePolygon = createTurtleShape(index);
+                
+                turtlePolygon.setLayoutX(turtlePos.getX() - 15);
+                turtlePolygon.setLayoutY(turtlePos.getY() - 12.5);
+                turtlePolygon.setRotate(Math.toDegrees(orientation));
 
-
-                Rectangle turtleRect = RectangleBuilder.create()
-                        .x(turtlePos.getX() - 10)
-                        .y(turtlePos.getY() - 10)
-                        .height(20)
-                        .width(20)
-                        .styleClass(String.format("default-color%d-agent", (int)index))
-                        .build();
-
-                turtleRect.setRotate(Math.toDegrees(orientation));
                 Text turtleText = new Text(turtlePos.getX() - 5, turtlePos.getY() + 5, String.valueOf(index + 1));
+                
                 turtleText.setFill(Color.WHITE);
                 turtleText.setRotate(Math.toDegrees(orientation));
 
-                shape_turtles[index] = new Pair(turtleRect, turtleText);
-                this.getChildren().add(turtleRect);
+                shape_turtles[index] = new Pair(turtlePolygon, turtleText);
+                this.getChildren().add(turtlePolygon);
                 this.getChildren().add(turtleText);
             } else {
               if(turtlePos.getX() != 0 || turtlePos.getY() != 0) {
-                shape_turtles[index].getKey().setX(turtlePos.getX() - 10);
-                shape_turtles[index].getKey().setY(turtlePos.getY() - 10);
+                shape_turtles[index].getKey().setTranslateY(orientation);
+                
+                shape_turtles[index].getKey().setLayoutX(turtlePos.getX() - 15);
+                shape_turtles[index].getKey().setLayoutY(turtlePos.getY() - 12.5);
                 shape_turtles[index].getKey().setRotate(Math.toDegrees(orientation));
-
+                
                 shape_turtles[index].getValue().setX(turtlePos.getX() - 5);
                 shape_turtles[index].getValue().setY(turtlePos.getY() + 5);
                 shape_turtles[index].getValue().setRotate(Math.toDegrees(orientation));
@@ -357,6 +357,21 @@ public class FieldCanvas extends Pane implements Chart{
         ex.printStackTrace();        
       }
     }
+  }
+  
+  private Polygon createTurtleShape(int index) {
+    Polygon polygon = new Polygon();
+    polygon.getPoints().addAll(new Double[]{
+        0.0, 0.0,
+        30.0, 0.0,
+        30.0, 5.0,
+        30.0, 15.0,
+        15.0, 25.0,
+        0.0, 15.0,
+        0.0, 5.0 });
+    polygon.getStyleClass().add(String.format("default-color%d-agent", index));
+    
+    return polygon;
   }
   
   private void drawOpponents() {
@@ -442,6 +457,7 @@ public class FieldCanvas extends Pane implements Chart{
 
             if(shape_ball[selectedTurtle] == null) {        
               shape_ball[selectedTurtle] = new Circle(ballPos.getX(), ballPos.getY(), 7.0f, Color.ORANGE);
+              shape_ball[selectedTurtle].setStroke(Color.DARKORANGE);
               this.getChildren().add(shape_ball[selectedTurtle]);
             } else {
               shape_ball[selectedTurtle].setVisible(true);

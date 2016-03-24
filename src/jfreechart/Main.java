@@ -138,7 +138,7 @@ public class Main extends Application {
     
     Menu elementMenu = new Menu("Elements");
     
-    MenuItem newScatterMenu = new MenuItem("Add scatterchart");
+    MenuItem newScatterMenu = new MenuItem("Add scatter-chart");
     newScatterMenu.setOnAction(new EventHandler() {
       @Override
       public void handle(Event t) {
@@ -148,7 +148,7 @@ public class Main extends Application {
     });
     elementMenu.getItems().add(newScatterMenu);
     
-    MenuItem newLineMenu = new MenuItem("Add linechart");
+    MenuItem newLineMenu = new MenuItem("Add line-chart");
     newLineMenu.setOnAction(new EventHandler() {
       @Override
       public void handle(Event t) {
@@ -158,7 +158,7 @@ public class Main extends Application {
     });
     elementMenu.getItems().add(newLineMenu);
     
-    MenuItem newCategoricalMenu = new MenuItem("Add categoricalchart");
+    MenuItem newCategoricalMenu = new MenuItem("Add categorical-chart");
     newCategoricalMenu.setOnAction(new EventHandler() {
       @Override
       public void handle(Event t) {
