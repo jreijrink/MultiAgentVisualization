@@ -1,3 +1,5 @@
+# TechUnited visual analytics prototpye
+
 This prototype is developped for TechUnited.
 
 Java 8 is required to run the prototype (http://openjdk.java.net/install/).<br />
@@ -15,3 +17,16 @@ Thanks for using and evaluating the prototype.
 
 For more information about the prototype read "Visualization of multi-agent systems - Prototype manual.pdf".<br />
 A compiled version with all required files can be found in the ”release” directory.
+
+##Quick start
+
+Run Prototype.jar<br />
+File > Open > Select .MAT file
+
+Default charts will show the data<br />
+Charts and fields are linked through mouse selection
+
+Selected parameter and shown turtles can be changed in the settings menu of a chart or field.<br />
+New charts can be added through the "Elements" menu.
+ 
+
