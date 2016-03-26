@@ -370,6 +370,7 @@ public class FieldCanvas extends Pane implements Chart{
         0.0, 15.0,
         0.0, 5.0 });
     polygon.getStyleClass().add(String.format("default-color%d-agent", index));
+    polygon.setStrokeWidth(1);
     
     return polygon;
   }
