@@ -1,8 +1,8 @@
 # TechUnited visual analytics prototype
 
-This prototype is developped for TechUnited.
+This prototype is developed for TechUnited.
 
-Java 8 is required to run the prototype (http://openjdk.java.net/install/).<br />
+ORACLE Java 8 is required to run the prototype.<br />
 To start the prototype double-click "Prototype.jar" or run "java -jar Prototype.jar" in your terminal.
 
 The goal of the prototype is to support the analysis after each game to detect anomalies faster.
@@ -20,7 +20,9 @@ A compiled version with all required files can be found in the ”release” dir
 
 ##Quick start
 
-Run Prototype.jar<br />
+ORACLE Java 8 is required to run the prototype.<br />
+To start the prototype double-click "Prototype.jar" or run "java -jar Prototype.jar" in your terminal.
+
 File > Open > Select .MAT file
 
 Default charts will show the data<br />
