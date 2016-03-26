@@ -1,6 +1,6 @@
 This prototype is developped for TechUnited.
 
-Java 8 is required to run the prototype (http://openjdk.java.net/install/).
+Java 8 is required to run the prototype (http://openjdk.java.net/install/).<br />
 To start the prototype double-click "Prototype.jar" or run "java -jar Prototype.jar" in your terminal.
 
 The goal of the prototype is to support the analysis after each game to detect anomalies faster.
@@ -13,5 +13,5 @@ You can contact me if you don’t get the prototype working, have questions or c
 I would appreciate to receive feedback about the prototype.
 Thanks for using and evaluating the prototype.
 
-For more information about the prototype read "Visualization of multi-agent systems - Prototype manual.pdf"
+For more information about the prototype read "Visualization of multi-agent systems - Prototype manual.pdf".<br />
 A compiled version with all required files can be found in the ”release” directory.
