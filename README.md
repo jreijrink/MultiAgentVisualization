@@ -1,4 +1,4 @@
-# TechUnited visual analytics prototpye
+# TechUnited visual analytics prototype
 
 This prototype is developped for TechUnited.
 
