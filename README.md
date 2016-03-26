@@ -3,7 +3,7 @@
 This prototype is developed for TechUnited.
 
 ORACLE Java 8 is required to run the prototype. (http://www.webupd8.org/2012/09/install-oracle-java-8-in-ubuntu-via-ppa.html)<br />
-To start the prototype double-click "Prototype.jar" or run "java -jar Prototype.jar" in your terminal.
+To start the prototype right-click "Prototype.jar" and select "Open With > Oracle Java 8 runtime".
 
 The goal of the prototype is to support the analysis after each game to detect anomalies faster.
 The base consists of several configurable charts that are linked with each other.
@@ -21,7 +21,7 @@ A compiled version with all required files can be found in the ”release” dir
 ##Quick start
 
 ORACLE Java 8 is required to run the prototype. (http://www.webupd8.org/2012/09/install-oracle-java-8-in-ubuntu-via-ppa.html)<br />
-To start the prototype double-click "Prototype.jar" or run "java -jar Prototype.jar" in your terminal.
+To start the prototype right-click "Prototype.jar" and select "Open With > Oracle Java 8 runtime".
 
 File > Open > Select .MAT file
 
