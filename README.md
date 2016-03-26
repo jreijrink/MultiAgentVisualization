@@ -1,7 +1,7 @@
 This prototype is developped for TechUnited.
 
 Java 8 is required to run the prototype (http://openjdk.java.net/install/)
-To start the prototype double-click it or run "java -jar Prototype.jar" in your terminal.
+To start the prototype double-click "Prototype.jar" or run "java -jar Prototype.jar" in your terminal.
 
 The goal of the prototype is to support the analysis after each game to detect anomalies faster.
 The base consists of several configurable charts that are linked with each other.
