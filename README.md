@@ -27,6 +27,4 @@ Default charts will show the data<br />
 Charts and fields are linked through mouse selection
 
 Selected parameter and shown turtles can be changed in the settings menu of a chart or field.<br />
-New charts can be added through the "Elements" menu.
- 
-
+New charts can be added through the "Elements" menu, drag the new chart to the preferred position in the layout.
