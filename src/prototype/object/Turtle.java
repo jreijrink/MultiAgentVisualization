@@ -10,11 +10,37 @@ public class Turtle {
   public final int turtleID;
   public final double[][] data;
   private ParameterMap parameterMap;
+  private boolean[] filterMap;
   
   public Turtle(int turtleID, double[][] data) {
     this.turtleID = turtleID;
     this.data = data;
     this.parameterMap = new ParameterMap();
+    
+    List<Filter> filters = new ArrayList();
+    filters.add(new Filter("Role ID", 0, "current", new double[] { 1 }));
+    applyFilter(filters);
+  }
+  
+  private void applyFilter(List<Filter> filters) {
+    try {
+      this.filterMap = new boolean[this.data[0].length];
+      for(int i = 0; i < this.data[0].length; i++) {
+        this.filterMap[i] = true;
+      }
+      
+      for(Filter filter : filters) {
+        int valueIndex = this.parameterMap.GetValueIndex(filter.ParameterName(), filter.ParameterIndex(), filter.ValueName());
+        double[] dataset = this.data[valueIndex];
+        for(int i = 0; i < dataset.length; i++) {
+          if(!filter.ContainsFilterValue(dataset[i])) {
+            this.filterMap[i] = false;
+          }
+        }
+      }
+    } catch(Exception ex) {
+      ex.printStackTrace();
+    }
   }
   
   public DataPoint GetValue(String parameterName, int parameterIndex, String valueName, int index) {
@@ -23,7 +49,7 @@ public class Turtle {
       
       int valueIndex = this.parameterMap.GetValueIndex(parameterName, parameterIndex, valueName);
       double[] dataset = this.data[valueIndex];
-      return processData(new double[] { dataset[index] }, value).get(0);
+      return processData(valueIndex, new double[] { dataset[index] }, value).get(0);
     } catch(Exception ex) {
       ex.printStackTrace();
       return null;
@@ -36,7 +62,7 @@ public class Turtle {
       
       int valueIndex = this.parameterMap.GetValueIndex(parameterName, parameterIndex, valueName);
       double[] dataset = Arrays.copyOfRange(this.data[valueIndex], startIndex, endIndex);
-      return processData(dataset, value);
+      return processData(startIndex, dataset, value);
     } catch(Exception ex) {
       ex.printStackTrace();
       return new ArrayList();
@@ -49,7 +75,7 @@ public class Turtle {
       
       int valueIndex = this.parameterMap.GetValueIndex(parameterName, parameterIndex, valueName);
       double[] dataset = this.data[valueIndex];
-      return processData(dataset, value);
+      return processData(0, dataset, value);
     } catch(Exception ex) {
       ex.printStackTrace();
       return new ArrayList();
@@ -69,18 +95,23 @@ public class Turtle {
     return String.format("Turtle: %d", turtleID);
   }
   
-  private List<DataPoint> processData(double[] data, Value value) {
+  private List<DataPoint> processData(int offest, double[] data, Value value) {
     List<DataPoint> values = new ArrayList();
     
-    double[] result =  applyDecimalMask(data, value);
+    double[] result = applyDecimalMask(data, value);
 
     for(int i = 0; i < result.length; i++) {
       double dataValue = result[i];
-      DataPoint point = new DataPoint(i, dataValue, i, value.aboveMin(dataValue), value.belowMax(dataValue));
+                  
+      DataPoint point = new DataPoint(i + offest, dataValue, i + offest, value.aboveMin(dataValue), value.belowMax(dataValue), satisfiesFilter(i + offest));
       values.add(point);
     }
     
     return values;
+  }
+  
+  private boolean satisfiesFilter(int index) {
+    return this.filterMap == null || this.filterMap.length <= index || this.filterMap[index];
   }
   
   private double[] applyDecimalMask(double[] data, Value value) {

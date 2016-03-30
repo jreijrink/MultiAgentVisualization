@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Timer;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -331,13 +332,24 @@ public class Main extends Application {
     
     DockNode chartDock = nodeManager.getDockNode(chart.getNode(), chart.getName(), new ImageView(dockImage));
     chartDock.setUserData(chart);
-    chartDock.setPrefSize(500, 500);
+    chartDock.setPrefSize(500, 1500);
+    chartDock.floatingProperty().addListener(new ChangeListener() {
+      @Override
+      public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+        boolean floating = (Boolean)newValue;
+        if(floating)          
+          chartDock.setPrefSize(500, 500);
+        else
+          chartDock.setPrefSize(500, 1500);
+      }
+    });
     chart.setDockNode(chartDock);
     
     if(position == null)
       chartDock.floatNode(dockPane, true);
     else
       chartDock.dock(dockPane, position);
+    chartDock.autosize();
   }
   
   private void updateLayout(List<Turtle> data) {

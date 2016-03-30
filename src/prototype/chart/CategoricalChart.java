@@ -408,8 +408,6 @@ public class CategoricalChart implements Chart {
     this.rootPane.getChildren().removeAll(pointChildren);
     
     if(data.size() > 0) {
-      int turtles = data.size();
-
       double minY = Double.MAX_VALUE;
       double maxY = Double.MIN_VALUE;  
 
@@ -426,7 +424,8 @@ public class CategoricalChart implements Chart {
       
       for(int turtleIndex : selectedTurtles) {
         
-        double currentCategory = Double.MIN_VALUE;
+        double currentCategory = -1;
+        boolean currentVisibility = true;
         int currentFrame = 0;
         double currentPosition = xAxis.getDisplayPosition(0);
         
@@ -436,10 +435,27 @@ public class CategoricalChart implements Chart {
         for(int timeFrame = 0; timeFrame < categoricalValues.size(); timeFrame++) {
           DataPoint category = categoricalValues.get(timeFrame);
           
-          if(currentCategory == Double.MIN_VALUE)
-            currentCategory = category.getLocation().getY();
+          //if(currentCategory == Double.MIN_VALUE)
+          //  currentCategory = category.getLocation().getY();
 
-          if(category.getLocation().getY() != currentCategory || timeFrame >= categoricalValues.size() - 1) {
+          boolean newBlock = false;
+          double newCategory = currentCategory;
+          
+          if(category.isVisible()) {
+            if(!currentVisibility || category.getLocation().getY() != currentCategory || timeFrame >= categoricalValues.size() - 1) {
+              newBlock = true;
+              newCategory = category.getLocation().getY();    
+            }
+            currentVisibility = true;
+          } else {
+            if(currentVisibility || timeFrame >= categoricalValues.size() - 1) {
+              currentVisibility = false;
+              newBlock = true;
+              newCategory = -1;
+            }
+          }
+          
+          if(newBlock) {
             double xPosition = xAxis.getDisplayPosition(timeFrame);
             double yPosition = yAxis.getDisplayPosition(String.format("Turtle %d", turtleIndex + 1));
 
@@ -452,14 +468,14 @@ public class CategoricalChart implements Chart {
                     .height(height)
                     .width(xPosition - currentPosition)
                     .userData(new Object[]{ String.format("Turtle %d", turtleIndex + 1), currentFrame, timeFrame })
-                    .styleClass(String.format("default-color%d-status-symbol", value.getCategoryIndex((int)currentCategory)))
+                      .styleClass(String.format("default-color%d-status-symbol", value.getCategoryIndex((int)currentCategory)))
                     .build();
 
-             this.rootPane.getChildren().add(categoryBlock);
+            this.rootPane.getChildren().add(categoryBlock);
 
-             currentPosition = xPosition;
-             currentFrame = timeFrame;
-             currentCategory = category.getLocation().getY();
+            currentPosition = xPosition;
+            currentFrame = timeFrame;
+            currentCategory = newCategory;
           }
         }
       }
@@ -511,10 +527,7 @@ public class CategoricalChart implements Chart {
       legend.getItems().setAll(items);
   }
   
-  private void resizeChart() {
-    
-    System.out.println("RESIZEAGENT");
-    
+  private void resizeChart() {    
     CategoryAxis yAxis = (CategoryAxis) scattterChart.getYAxis();
     NumberAxis xAxis = (NumberAxis) scattterChart.getXAxis();
 
@@ -584,8 +597,6 @@ public class CategoricalChart implements Chart {
     ScatterChart<Number,String> scattterChart = (ScatterChart<Number,String>)rootPane.getCenter();
     
     node.setOnMousePressed((MouseEvent event) -> {
-      System.out.printf("MOUSE_PRESSED \n");
-
       double xAxisShift = getSceneXShift(xAxis);
       double yAxisShift = getSceneYShift(yAxis);
       
@@ -600,8 +611,6 @@ public class CategoricalChart implements Chart {
     });
 
     node.setOnMouseDragged((MouseEvent event) -> {
-      System.out.printf("MOUSE_DRAGGED \n");      
-
       double xAxisShift = getSceneXShift(xAxis);
       double yAxisShift = getSceneYShift(yAxis);
       
@@ -617,7 +626,6 @@ public class CategoricalChart implements Chart {
     });
     
     node.setOnMouseReleased((MouseEvent event) -> {
-      System.out.printf("MOUSE_RELEASED \n");
 
       double xAxisShift = getSceneXShift(xAxis);
       double yAxisShift = getSceneYShift(yAxis);

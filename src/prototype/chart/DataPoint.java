@@ -5,19 +5,21 @@ import java.util.List;
 import javafx.geometry.Point2D;
 
 public class DataPoint {
-  private int timeframe;
-  private double value;
-  private List<Integer> indices;
-  private boolean aboveMin;
-  private boolean belowMax;
+  private final int timeframe;
+  private final double value;
+  private final List<Integer> indices;
+  private final boolean aboveMin;
+  private final boolean belowMax;
+  private final boolean satisfiesFilter;
   
-  public DataPoint(int timeframe, double value, int initialIndex, boolean aboveMin, boolean belowMax) {
+  public DataPoint(int timeframe, double value, int initialIndex, boolean aboveMin, boolean belowMax, boolean satisfiesFilter) {
     this.timeframe = timeframe;
     this.value = value;
     this.indices = new ArrayList();
     this.indices.add(initialIndex);
     this.aboveMin = aboveMin;
     this.belowMax = belowMax;
+    this.satisfiesFilter = satisfiesFilter;
   }
   
   public void addIndices(List<Integer> indices) {
@@ -48,7 +50,15 @@ public class DataPoint {
     return this.belowMax;
   }
   
+  public boolean satisfiesFilter() {
+    return this.satisfiesFilter;
+  }
+  
+  public boolean outOfRange() {
+    return (!this.aboveMin || !this.belowMax);
+  }
+  
   public boolean isVisible() {
-    return (this.aboveMin && this.belowMax);
+    return (this.aboveMin && this.belowMax && this.satisfiesFilter);
   }
 }

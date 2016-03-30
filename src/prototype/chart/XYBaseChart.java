@@ -321,9 +321,7 @@ public class XYBaseChart implements Chart {
     selectFrames(selectedStartIndex, selectedEndIndex, false);
   }
   
-  private void createChart() {
-    System.out.printf("getChart\n");
-    
+  private void createChart() {    
     NumberAxis xAxis = new NumberAxis();
     try {
         int timeframes = this.data.get(0).getTimeFrameCount();
@@ -382,9 +380,7 @@ public class XYBaseChart implements Chart {
     
     rootPane.getChildren().clear();
     
-    System.out.printf("CLEARED \n");
     rootPane.setCenter(this.XYChart);
-    System.out.printf("SET CENTER \n");
     
     //if(data.size() > 0) {
 
@@ -392,9 +388,7 @@ public class XYBaseChart implements Chart {
     yAxis.setLabel(this.yParameter + " [" + yParameterIndex + "] " + " (" + yParameterValue + ")");
 
     Collection data = getData();
-    System.out.printf("Data received \n");    
 
-    System.out.printf("Yaxis updated\n");    
     this.XYChart.getData().setAll(data);
     //}
     
@@ -413,8 +407,6 @@ public class XYBaseChart implements Chart {
           });
         }
       }, 50);
-    
-    System.out.printf("Completed chart\n");
   }
   
   private void resizeSelection() {
@@ -488,14 +480,10 @@ public class XYBaseChart implements Chart {
         createRectangleSelectionEvents(child, xAxis, yAxis);
       }
     }
-    
-    System.out.printf("END LISTEN \n");
   }
   
   private void createRectangleSelectionEvents(Node node, NumberAxis xAxis, NumberAxis yAxis) {    
     node.setOnMousePressed((MouseEvent event) -> {
-      System.out.printf("MOUSE_PRESSED \n");
-
       double xChartShift = getSceneXShift(node);
       double yChartShift = getSceneYShift(node);
       double xAxisShift = getSceneXShift(xAxis);
@@ -512,8 +500,6 @@ public class XYBaseChart implements Chart {
     });
 
     node.setOnMouseDragged((MouseEvent event) -> {
-      System.out.printf("MOUSE_DRAGGED \n");      
-
       double xChartShift = getSceneXShift(node);
       double yChartShift = getSceneYShift(node);
       double xAxisShift = getSceneXShift(xAxis);
@@ -531,8 +517,6 @@ public class XYBaseChart implements Chart {
     });
     
     node.setOnMouseReleased((MouseEvent event) -> {
-      System.out.printf("MOUSE_RELEASED \n");      
-
       double xChartShift = getSceneXShift(node);
       double yChartShift = getSceneYShift(node);
       double xAxisShift = getSceneXShift(xAxis);
@@ -576,18 +560,15 @@ public class XYBaseChart implements Chart {
         seriesList.add(getSeries(turtle, showData));
       }
     }
-      System.out.printf("return series list");
 
     return seriesList;
   }
   
   private XYChart.Series getSeries(int turtleIndex, boolean showData) {
-      System.out.printf("getSeries for %d\n", turtleIndex);
 
       XYChart.Series series = new XYChart.Series();
       series.setName(String.format("Turtle %d", turtleIndex + 1));
     
-      System.out.printf("Start filling values for %d\n", turtleIndex);
       List<XYChart.Data> elements = new ArrayList();
             
       if(showData) {
@@ -620,13 +601,8 @@ public class XYBaseChart implements Chart {
       }
       
       ObservableList<XYChart.Data> data = series.getData();
-      System.out.printf("Add to data");      
       data.addAll(elements);
-      
-      System.out.printf("Completed filling values for %d\n", turtleIndex);
-      
-      System.out.printf("Done for %d\n", turtleIndex);
-            
+                  
       return series;
   }
   
@@ -653,7 +629,7 @@ public class XYBaseChart implements Chart {
 
         for(DataPoint point : data) {
 
-          if(!point.isVisible()) {
+          if(point.outOfRange() && point.satisfiesFilter()) {
 
             double xPosition = xAxis.getDisplayPosition(point.getTimeframe());
 
@@ -686,13 +662,11 @@ public class XYBaseChart implements Chart {
   }
   
   private List<DataPoint> simplifyRadialDistance(List<DataPoint> data, double xTolerance, double yTolerance) {
-    System.out.printf("START SIMPLIFY, size: %d\n", data.size());
-    
     List<DataPoint> sortedPoints = new ArrayList();
 
     for(DataPoint point : data) {
       if(point.isVisible()) {
-        DataPoint validPoint = new DataPoint(point.getTimeframe(), point.getValue(), point.getIndices().get(0), point.aboveMin(), point.belowMax());
+        DataPoint validPoint = new DataPoint(point.getTimeframe(), point.getValue(), point.getIndices().get(0), point.aboveMin(), point.belowMax(), point.satisfiesFilter());
         sortedPoints.add(validPoint);
       }
     }
@@ -702,29 +676,30 @@ public class XYBaseChart implements Chart {
 
     Collections.sort(sortedPoints, (DataPoint p1, DataPoint p2) -> Double.compare(p1.getLocation().getY(), p2.getLocation().getY()));
     sortedPoints = filterPoints(sortedPoints, xTolerance, yTolerance);
-    
-    System.out.printf("END SIMPLIFY, size: %d\n", sortedPoints.size());
-    
+        
     return sortedPoints;
   }
   
   private List<DataPoint> filterPoints(List<DataPoint> points, double xTolerance, double yTolerance) {
     int len = points.size();
     
-    DataPoint point;
-    DataPoint prevPoint = points.get(0);
-
     List<DataPoint> newPoints = new ArrayList();
-    newPoints.add(prevPoint);
     
-    for (int i = 1; i < len; i++) {
-      point = points.get(i);
+    if(len > 0) {
+      DataPoint point;
+      DataPoint prevPoint = points.get(0);
 
-      if (getDistance(point.getLocation().getX(), prevPoint.getLocation().getX()) > xTolerance || getDistance(point.getLocation().getY(), prevPoint.getLocation().getY()) > yTolerance) {
-          newPoints.add(point);
-          prevPoint = point;
-      } else {
-        newPoints.get(newPoints.size() - 1).addIndices(point.getIndices());
+      newPoints.add(prevPoint);
+
+      for (int i = 1; i < len; i++) {
+        point = points.get(i);
+
+        if (getDistance(point.getLocation().getX(), prevPoint.getLocation().getX()) > xTolerance || getDistance(point.getLocation().getY(), prevPoint.getLocation().getY()) > yTolerance) {
+            newPoints.add(point);
+            prevPoint = point;
+        } else {
+          newPoints.get(newPoints.size() - 1).addIndices(point.getIndices());
+        }
       }
     }
     return newPoints;

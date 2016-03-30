@@ -10,7 +10,7 @@
           "index": 0,
           "decimalmask": "",
           "categories": [],
-          "rangeEnabled": true
+          "rangeEnabled": false
         },
         {
           "unit": "meter",
@@ -20,7 +20,7 @@
           "index": 1,
           "decimalmask": "",
           "categories": [],
-          "rangeEnabled": true
+          "rangeEnabled": false
         },
         {
           "unit": "radial",
