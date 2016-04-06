@@ -29,7 +29,6 @@ import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.RectangleBuilder;
@@ -47,7 +46,7 @@ import prototype.object.Value;
 import prototype.settings.Configuration;
 import org.dockfx.DockNode;
 
-public class CategoricalChart implements Chart {
+public class AgentChart implements Chart {
   
   private Scene scene;
   private int[] selectedTurtles;
@@ -74,7 +73,7 @@ public class CategoricalChart implements Chart {
   private int selectedStartIndex;
   private int selectedEndIndex;
   
-  public CategoricalChart(Scene scene, int[] selectedTurtles, String yParameter, int yParameterIndex, String yParameterValue, List<Turtle> data, boolean liveUpdate) {
+  public AgentChart(Scene scene, int[] selectedTurtles, String yParameter, int yParameterIndex, String yParameterValue, List<Turtle> data, boolean liveUpdate) {
     this.scene = scene;
     this.selectedTurtles = selectedTurtles;
     this.yParameter = yParameter;
@@ -89,7 +88,7 @@ public class CategoricalChart implements Chart {
     initialize();
   }
   
-  public CategoricalChart(Scene scene) {
+  public AgentChart(Scene scene) {
     this.scene = scene;
     
     this.parameterMap = new ParameterMap();
@@ -125,7 +124,7 @@ public class CategoricalChart implements Chart {
   
   @Override
   public String getName() {
-    return "Categorical-chart";
+    return "Agent-chart";
   }
   
   @Override
@@ -193,10 +192,8 @@ public class CategoricalChart implements Chart {
   
   private void createChart() {
     ObservableList<String> categories = FXCollections.observableArrayList();
-    Parameter parameter = this.parameterMap.GetParameter(yParameter);
-    Value value = parameter.getValue(yParameterValue);
-    for(Category category : value.getCategories()) {
-      categories.add(category.getName());
+    for(int turtle : selectedTurtles) {
+      categories.add(String.format("Turtle %d", turtle + 1));
     }
     CategoryAxis yAxis = new CategoryAxis(categories);
     
@@ -253,9 +250,9 @@ public class CategoricalChart implements Chart {
     rootPane.getChildren().clear();
     rootPane.setCenter(this.scattterChart);
 
-    Timer timer = new java.util.Timer();
-    timer.schedule( 
-      new java.util.TimerTask() {
+      Timer timer = new java.util.Timer();
+      timer.schedule( 
+        new java.util.TimerTask() {
         @Override
         public void run() {
           Platform.runLater(new Runnable() {
@@ -268,7 +265,7 @@ public class CategoricalChart implements Chart {
               }
             });
           }
-        }, 100);
+        }, 0);
   }
   
   @Override
@@ -422,29 +419,7 @@ public class CategoricalChart implements Chart {
       Parameter parameter = this.parameterMap.GetParameter(yParameter);
       Value value = parameter.getValue(yParameterValue);
       
-      for(Category category : value.getCategories()) {        
-          double yPosition = yAxis.getDisplayPosition(category.getName());
-          int timeframes = this.data.get(0).getTimeFrameCount();
-
-          Rectangle categoryBlock = RectangleBuilder.create()
-                  .x(xAxisShift)
-                  .y(yPosition + yAxisShift - (height / 2))
-                  .height(height)
-                  .width(xAxis.getWidth())
-                  .userData(new Object[]{ category.getName(), 0, 0, timeframes })
-                  .styleClass("default-color-agent-category-background")
-                  .id("background")
-                  .build();
-
-          this.rootPane.getChildren().add(categoryBlock);
-      }     
-            
-      int selectionSize = selectedTurtles.length;
-      double offset = height * 0.05;
-      double turtleHeight = (height - (offset * 2)) / selectionSize;
-      
-      for(int index = 0; index < selectionSize; index++) {
-        int turtleIndex = selectedTurtles[index];
+      for(int turtleIndex : selectedTurtles) {
         
         double currentCategory = -1;
         boolean currentVisibility = true;
@@ -476,15 +451,15 @@ public class CategoricalChart implements Chart {
           
           if(newBlock) {
             double xPosition = xAxis.getDisplayPosition(timeFrame);
-            double yPosition = yAxis.getDisplayPosition(value.getCategoryName((int)currentCategory));
+            double yPosition = yAxis.getDisplayPosition(String.format("Turtle %d", turtleIndex + 1));
 
             Rectangle categoryBlock = RectangleBuilder.create()
                     .x(currentPosition + xAxisShift)
-                    .y(yPosition + yAxisShift - (height / 2) + (turtleHeight * index) + offset)
-                    .height(turtleHeight)
+                    .y(yPosition + yAxisShift - (height / 2))
+                    .height(height)
                     .width(xPosition - currentPosition)
-                    .userData(new Object[]{ value.getCategoryName((int)currentCategory), index, currentFrame, timeFrame })
-                    .styleClass(String.format("default-color%d-agent-category", turtleIndex))
+                    .userData(new Object[]{ String.format("Turtle %d", turtleIndex + 1), currentFrame, timeFrame })
+                      .styleClass(String.format("default-color%d-status-symbol", value.getCategoryIndex((int)currentCategory)))
                     .build();
 
             this.rootPane.getChildren().add(categoryBlock);
@@ -519,19 +494,23 @@ public class CategoricalChart implements Chart {
   }
     
   private void createLegend() {
+      Parameter parameter = this.parameterMap.GetParameter(yParameter);
+      Value value = parameter.getValue(yParameterValue);
+      List<Category> categories = value.getCategories();
+      
       Legend legend = (Legend)scattterChart.lookup(".chart-legend");
       legend.getStylesheets().add("prototype/plot.css");
           
       List<LegendItem> items = new ArrayList();
       
-      for(int turtle = 0; turtle < new Configuration().MaxTurtles; turtle++) {
+      for(int index = 0; index < categories.size(); index++) {
           Rectangle legendPoint = RectangleBuilder.create()
                   .height(10)
                   .width(10)
                   .build();
         
-        LegendItem item = new Legend.LegendItem(String.format("Turtle %d", turtle + 1), legendPoint);
-        item.getSymbol().getStyleClass().add(String.format("default-color%d-agent-category", turtle));
+        LegendItem item = new Legend.LegendItem(categories.get(index).getName(), legendPoint);
+        item.getSymbol().getStyleClass().add(String.format("default-color%d-status-symbol", index));
         
         items.add(item);
       }
@@ -547,47 +526,24 @@ public class CategoricalChart implements Chart {
     double yAxisShift = getSceneYShift(yAxis);
     
     double height = getRowHeigt();
-    int selectionSize = selectedTurtles.length;
-    double offset = height * 0.05;
-    double turtleHeight = (height - (offset * 2)) / selectionSize;
 
     for(Node child : this.rootPane.getChildren()) {
       if(child.getClass() == Rectangle.class && child.getId() == null) {
         Rectangle rectChild = (Rectangle)child;
         
         Object[] userData = (Object[])rectChild.getUserData();
-        String category = (String)userData[0];
-        int index = (int)userData[1];
-        int startFrame = (int)userData[2];
-        int endFrame = (int)userData[3];
+        String turtle = (String)userData[0];
+        int startFrame = (int)userData[1];
+        int endFrame = (int)userData[2];
 
         double startPosition = xAxis.getDisplayPosition(startFrame);
         double endPosition = xAxis.getDisplayPosition(endFrame);
-        double yPosition = yAxis.getDisplayPosition(category);
+        double yPosition = yAxis.getDisplayPosition(turtle);
 
         rectChild.setX(startPosition + xAxisShift);
         rectChild.setWidth(endPosition - startPosition);
-        rectChild.setY(yPosition + yAxisShift - (height / 2) + (turtleHeight * index) + offset);
-        rectChild.setHeight(turtleHeight);
-      } else {
-        if(child.getClass() == Rectangle.class && "background".equals(child.getId())) {
-          Rectangle rectChild = (Rectangle)child;
-
-          Object[] userData = (Object[])rectChild.getUserData();
-          String category = (String)userData[0];
-          int index = (int)userData[1];
-          int startFrame = (int)userData[2];
-          int endFrame = (int)userData[3];
-
-          double startPosition = xAxis.getDisplayPosition(startFrame);
-          double endPosition = xAxis.getDisplayPosition(endFrame);
-          double yPosition = yAxis.getDisplayPosition(category);
-
-          rectChild.setX(startPosition + xAxisShift);
-          rectChild.setWidth(endPosition - startPosition);
-          rectChild.setY(yPosition + yAxisShift - (height / 2));
-          rectChild.setHeight(height);
-        }
+        rectChild.setY(yPosition + yAxisShift - (height / 2));
+        rectChild.setHeight(height);
       }
     }
 

@@ -116,6 +116,22 @@ public class Value {
     return -1;
   }
   
+  public Category getCategory(int categoryValue) {
+    int categoryIndex = getCategoryIndex(categoryValue);
+    if(categoryIndex >= 0)
+      return this.categories.get(categoryIndex);
+    else
+      return null;
+  }
+    
+  public String getCategoryName(int categoryValue) {
+    Category category = getCategory(categoryValue);
+    if(category != null)
+      return category.getName();
+    else
+      return "";
+  }
+  
   public Value copy() {
     ArrayList<Category> categoriesCopy = new ArrayList();
     for(Category category : this.categories) {

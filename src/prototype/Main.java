@@ -3,7 +3,7 @@ package prototype;
 import prototype.chart.Chart;
 import prototype.chart.XYBaseChart;
 import prototype.chart.FieldCanvas;
-import prototype.chart.CategoricalChart;
+import prototype.chart.AgentChart;
 import java.io.File;
 import java.io.IOException;
 import javafx.scene.image.Image;
@@ -43,6 +43,7 @@ import org.dockfx.DockPos;
 import org.dockfx.NodeManager;
 import org.dockfx.events.DockNodeEvent;
 import org.dockfx.events.DockNodeEventListenerInterface;
+import prototype.chart.CategoricalChart;
 
 public class Main extends Application {
   private List<Chart> charts;
@@ -158,6 +159,16 @@ public class Main extends Application {
       }
     });
     elementMenu.getItems().add(newLineMenu);
+    
+    MenuItem newAgentMenu = new MenuItem("Add agent-chart");
+    newAgentMenu.setOnAction(new EventHandler() {
+      @Override
+      public void handle(Event t) {
+        AgentChart chart = new AgentChart(scene);
+        addChart(dockPane, null, chart);
+      }
+    });
+    elementMenu.getItems().add(newAgentMenu);
     
     MenuItem newCategoricalMenu = new MenuItem("Add categorical-chart");
     newCategoricalMenu.setOnAction(new EventHandler() {
@@ -279,6 +290,9 @@ public class Main extends Application {
         
     XYBaseChart line = new XYBaseChart(scene, ChartType.Line);
     addChart(dockPane, DockPos.TOP, line);
+        
+    AgentChart agent = new AgentChart(scene);
+    addChart(dockPane, DockPos.TOP, agent);
         
     CategoricalChart categorical = new CategoricalChart(scene);
     addChart(dockPane, DockPos.TOP, categorical);

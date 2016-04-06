@@ -17,9 +17,9 @@ public class Turtle {
     this.data = data;
     this.parameterMap = new ParameterMap();
     
-    List<Filter> filters = new ArrayList();
-    filters.add(new Filter("Role ID", 0, "current", new double[] { 1 }));
-    applyFilter(filters);
+    //List<Filter> filters = new ArrayList();
+    //filters.add(new Filter("Role ID", 0, "current", new double[] { 1, 2 }));
+    //applyFilter(filters);
   }
   
   private void applyFilter(List<Filter> filters) {
@@ -29,6 +29,7 @@ public class Turtle {
         this.filterMap[i] = true;
       }
       
+      //STREAM
       for(Filter filter : filters) {
         int valueIndex = this.parameterMap.GetValueIndex(filter.ParameterName(), filter.ParameterIndex(), filter.ValueName());
         double[] dataset = this.data[valueIndex];
