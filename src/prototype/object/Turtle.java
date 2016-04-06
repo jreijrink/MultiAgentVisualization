@@ -3,7 +3,6 @@ package prototype.object;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import javafx.geometry.Point2D;
 import prototype.chart.DataPoint;
 
 public class Turtle {
@@ -47,9 +46,13 @@ public class Turtle {
   public DataPoint GetValue(String parameterName, int parameterIndex, String valueName, int index) {
     try {
       Value value = this.parameterMap.GetParameter(parameterName).getValue(valueName);
-      
+            
       int valueIndex = this.parameterMap.GetValueIndex(parameterName, parameterIndex, valueName);
       double[] dataset = this.data[valueIndex];
+      
+      index = Math.max(index, 0);
+      index = Math.min(index, dataset.length - 1);
+      
       return processData(valueIndex, new double[] { dataset[index] }, value).get(0);
     } catch(Exception ex) {
       ex.printStackTrace();
@@ -62,6 +65,10 @@ public class Turtle {
       Value value = this.parameterMap.GetParameter(parameterName).getValue(valueName);
       
       int valueIndex = this.parameterMap.GetValueIndex(parameterName, parameterIndex, valueName);
+      
+      startIndex = Math.max(startIndex, 0);
+      endIndex = Math.min(endIndex, this.data[valueIndex].length - 1);
+      
       double[] dataset = Arrays.copyOfRange(this.data[valueIndex], startIndex, endIndex);
       return processData(startIndex, dataset, value);
     } catch(Exception ex) {
