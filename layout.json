@@ -1,55 +1,157 @@
 {
   "charts": [
     {
+      "charts": [],
+      "pos": "BOTTOM",
+      "liveUpdate": true,
+      "selectedTurtles": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "parameter": "Cpu1 load",
+      "time": "2016-04-07T19:08:56.416",
+      "chart": "Line-chart",
+      "parameterIndex": 0,
+      "parameterValue": "cpu1-load"
+    },
+    {
       "charts": [
         {
           "charts": [],
           "pos": "TOP",
-          "time": "2016-04-07T16:30:34.687",
-          "chart": "Scatter-chart"
+          "liveUpdate": true,
+          "selectedTurtles": [
+            0,
+            1,
+            3,
+            4,
+            5
+          ],
+          "parameter": "Role ID",
+          "time": "2016-04-07T19:08:56.458",
+          "chart": "Categorical-chart",
+          "parameterIndex": 0,
+          "parameterValue": "current"
         }
       ],
-      "pos": "TOP",
-      "time": "2016-04-07T16:30:34.676",
-      "chart": "Line-chart"
-    },
-    {
-      "charts": [],
       "pos": "RIGHT",
-      "time": "2016-04-07T16:30:34.653",
-      "chart": "Categorical-chart"
-    },
-    {
-      "charts": [
-        {
-          "charts": [],
-          "pos": "RIGHT",
-          "time": "2016-04-07T16:30:34.632",
-          "chart": "Line-chart"
-        }
+      "liveUpdate": true,
+      "selectedTurtles": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
       ],
-      "pos": "TOP",
-      "time": "2016-04-07T16:30:34.604",
-      "chart": "Line-chart"
+      "parameter": "Battery voltage",
+      "time": "2016-04-07T19:08:56.440",
+      "chart": "Scatter-chart",
+      "parameterIndex": 0,
+      "parameterValue": "battery-voltage"
     },
     {
       "charts": [],
       "pos": "TOP",
-      "time": "2016-04-07T16:30:34.664",
-      "chart": "Categorical-chart"
+      "liveUpdate": true,
+      "selectedTurtles": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "parameter": "Cpu0 load",
+      "time": "2016-04-07T19:08:56.348",
+      "chart": "Scatter-chart",
+      "parameterIndex": 0,
+      "parameterValue": "cpu0-load"
     },
     {
       "charts": [
         {
           "charts": [],
+          "ballHistory": false,
+          "turtleHistory": true,
+          "pos": "RIGHT",
+          "liveUpdate": true,
+          "selectedTurtles": [
+            3
+          ],
+          "opponentsHistory": false,
+          "time": "2016-04-07T19:08:56.504",
+          "chart": "Field",
+          "selectedBall": [
+            3
+          ],
+          "selectedOpponents": [
+            3
+          ]
+        },
+        {
+          "charts": [
+            {
+              "charts": [],
+              "ballHistory": false,
+              "turtleHistory": true,
+              "pos": "RIGHT",
+              "liveUpdate": true,
+              "selectedTurtles": [
+                5
+              ],
+              "opponentsHistory": false,
+              "time": "2016-04-07T19:08:56.494",
+              "chart": "Field",
+              "selectedBall": [
+                5
+              ],
+              "selectedOpponents": [
+                5
+              ]
+            }
+          ],
+          "ballHistory": false,
+          "turtleHistory": true,
           "pos": "BOTTOM",
-          "time": "2016-04-07T16:30:34.539",
-          "chart": "Field"
+          "liveUpdate": true,
+          "selectedTurtles": [
+            4
+          ],
+          "opponentsHistory": false,
+          "time": "2016-04-07T19:08:56.487",
+          "chart": "Field",
+          "selectedBall": [
+            4
+          ],
+          "selectedOpponents": [
+            4
+          ]
         }
       ],
-      "pos": "TOP",
-      "time": "2016-04-07T16:30:34.477",
-      "chart": "Field"
+      "ballHistory": false,
+      "turtleHistory": true,
+      "pos": "RIGHT",
+      "liveUpdate": true,
+      "selectedTurtles": [
+        1
+      ],
+      "opponentsHistory": false,
+      "time": "2016-04-07T19:08:56.479",
+      "chart": "Field",
+      "selectedBall": [
+        1
+      ],
+      "selectedOpponents": [
+        1
+      ]
     }
   ]
 }

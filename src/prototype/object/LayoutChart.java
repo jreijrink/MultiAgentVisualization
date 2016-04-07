@@ -1,6 +1,7 @@
 package prototype.object;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import javafx.scene.Scene;
 import org.dockfx.DockPos;
 import prototype.chart.AgentChart;
@@ -13,26 +14,52 @@ public class LayoutChart {
   private final String type;
   private final String position;
   private final String time;
+  private final int[] selectedTurtles;
+  private final boolean liveUpdate;
   
-  public LayoutChart(String type, String position, String time) {
+  private final String parameter;
+  private final int parameterIndex;
+  private final String parameterValue;
+  
+  private final boolean turtleHistory;
+  private final int[] selectedBall;
+  private final boolean ballHistory;
+  private final int[] selectedOpponents;
+  private final boolean opponentsHistory;
+  
+  public LayoutChart(String type, String position, String time, int[] selectedTurtles, boolean liveUpdate,
+          String parameter, int parameterIndex, String parameterValue,
+          boolean turtleHistory, int[] selectedBall, boolean ballHistory, int[] selectedOpponents, boolean opponentsHistory) {
     this.type = type;
     this.position = position;
     this.time = time;
+    this.selectedTurtles = selectedTurtles;
+    this.liveUpdate = liveUpdate;
+    
+    this.parameter = parameter;
+    this.parameterIndex = parameterIndex;
+    this.parameterValue = parameterValue;
+    
+    this.turtleHistory = turtleHistory;
+    this.selectedBall = selectedBall;
+    this.ballHistory = ballHistory;
+    this.selectedOpponents = selectedOpponents;
+    this.opponentsHistory = opponentsHistory;
   }
   
-  public Chart GetChartType(Scene scene) {
+  public Chart GetChart(Scene scene, List<Turtle> data) {
     switch(this.type)
     {
       case "Field":
-        return new FieldCanvas();
+        return new FieldCanvas(data, liveUpdate, selectedTurtles, turtleHistory, selectedBall, ballHistory, selectedOpponents, opponentsHistory);
       case "Agent-chart":
-        return new AgentChart(scene);
+        return new AgentChart(scene, selectedTurtles, parameter, parameterIndex, parameterValue, data,  liveUpdate);
       case "Categorical-chart":
-        return new CategoricalChart(scene);
+        return new CategoricalChart(scene, selectedTurtles, parameter, parameterIndex, parameterValue, data, liveUpdate);
       case "Scatter-chart":
-        return new XYBaseChart(scene, XYBaseChart.ChartType.Scatter);
+        return new XYBaseChart(scene, XYBaseChart.ChartType.Scatter, selectedTurtles, parameter, parameterIndex, parameterValue, data, liveUpdate);
       case "Line-chart":
-        return new XYBaseChart(scene, XYBaseChart.ChartType.Line);
+        return new XYBaseChart(scene, XYBaseChart.ChartType.Line, selectedTurtles, parameter, parameterIndex, parameterValue, data, liveUpdate);
     }
     return null;
   }

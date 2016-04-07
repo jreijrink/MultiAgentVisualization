@@ -43,13 +43,14 @@ public class FieldCanvas extends Pane implements Chart{
   private List<Turtle> data;
   private Range selection;
   private Rectangle field;
-  private boolean liveUpdate;
-  private int[] selectedTurtles;
-  private boolean turtleHistory;
-  private int[] selectedBall;
-  private boolean ballHistory;
-  private int[] selectedOpponents;
-  private boolean opponentsHistory;
+  
+  public boolean liveUpdate;  
+  public int[] selectedTurtles;
+  public boolean turtleHistory;
+  public int[] selectedBall;
+  public boolean ballHistory;
+  public int[] selectedOpponents;
+  public boolean opponentsHistory;
   
   private DockNode dockNode;
   
@@ -117,8 +118,8 @@ public class FieldCanvas extends Pane implements Chart{
   @Override
   public void updateData(List<Turtle> data) {
     this.data = data;
-    this.selection = null;
-    
+    this.selection = new Range(0, 0);
+   
     this.configuration = new Configuration();
     this.parameterMap = new ParameterMap();
     
@@ -132,7 +133,7 @@ public class FieldCanvas extends Pane implements Chart{
       drawMovingShapes();
       setDockTitle();
     } else {
-      this.selection = null;
+      this.selection = new Range(0, 0);
     }
   }
   
@@ -154,6 +155,7 @@ public class FieldCanvas extends Pane implements Chart{
   @Override
   public void setDockNode(DockNode dockNode) {
     this.dockNode = dockNode;
+    setDockTitle();
   }
   
   private void setDockTitle() {
@@ -300,7 +302,7 @@ public class FieldCanvas extends Pane implements Chart{
       }
     }
     
-    if(selection != null) {
+    if(selection != null && data != null && data.size() > 0) {
       try {
         for(int selectedTurtle : selectedTurtles) {
           Turtle turtle  = data.get(selectedTurtle);
@@ -386,7 +388,7 @@ public class FieldCanvas extends Pane implements Chart{
       }
     }
     
-    if(selection != null) {
+    if(selection != null && data != null && data.size() > 0) {
       try {
         for(int selectedTurtle : selectedOpponents) {        
           Turtle turtle  = data.get(selectedTurtle);
@@ -443,7 +445,7 @@ public class FieldCanvas extends Pane implements Chart{
       }          
     }
 
-    if(selection != null) {
+    if(selection != null && data != null && data.size() > 0) {
       
       try {
         for(int selectedTurtle : selectedBall) {
@@ -547,7 +549,7 @@ public class FieldCanvas extends Pane implements Chart{
   }
   
   private void drawTurtleLines() {
-    if(turtleHistory && selection != null) {
+    if(turtleHistory && selection != null && data != null && data.size() > 0) {
       List<Pair<Integer, List<Point>>> turtle_paths = new ArrayList();
 
       for(int selectedTurtle : selectedTurtles) {
@@ -589,7 +591,7 @@ public class FieldCanvas extends Pane implements Chart{
   }
   
   private void drawBallLines() {
-    if(ballHistory && selection != null) {
+    if(ballHistory && selection != null && data != null && data.size() > 0) {
       List<Pair<Integer, List<Point>>> ball_paths = new ArrayList();
 
       for(int selectedTurtle : selectedBall) {
@@ -637,7 +639,7 @@ public class FieldCanvas extends Pane implements Chart{
   }
   
   private void drawOpponentLines() {
-    if(opponentsHistory && selection != null) {
+    if(opponentsHistory && selection != null && data != null && data.size() > 0) {
       List<Pair<Integer, List<Point>>> opponent_paths = new ArrayList();
 
       for(int selectedTurtle : selectedOpponents) {

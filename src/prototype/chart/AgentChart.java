@@ -49,12 +49,13 @@ import org.dockfx.DockNode;
 public class AgentChart implements Chart {
   
   private Scene scene;
-  private int[] selectedTurtles;
-  private String yParameter;
-  private int yParameterIndex;
-  private String yParameterValue;
   private List<Turtle> data;
-  private boolean liveUpdate;
+  
+  public int[] selectedTurtles;
+  public String parameter;
+  public int parameterIndex;
+  public String parameterValue;
+  public boolean liveUpdate;
   
   private DockNode dockNode;
   
@@ -76,9 +77,9 @@ public class AgentChart implements Chart {
   public AgentChart(Scene scene, int[] selectedTurtles, String yParameter, int yParameterIndex, String yParameterValue, List<Turtle> data, boolean liveUpdate) {
     this.scene = scene;
     this.selectedTurtles = selectedTurtles;
-    this.yParameter = yParameter;
-    this.yParameterIndex = yParameterIndex;
-    this.yParameterValue = yParameterValue;
+    this.parameter = yParameter;
+    this.parameterIndex = yParameterIndex;
+    this.parameterValue = yParameterValue;
     this.data = data;
     this.liveUpdate = liveUpdate;
     this.rootPane = new BorderPane();
@@ -99,15 +100,15 @@ public class AgentChart implements Chart {
       this.selectedTurtles[i] = i;
     }
     
-    this.yParameterIndex = 0;
+    this.parameterIndex = 0;
     this.data = new ArrayList();
     this.liveUpdate = true;
     
     if(this.parameterMap.GetParametersOfType(Type.Categorical).size() > 0) {
     Parameter firstParameter = this.parameterMap.GetParametersOfType(Type.Categorical).get(0);
-      this.yParameter = firstParameter.getName();
+      this.parameter = firstParameter.getName();
       if(firstParameter.getValues().size() > 0) {
-        this.yParameterValue = firstParameter.getValues().get(0).getName();
+        this.parameterValue = firstParameter.getValues().get(0).getName();
       }
     }
     
@@ -167,11 +168,12 @@ public class AgentChart implements Chart {
   @Override
   public void setDockNode(DockNode dockNode) {
     this.dockNode = dockNode;
+    setDockTitle();
   }
   
   private void setDockTitle() {
     if(this.dockNode != null) {
-      this.dockNode.setTitle(String.format("%s - %s[%d] (%s) [%d - %d]", getName(), this.yParameter, this.yParameterIndex, this.yParameterValue, this.selectedStartIndex, this.selectedEndIndex));
+      this.dockNode.setTitle(String.format("%s - %s[%d] (%s) [%d - %d]", getName(), this.parameter, this.parameterIndex, this.parameterValue, this.selectedStartIndex, this.selectedEndIndex));
     }
   }
   
@@ -298,9 +300,9 @@ public class AgentChart implements Chart {
     options = options.sorted();
 
     parameterChoiceBox.setItems(options);
-    if(options.contains(yParameter)) {
-      parameterChoiceBox.getSelectionModel().select(yParameter);
-      Parameter parameter = parameterMap.GetParameter(yParameter);
+    if(options.contains(parameter)) {
+      parameterChoiceBox.getSelectionModel().select(parameter);
+      Parameter parameter = parameterMap.GetParameter(this.parameter);
       
       int count = parameter.getCount();
       ObservableList<Integer> indexOptions = FXCollections.observableArrayList();
@@ -308,8 +310,8 @@ public class AgentChart implements Chart {
         indexOptions.add(index);
       }      
       indexChoiceBox.setItems(indexOptions);
-      if(indexOptions.contains(yParameterIndex)) {
-        indexChoiceBox.getSelectionModel().select(yParameterIndex);
+      if(indexOptions.contains(parameterIndex)) {
+        indexChoiceBox.getSelectionModel().select(parameterIndex);
       }
       
       List<Value> values = parameter.getValues();
@@ -318,8 +320,8 @@ public class AgentChart implements Chart {
         valueOptions.add(value.getName());
       }
       valueChoiceBox.setItems(valueOptions);
-      if(valueOptions.contains(yParameterValue)) {
-        valueChoiceBox.getSelectionModel().select(yParameterValue);
+      if(valueOptions.contains(parameterValue)) {
+        valueChoiceBox.getSelectionModel().select(parameterValue);
       }
     }
 
@@ -370,9 +372,9 @@ public class AgentChart implements Chart {
         }
         
         if(parameterChoiceBox.getSelectionModel().getSelectedItem() != null) {
-          yParameter = parameterChoiceBox.getSelectionModel().getSelectedItem();
-          yParameterIndex = indexChoiceBox.getSelectionModel().getSelectedItem();
-          yParameterValue = valueChoiceBox.getSelectionModel().getSelectedItem();
+          parameter = parameterChoiceBox.getSelectionModel().getSelectedItem();
+          parameterIndex = indexChoiceBox.getSelectionModel().getSelectedItem();
+          parameterValue = valueChoiceBox.getSelectionModel().getSelectedItem();
         }
         
         liveUpdate = liveCheckbox.isSelected();
@@ -416,8 +418,8 @@ public class AgentChart implements Chart {
 
       double height = getRowHeigt();
             
-      Parameter parameter = this.parameterMap.GetParameter(yParameter);
-      Value value = parameter.getValue(yParameterValue);
+      Parameter parameter = this.parameterMap.GetParameter(this.parameter);
+      Value value = parameter.getValue(parameterValue);
       
       for(int turtleIndex : selectedTurtles) {
         
@@ -427,7 +429,7 @@ public class AgentChart implements Chart {
         double currentPosition = xAxis.getDisplayPosition(0);
         
         Turtle turtle = data.get(turtleIndex);
-        List<DataPoint> categoricalValues = turtle.GetAllValues(yParameter, yParameterIndex, yParameterValue);
+        List<DataPoint> categoricalValues = turtle.GetAllValues(this.parameter, parameterIndex, parameterValue);
         
         for(int timeFrame = 0; timeFrame < categoricalValues.size(); timeFrame++) {
           DataPoint category = categoricalValues.get(timeFrame);
@@ -494,8 +496,8 @@ public class AgentChart implements Chart {
   }
     
   private void createLegend() {
-      Parameter parameter = this.parameterMap.GetParameter(yParameter);
-      Value value = parameter.getValue(yParameterValue);
+      Parameter parameter = this.parameterMap.GetParameter(this.parameter);
+      Value value = parameter.getValue(parameterValue);
       List<Category> categories = value.getCategories();
       
       Legend legend = (Legend)scattterChart.lookup(".chart-legend");

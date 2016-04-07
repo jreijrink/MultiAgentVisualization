@@ -50,13 +50,14 @@ public class XYBaseChart implements Chart {
   public enum ChartType { Scatter, Line };
   
   private Scene scene;
-  private ChartType type;
-  private int[] selectedTurtles;
-  private String yParameter;
-  private int yParameterIndex;
-  private String yParameterValue;
   private List<Turtle> data;
-  private boolean liveUpdate;
+  private ChartType type;
+  
+  public int[] selectedTurtles;
+  public String parameter;
+  public int parameterIndex;
+  public String parameterValue;
+  public boolean liveUpdate;
   
   private DockNode dockNode;
   
@@ -74,9 +75,9 @@ public class XYBaseChart implements Chart {
     this.scene = scene;
     this.type = type;
     this.selectedTurtles = selectedTurtles;
-    this.yParameter = yParameter;
-    this.yParameterIndex = yParameterIndex;
-    this.yParameterValue = yParameterValue;
+    this.parameter = yParameter;
+    this.parameterIndex = yParameterIndex;
+    this.parameterValue = yParameterValue;
     this.data = data;
     this.liveUpdate = liveUpdate;
     this.rootPane = new BorderPane();
@@ -91,15 +92,15 @@ public class XYBaseChart implements Chart {
     this.type = type;
     this.parameterMap = new ParameterMap();
     this.selectedTurtles = new int[]{ 0 };    
-    this.yParameterIndex = 0;
+    this.parameterIndex = 0;
     this.data = new ArrayList();
     this.liveUpdate = true;
     
     if(this.parameterMap.GetParameters().size() > 0) {
     Parameter firstParameter = this.parameterMap.GetParameters().get(0);
-      this.yParameter = firstParameter.getName();
+      this.parameter = firstParameter.getName();
       if(firstParameter.getValues().size() > 0) {
-        this.yParameterValue = firstParameter.getValues().get(0).getName();
+        this.parameterValue = firstParameter.getValues().get(0).getName();
       }
     }
     
@@ -163,11 +164,12 @@ public class XYBaseChart implements Chart {
   @Override
   public void setDockNode(DockNode dockNode) {
     this.dockNode = dockNode;
+    setDockTitle();
   }
   
   private void setDockTitle() {
     if(this.dockNode != null) {
-      this.dockNode.setTitle(String.format("%s - %s[%d] (%s) [%d - %d]", getName(), this.yParameter, this.yParameterIndex, this.yParameterValue, this.selectedStartIndex, this.selectedEndIndex));
+      this.dockNode.setTitle(String.format("%s - %s[%d] (%s) [%d - %d]", getName(), this.parameter, this.parameterIndex, this.parameterValue, this.selectedStartIndex, this.selectedEndIndex));
     }
   }
   
@@ -201,9 +203,9 @@ public class XYBaseChart implements Chart {
     options = options.sorted();
 
     parameterChoiceBox.setItems(options);
-    if(options.contains(yParameter)) {
-      parameterChoiceBox.getSelectionModel().select(yParameter);
-      Parameter parameter = parameterMap.GetParameter(yParameter);
+    if(options.contains(parameter)) {
+      parameterChoiceBox.getSelectionModel().select(parameter);
+      Parameter parameter = parameterMap.GetParameter(this.parameter);
       
       int count = parameter.getCount();
       ObservableList<Integer> indexOptions = FXCollections.observableArrayList();
@@ -211,8 +213,8 @@ public class XYBaseChart implements Chart {
         indexOptions.add(index);
       }      
       indexChoiceBox.setItems(indexOptions);
-      if(indexOptions.contains(yParameterIndex)) {
-        indexChoiceBox.getSelectionModel().select(yParameterIndex);
+      if(indexOptions.contains(parameterIndex)) {
+        indexChoiceBox.getSelectionModel().select(parameterIndex);
       }
       
       List<Value> values = parameter.getValues();
@@ -221,8 +223,8 @@ public class XYBaseChart implements Chart {
         valueOptions.add(value.getName());
       }
       valueChoiceBox.setItems(valueOptions);
-      if(valueOptions.contains(yParameterValue)) {
-        valueChoiceBox.getSelectionModel().select(yParameterValue);
+      if(valueOptions.contains(parameterValue)) {
+        valueChoiceBox.getSelectionModel().select(parameterValue);
       }
     }
 
@@ -273,9 +275,9 @@ public class XYBaseChart implements Chart {
         }
         
         if(parameterChoiceBox.getSelectionModel().getSelectedItem() != null) {
-          yParameter = parameterChoiceBox.getSelectionModel().getSelectedItem();
-          yParameterIndex = indexChoiceBox.getSelectionModel().getSelectedItem();
-          yParameterValue = valueChoiceBox.getSelectionModel().getSelectedItem();
+          parameter = parameterChoiceBox.getSelectionModel().getSelectedItem();
+          parameterIndex = indexChoiceBox.getSelectionModel().getSelectedItem();
+          parameterValue = valueChoiceBox.getSelectionModel().getSelectedItem();
         }
         
         liveUpdate = liveCheckbox.isSelected();
@@ -385,7 +387,7 @@ public class XYBaseChart implements Chart {
     //if(data.size() > 0) {
 
     xAxis.setLabel("Time");
-    yAxis.setLabel(this.yParameter + " [" + yParameterIndex + "] " + " (" + yParameterValue + ")");
+    yAxis.setLabel(this.parameter + " [" + parameterIndex + "] " + " (" + parameterValue + ")");
 
     Collection data = getData();
 
@@ -574,7 +576,7 @@ public class XYBaseChart implements Chart {
       if(showData) {
         try {
           Turtle turtle = data.get(turtleIndex);
-          List<DataPoint> values = turtle.GetAllValues(yParameter, yParameterIndex, yParameterValue);
+          List<DataPoint> values = turtle.GetAllValues(parameter, parameterIndex, parameterValue);
 
           double minValue = Double.MAX_VALUE;
           double maxValue = Double.MIN_VALUE;
@@ -619,7 +621,7 @@ public class XYBaseChart implements Chart {
     if(data.size() > 0) {  
       for(int turtleIndex : selectedTurtles) {
         Turtle turtle = data.get(turtleIndex);
-        List<DataPoint> data = turtle.GetAllValues(yParameter, yParameterIndex, yParameterValue);
+        List<DataPoint> data = turtle.GetAllValues(parameter, parameterIndex, parameterValue);
 
         NumberAxis yAxis = (NumberAxis) XYChart.getYAxis();
         NumberAxis xAxis = (NumberAxis) XYChart.getXAxis();

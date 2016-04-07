@@ -388,17 +388,49 @@ public class Main extends Application {
     
     String type = "";
     if(root.containsKey("chart"))
-      type = (String)root.get("chart");
-    
+      type = (String)root.get("chart");    
     String pos = "";
     if(root.containsKey("pos"))
-      pos = (String)root.get("pos");
-    
+      pos = (String)root.get("pos");    
     String time = "";
     if(root.containsKey("time"))
       time = (String)root.get("time");
+    int[] selectedTurtles = new int[0];
+    if(root.containsKey("selectedTurtles"))
+      selectedTurtles = jsonToArray((JSONArray)root.get("selectedTurtles"));
+    boolean liveUpdate = false;
+    if(root.containsKey("liveUpdate"))
+      liveUpdate = (boolean)root.get("liveUpdate");
     
-    LayoutChart node = new LayoutChart(type, pos, time);
+    String parameter = "";
+    if(root.containsKey("parameter"))
+      parameter = (String)root.get("parameter");
+    int parameterIndex = 0;
+    if(root.containsKey("parameterIndex"))
+      parameterIndex = (int)(long)root.get("parameterIndex");
+    String parameterValue = "";
+    if(root.containsKey("parameterValue"))
+      parameterValue = (String)root.get("parameterValue");
+    
+    boolean turtleHistory = false;
+    if(root.containsKey("turtleHistory"))
+      turtleHistory = (boolean)root.get("turtleHistory");
+    int[] selectedBall = new int[0];
+    if(root.containsKey("selectedBall"))
+      selectedBall = jsonToArray((JSONArray)root.get("selectedBall"));
+    boolean ballHistory = false;
+    if(root.containsKey("ballHistory"))
+      ballHistory = (boolean)root.get("ballHistory");
+    int[] selectedOpponents = new int[0];
+    if(root.containsKey("selectedOpponents"))
+      selectedOpponents = jsonToArray((JSONArray)root.get("selectedOpponents"));
+    boolean opponentsHistory = false;
+    if(root.containsKey("opponentsHistory"))
+      opponentsHistory = (boolean)root.get("opponentsHistory");
+    
+    LayoutChart node = new LayoutChart(type, pos, time, selectedTurtles, liveUpdate,
+                                      parameter, parameterIndex, parameterValue,
+                                      turtleHistory, selectedBall, ballHistory, selectedOpponents, opponentsHistory);
     
     Comparator comparator = new DateComparator();
     SortedMap<LayoutChart, SortedMap> children = new TreeMap(comparator);
@@ -447,7 +479,44 @@ public class Main extends Application {
     if(node != null) {
       Chart chart = (Chart)node.getUserData();
       root.put("chart", chart.getName());
-
+      
+      if(chart.getClass() ==  FieldCanvas.class) {
+        FieldCanvas implChart = (FieldCanvas)chart;
+      root.put("liveUpdate", implChart.liveUpdate);
+        root.put("selectedTurtles", arrayToJson(implChart.selectedTurtles));
+      root.put("turtleHistory", implChart.turtleHistory);
+      root.put("selectedBall", arrayToJson(implChart.selectedBall));
+      root.put("ballHistory", implChart.ballHistory);
+      root.put("selectedOpponents", arrayToJson(implChart.selectedOpponents));
+      root.put("opponentsHistory", implChart.opponentsHistory);
+        
+      }
+      if(chart.getClass() ==  AgentChart.class) {
+        AgentChart implChart = (AgentChart)chart;
+        root.put("liveUpdate", implChart.liveUpdate);
+        root.put("selectedTurtles", arrayToJson(implChart.selectedTurtles));
+        root.put("parameter", implChart.parameter);
+        root.put("parameterIndex", implChart.parameterIndex);
+        root.put("parameterValue", implChart.parameterValue);        
+      }
+      if(chart.getClass() ==  CategoricalChart.class) {
+        CategoricalChart implChart = (CategoricalChart)chart;
+        root.put("liveUpdate", implChart.liveUpdate);
+        root.put("selectedTurtles", arrayToJson(implChart.selectedTurtles));
+        root.put("parameter", implChart.parameter);
+        root.put("parameterIndex", implChart.parameterIndex);
+        root.put("parameterValue", implChart.parameterValue);
+        
+      }
+      if(chart.getClass() ==  XYBaseChart.class) {
+        XYBaseChart implChart = (XYBaseChart)chart;
+        root.put("liveUpdate", implChart.liveUpdate);
+        root.put("selectedTurtles", arrayToJson(implChart.selectedTurtles));
+        root.put("parameter", implChart.parameter);
+        root.put("parameterIndex", implChart.parameterIndex);
+        root.put("parameterValue", implChart.parameterValue);
+      }
+      
       if(node.isFloating()) {
         root.put("pos", "FLOAT");
       } else {
@@ -469,14 +538,34 @@ public class Main extends Application {
     return root;    
   }
   
+  private JSONArray arrayToJson(int[] array) {
+    JSONArray jsonArray = new JSONArray();
+    for(int i = 0; i < array.length; i++) {
+      jsonArray.add(array[i]);
+    }
+    return jsonArray;
+  }
+  
+  private int[] jsonToArray(JSONArray json) {
+    int[] array = new int[json.size()];
+    for(int i = 0; i < json.size(); i++) {
+      array[i] = (int)(long)json.get(i);
+    }
+    return array;
+  }
+  
   private void createDefaultLayout(Scene scene) {
+    try {
     SortedMap.Entry<LayoutChart, SortedMap> layout = loadLayout();
     createLayout(scene, layout.getKey(), layout.getValue(), null);
+    } catch(Exception e) {
+      e.printStackTrace();
+    }
   }
   
   private void createLayout(Scene scene, LayoutChart root, SortedMap<LayoutChart, SortedMap> children, DockNode sibling) {
     
-    Chart newChart = root.GetChartType(scene);    
+    Chart newChart = root.GetChart(scene, data);    
     DockPos position = root.GetPosition();
     
     DockNode newNode = null;
@@ -500,6 +589,7 @@ public class Main extends Application {
       public void dockNodeSettings(DockNodeEvent e) {
         Chart chart = (Chart)e.getSource().getUserData();
         chart.showParameterDialog();
+        saveLayout();
       }
 
       @Override
