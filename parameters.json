@@ -754,12 +754,12 @@
         {
           "unit": "load",
           "min": 0,
-          "max": 0,
+          "max": 100,
           "name": "cpu0-load",
           "index": 0,
           "decimalmask": "",
           "categories": [],
-          "rangeEnabled": false
+          "rangeEnabled": true
         }
       ],
       "name": "Cpu0 load",
@@ -771,12 +771,12 @@
         {
           "unit": "load",
           "min": 0,
-          "max": 0,
+          "max": 100,
           "name": "cpu1-load",
           "index": 0,
           "decimalmask": "",
           "categories": [],
-          "rangeEnabled": false
+          "rangeEnabled": true
         }
       ],
       "name": "Cpu1 load",

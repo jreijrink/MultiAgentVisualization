@@ -267,7 +267,13 @@ public class NodeManager {
 					listener.dockNodeDefocused(e);
 				}
 			}
-
+            
+			@Override
+			public void dockUpdated(DockNodeEvent e) {
+				for (DockNodeEventListenerInterface listener : listeners) {
+					listener.dockUpdated(e);
+				}
+			}
 		});
 	};
 

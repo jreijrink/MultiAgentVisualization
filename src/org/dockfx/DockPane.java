@@ -26,6 +26,8 @@ import java.util.Stack;
 import org.dockfx.events.DockEvent;
 import org.dockfx.taskBar.TaskBar;
 import com.sun.javafx.css.StyleManager;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -387,8 +389,10 @@ public class DockPane extends VBox implements EventHandler<DockEvent> {
 	 * @param sibling
 	 *            The sibling of this node in the layout.
 	 */
-	public void dock(Node node, DockPos dockPos, Node sibling) {
-		DockNodeEventHandler dockNodeEventHandler = new DockNodeEventHandler(node);
+	public void dock(DockNode node, DockPos dockPos, Node sibling) {
+        node.setDockPos(dockPos, sibling, LocalDateTime.now());
+        
+        DockNodeEventHandler dockNodeEventHandler = new DockNodeEventHandler(node);
 		dockNodeEventFilters.put(node, dockNodeEventHandler);
 		node.addEventFilter(DockEvent.DOCK_OVER, dockNodeEventHandler);
 
@@ -504,7 +508,7 @@ public class DockPane extends VBox implements EventHandler<DockEvent> {
 	 * @param dockPos
 	 *            The docking position of the node relative to the sibling.
 	 */
-	public void dock(Node node, DockPos dockPos) {
+	public void dock(DockNode node, DockPos dockPos) {
 		dock(node, dockPos, root);
 	}
 
@@ -592,7 +596,14 @@ public class DockPane extends VBox implements EventHandler<DockEvent> {
 								} else {
 									clearStack.push(split);
 								}
-							}
+							} else {
+                              if (children.get(i) instanceof DockNode) {
+                                DockNode child = (DockNode)children.get(i);
+                                if(child.getDockSibling() == node) {
+                                  child.setDockPos(node.getDockPos(), node.getDockSibling(), node.getDockTime());
+                                }
+                              }
+                            }
 
 						}
 					}

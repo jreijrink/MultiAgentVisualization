@@ -20,6 +20,8 @@
 
 package org.dockfx;
 
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -93,6 +95,10 @@ public class DockNode extends VBox implements EventHandler<MouseEvent> {
 	 */
 	private DockPane dockPane;
 
+    private DockPos dockPos;
+    private Node sibling;
+    private LocalDateTime time;
+    
 	/**
 	 * View controller of node inside this DockNode
 	 */
@@ -411,6 +417,31 @@ public class DockNode extends VBox implements EventHandler<MouseEvent> {
 		}
 	}
 
+	public void fireDockUpdatedEvent() {        
+		DockNodeEvent e = new DockNodeEvent(this);
+		for (DockNodeEventListenerInterface listener : listeners) {
+			listener.dockUpdated(e);
+		}
+	}
+
+    public void setDockPos(DockPos dockPos, Node sibling, LocalDateTime time) {
+      this.dockPos = dockPos;
+      this.sibling = sibling;
+      this.time = time;
+    }
+    
+    public DockPos getDockPos() {
+      return this.dockPos;
+    }
+        
+    public Node getDockSibling() {
+      return this.sibling;
+    }
+    
+    public LocalDateTime getDockTime() {
+      return this.time;
+    }
+    
 	/**
 	 * The stage style that will be used when the dock node is floating. This
 	 * must be set prior to setting the dock node to floating.
@@ -652,6 +683,7 @@ public class DockNode extends VBox implements EventHandler<MouseEvent> {
 
 			stage.close();
 		}
+        this.fireDockUpdatedEvent();
 	}
 
 	/**
@@ -1068,6 +1100,7 @@ public class DockNode extends VBox implements EventHandler<MouseEvent> {
 	public void dock(DockPane dockPane, DockPos dockPos, Node sibling) {
 		dockImpl(dockPane);
 		dockPane.dock(this, dockPos, sibling);
+        fireDockUpdatedEvent();
 	}
 
 	/**
@@ -1081,6 +1114,7 @@ public class DockNode extends VBox implements EventHandler<MouseEvent> {
 	public void dock(DockPane dockPane, DockPos dockPos) {
 		dockImpl(dockPane);
 		dockPane.dock(this, dockPos);
+        fireDockUpdatedEvent();
 	}
 
 	private final void dockImpl(DockPane dockPane) {
@@ -1100,6 +1134,7 @@ public class DockNode extends VBox implements EventHandler<MouseEvent> {
 			dockPane.undock(this);
 		}
 		this.dockedProperty.set(false);
+        fireDockUpdatedEvent();
 	}
 
 	/**
@@ -1113,6 +1148,7 @@ public class DockNode extends VBox implements EventHandler<MouseEvent> {
 			undock();
 		}
 		fireCloseEvent();
+        fireDockUpdatedEvent();
 	}
     
 	public void settings() {

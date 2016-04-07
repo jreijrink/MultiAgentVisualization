@@ -84,11 +84,17 @@ public interface DockNodeEventListenerInterface {
    * @param e Event object
    */
   public void dockNodeFocused(DockNodeEvent e);
-
   /**
    * Fired when node loses focus
    *
    * @param e Event object
    */
   public void dockNodeDefocused(DockNodeEvent e);
+
+  /**
+   * Fired after the dock is updated
+   *
+   * @param e Event object
+   */
+  public void dockUpdated(DockNodeEvent e);
 }

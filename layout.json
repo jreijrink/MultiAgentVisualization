@@ -1,0 +1,55 @@
+{
+  "charts": [
+    {
+      "charts": [
+        {
+          "charts": [],
+          "pos": "TOP",
+          "time": "2016-04-07T16:30:34.687",
+          "chart": "Scatter-chart"
+        }
+      ],
+      "pos": "TOP",
+      "time": "2016-04-07T16:30:34.676",
+      "chart": "Line-chart"
+    },
+    {
+      "charts": [],
+      "pos": "RIGHT",
+      "time": "2016-04-07T16:30:34.653",
+      "chart": "Categorical-chart"
+    },
+    {
+      "charts": [
+        {
+          "charts": [],
+          "pos": "RIGHT",
+          "time": "2016-04-07T16:30:34.632",
+          "chart": "Line-chart"
+        }
+      ],
+      "pos": "TOP",
+      "time": "2016-04-07T16:30:34.604",
+      "chart": "Line-chart"
+    },
+    {
+      "charts": [],
+      "pos": "TOP",
+      "time": "2016-04-07T16:30:34.664",
+      "chart": "Categorical-chart"
+    },
+    {
+      "charts": [
+        {
+          "charts": [],
+          "pos": "BOTTOM",
+          "time": "2016-04-07T16:30:34.539",
+          "chart": "Field"
+        }
+      ],
+      "pos": "TOP",
+      "time": "2016-04-07T16:30:34.477",
+      "chart": "Field"
+    }
+  ]
+}

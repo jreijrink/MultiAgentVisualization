@@ -25,7 +25,7 @@ public interface Chart extends EventListener {
   
   public void updateData(List<Turtle> data);
   
-  public String getName();
+  public String getName();  
   public Node getNode();
   
   public void setDockNode(DockNode dockNode);

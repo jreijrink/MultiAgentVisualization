@@ -1,15 +1,33 @@
 package prototype;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import com.sun.corba.se.impl.orbutil.graph.Graph;
 import prototype.chart.Chart;
 import prototype.chart.XYBaseChart;
 import prototype.chart.FieldCanvas;
 import prototype.chart.AgentChart;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URL;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.AbstractMap.SimpleEntry;
 import javafx.scene.image.Image;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.SortedMap;
 import java.util.Timer;
+import java.util.TreeMap;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -18,6 +36,7 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Menu;
@@ -43,7 +62,13 @@ import org.dockfx.DockPos;
 import org.dockfx.NodeManager;
 import org.dockfx.events.DockNodeEvent;
 import org.dockfx.events.DockNodeEventListenerInterface;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import prototype.chart.CategoricalChart;
+import prototype.object.DateComparator;
+import prototype.object.LayoutChart;
+import prototype.settings.DataMapping;
 
 public class Main extends Application {
   private List<Chart> charts;
@@ -69,14 +94,12 @@ public class Main extends Application {
 
     this.dockPane = new DockPane();
     this.nodeManager = new NodeManager(dockPane);
-    
+        
     setEventListener();
     
     root.setCenter(dockPane);
     
     createMenu(stage, scene, root);
-    
-    createDefaultLayout(scene);
     
     Application.setUserAgentStylesheet(Application.STYLESHEET_MODENA);
     DockPane.initializeDefaultUserAgentStylesheet();
@@ -87,6 +110,8 @@ public class Main extends Application {
     stage.getIcons().add(new Image(Main.class.getClassLoader().getResource("prototype/icon.png").toExternalForm()));
     
     stage.show();
+    
+    createDefaultLayout(scene);
   }
   
   private void  createMenu(Stage stage, Scene scene, BorderPane root) {
@@ -145,7 +170,7 @@ public class Main extends Application {
       @Override
       public void handle(Event t) {
         XYBaseChart chart = new XYBaseChart(scene, ChartType.Scatter);
-        addChart(dockPane, null, chart);
+        addChart(dockPane, null, null, chart);
       }
     });
     elementMenu.getItems().add(newScatterMenu);
@@ -155,7 +180,7 @@ public class Main extends Application {
       @Override
       public void handle(Event t) {
         XYBaseChart chart = new XYBaseChart(scene, ChartType.Line);
-        addChart(dockPane, null, chart);
+        addChart(dockPane, null, null, chart);
       }
     });
     elementMenu.getItems().add(newLineMenu);
@@ -165,7 +190,7 @@ public class Main extends Application {
       @Override
       public void handle(Event t) {
         AgentChart chart = new AgentChart(scene);
-        addChart(dockPane, null, chart);
+        addChart(dockPane, null, null, chart);
       }
     });
     elementMenu.getItems().add(newAgentMenu);
@@ -175,7 +200,7 @@ public class Main extends Application {
       @Override
       public void handle(Event t) {
         CategoricalChart chart = new CategoricalChart(scene);
-        addChart(dockPane, null, chart);
+        addChart(dockPane, null, null, chart);
       }
     });
     elementMenu.getItems().add(newCategoricalMenu);
@@ -185,7 +210,7 @@ public class Main extends Application {
       @Override
       public void handle(Event t) {
         FieldCanvas field = new FieldCanvas();
-        addChart(dockPane, null, field);
+        addChart(dockPane, null, null, field);
       }
     });
     elementMenu.getItems().add(newFieldMenu);
@@ -283,24 +308,185 @@ public class Main extends Application {
     return true;
   }
   
-  private DockPane createDefaultLayout(Scene scene) {
-    
-    XYBaseChart scatter = new XYBaseChart(scene, ChartType.Scatter);
-    addChart(dockPane, DockPos.TOP, scatter);
+  private void saveLayout() {    
+    try
+    {
+      Map<DockNode, Map> nodeStructure = new HashMap();
+      
+      List<DockNode> loopList = new ArrayList();
+      for(DockNode node : nodeManager.getDockNodes()) {
+        loopList.add(node);
+      }
+      
+      while(loopList.size() > 0) {
+        DockNode selected = null;
+        Node sibling = null;
         
-    XYBaseChart line = new XYBaseChart(scene, ChartType.Line);
-    addChart(dockPane, DockPos.TOP, line);
+        for(DockNode node : loopList) {
+          if(!nodeManager.getDockNodes().contains(node.getDockSibling())) {
+            //Found a root node
+            selected = node;
+            break;
+          } else {
+            //This node has a sibling node, check if siblin in map
+            if(nodeInMap(nodeStructure, node.getDockSibling())) {
+              //Only add this node if the sibling is present in the map
+              sibling = node.getDockSibling();
+              selected = node;
+              break;
+            }
+          }
+        }
         
-    AgentChart agent = new AgentChart(scene);
-    addChart(dockPane, DockPos.TOP, agent);
-        
-    CategoricalChart categorical = new CategoricalChart(scene);
-    addChart(dockPane, DockPos.TOP, categorical);
+        if(selected != null) {
+          if(sibling == null) {
+          loopList.remove(selected);
+          nodeStructure.put(selected, new HashMap());
+          } else {
+            loopList.remove(selected);
+            insertInMap(nodeStructure, sibling, selected);
+          }
+        } else {
+          break;
+        }
+      }
+      
+      JSONObject layoutObject = createJSONMap(null, nodeStructure);
+      
+      Gson gson = new GsonBuilder().setPrettyPrinting().create();
+      JsonParser jp = new JsonParser();
+      JsonElement je = jp.parse(layoutObject.toJSONString());
+      String prettyJsonString = gson.toJson(je);
+      
+      FileWriter file = new FileWriter(getDefaultLayoutFile());
+      file.write(prettyJsonString);
+      file.close();      
+    }
+    catch(Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+  
+  private SortedMap.Entry<LayoutChart, SortedMap> loadLayout() {
+    try
+    {
+      JSONParser parser = new JSONParser();
     
-    FieldCanvas field = new FieldCanvas();
-    addChart(dockPane, DockPos.RIGHT, field);
+      Object obj = parser.parse(new FileReader(getDefaultLayoutFile()));
+
+      JSONObject jsonObject = (JSONObject) obj;
+      return loadJSON(jsonObject);
+      
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
     
-    return dockPane;
+    return null;
+  }
+  
+  private SortedMap.Entry<LayoutChart, SortedMap> loadJSON(JSONObject root) {
+    
+    String type = "";
+    if(root.containsKey("chart"))
+      type = (String)root.get("chart");
+    
+    String pos = "";
+    if(root.containsKey("pos"))
+      pos = (String)root.get("pos");
+    
+    String time = "";
+    if(root.containsKey("time"))
+      time = (String)root.get("time");
+    
+    LayoutChart node = new LayoutChart(type, pos, time);
+    
+    Comparator comparator = new DateComparator();
+    SortedMap<LayoutChart, SortedMap> children = new TreeMap(comparator);
+    JSONArray childList = (JSONArray)root.get("charts");
+    for(Object child : childList) {
+      SortedMap.Entry<LayoutChart, SortedMap> entry = loadJSON((JSONObject)child);
+      children.put(entry.getKey(), entry.getValue());
+    }
+    
+    return new SimpleEntry(node, children);
+  }
+  
+  private boolean nodeInMap(Map<DockNode, Map> map, Node node) {
+    for(Map.Entry<DockNode, Map> entry : map.entrySet()) {
+      if (entry.getKey() == node)
+        return true;
+      if(nodeInMap(entry.getValue(), node))
+        return true;
+    }
+    return false;
+  }
+  
+  private void insertInMap(Map<DockNode, Map> map, Node sibling, DockNode node) {
+    Map<DockNode, Map> siblingMap = getSiblingMap(map, sibling);
+    if(siblingMap != null)
+      siblingMap.put(node, new HashMap());
+  }
+  
+  private Map<DockNode, Map> getSiblingMap(Map<DockNode, Map> map, Node sibling) {
+    for(Map.Entry<DockNode, Map> entry : map.entrySet()) {
+      if (entry.getKey() == sibling) {
+        return entry.getValue();
+      } else {
+        Map<DockNode, Map> found = getSiblingMap(entry.getValue(), sibling);
+        if(found != null) 
+          return found;
+      }
+    }
+    return null;
+  }
+  
+  private JSONObject createJSONMap(DockNode node, Map<DockNode, Map> map) {
+    JSONObject root = new JSONObject();
+    JSONArray childList = new JSONArray();
+
+    if(node != null) {
+      Chart chart = (Chart)node.getUserData();
+      root.put("chart", chart.getName());
+
+      if(node.isFloating()) {
+        root.put("pos", "FLOAT");
+      } else {
+        DockPos pos = node.getDockPos();
+        if(pos != null) {
+          LocalDateTime datetime = node.getDockTime();
+          root.put("pos", pos.toString());
+          root.put("time", datetime.toString());
+        }
+      }
+    }
+
+    for(Map.Entry<DockNode, Map> entry : map.entrySet()) {
+      childList.add(createJSONMap(entry.getKey(), entry.getValue()));
+    }
+    
+    root.put("charts", childList);
+    
+    return root;    
+  }
+  
+  private void createDefaultLayout(Scene scene) {
+    SortedMap.Entry<LayoutChart, SortedMap> layout = loadLayout();
+    createLayout(scene, layout.getKey(), layout.getValue(), null);
+  }
+  
+  private void createLayout(Scene scene, LayoutChart root, SortedMap<LayoutChart, SortedMap> children, DockNode sibling) {
+    
+    Chart newChart = root.GetChartType(scene);    
+    DockPos position = root.GetPosition();
+    
+    DockNode newNode = null;
+    if(newChart != null)
+      newNode = addChart(dockPane, position, sibling, newChart);
+    
+    //SORT ON TIME
+    for(Map.Entry<LayoutChart, SortedMap> entry : children.entrySet()) {
+      createLayout(scene, entry.getKey(), entry.getValue(), newNode);
+    }
   }
   
   private void setEventListener() {
@@ -315,6 +501,11 @@ public class Main extends Application {
         Chart chart = (Chart)e.getSource().getUserData();
         chart.showParameterDialog();
       }
+
+      @Override
+      public void dockUpdated(DockNodeEvent e) {
+        saveLayout();
+      }
       
       @Override public void dockNodeMaximized(DockNodeEvent e) {}
       @Override public void dockNodeWindowed(DockNodeEvent e) {}
@@ -327,7 +518,7 @@ public class Main extends Application {
     });
   }
     
-  private void addChart(DockPane dockPane, DockPos position, Chart chart) {
+  private DockNode addChart(DockPane dockPane, DockPos position, DockNode sibling, Chart chart) {
     this.charts.add(chart);
 
     chart.updateData(this.data);
@@ -359,11 +550,19 @@ public class Main extends Application {
     });
     chart.setDockNode(chartDock);
     
-    if(position == null)
+    if(position == null) {
       chartDock.floatNode(dockPane, true);
-    else
-      chartDock.dock(dockPane, position);
+    } else {
+      if(sibling == null) {
+        chartDock.dock(dockPane, position);
+      } else {
+        chartDock.dock(dockPane, position, sibling);
+      }
+    }
+    
     chartDock.autosize();
+    
+    return chartDock;
   }
   
   private void updateLayout(List<Turtle> data) {
@@ -372,6 +571,24 @@ public class Main extends Application {
     for (Chart chart : this.charts) {
       chart.updateData(data);
     }
+  }
+  
+  private static File getDefaultLayoutFile() throws Exception {
+    String fileName = "layout.json";    
+    
+    URL url = DataMapping.class.getProtectionDomain().getCodeSource().getLocation();
+    String jarPath = new File(url.toURI()).getParentFile() + File.separator + fileName;
+    
+    File jarFile = new File(jarPath);
+    if(jarFile.exists())
+      return jarFile;
+    
+    File localFile = new File(fileName);
+    String abs = localFile.getAbsolutePath();
+    if(localFile.exists())
+      return localFile;
+    
+    return jarFile;
   }
 
   public static void main(String[] args) {

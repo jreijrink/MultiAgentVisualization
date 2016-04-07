@@ -126,7 +126,7 @@ public class AgentChart implements Chart {
   public String getName() {
     return "Agent-chart";
   }
-  
+    
   @Override
   public void addSelectionEventListener(SelectionEventListener listener) {
     listenerList.add(SelectionEventListener.class, listener);
