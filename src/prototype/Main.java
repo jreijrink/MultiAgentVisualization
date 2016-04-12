@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import com.sun.corba.se.impl.orbutil.graph.Graph;
 import prototype.chart.Chart;
 import prototype.chart.XYBaseChart;
 import prototype.chart.FieldCanvas;
@@ -12,22 +11,26 @@ import prototype.chart.AgentChart;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.AbstractMap.SimpleEntry;
 import javafx.scene.image.Image;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
+import java.util.Optional;
 import java.util.SortedMap;
 import java.util.Timer;
 import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
@@ -35,13 +38,15 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
@@ -78,7 +83,7 @@ public class Main extends Application {
   private int startIndex;
   private int endIndex;
   private boolean drag;
-  
+  private Menu loadMenu;  
   private File currentFile;
   
   @Override
@@ -111,7 +116,7 @@ public class Main extends Application {
     
     stage.show();
     
-    createDefaultLayout(scene);
+    showDefaultLayout(scene);
   }
   
   private void  createMenu(Stage stage, Scene scene, BorderPane root) {
@@ -120,23 +125,6 @@ public class Main extends Application {
     menuBar.prefWidthProperty().bind(stage.widthProperty());
 
     root.setTop(menuBar);
-    
-    Menu fileMenu = new Menu("File");
-    MenuItem openMenu = new MenuItem("Open");
-    openMenu.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_DOWN));
-    openMenu.setOnAction(new EventHandler() {
-      @Override
-      public void handle(Event t) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open MAT File");
-        currentFile = fileChooser.showOpenDialog(stage);
-        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("MAT files (*.mat)", "*.mat");
-        fileChooser.getExtensionFilters().add(extFilter);
-
-        loadData(scene);
-      }
-    });
-    fileMenu.getItems().add(openMenu);
     
     root.widthProperty().addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
     
@@ -163,9 +151,42 @@ public class Main extends Application {
       menuBar.requestLayout();
     });
     
+    Menu fileMenu = fileMenu(stage, scene);
+    
+    Menu elementMenu = elementMenu(stage, scene);
+    
+    Menu layoutMenu = layoutMenu(stage, scene);
+    
+    Menu settingsMenu = settingsMenu(stage, scene);
+    
+    menuBar.getMenus().addAll(fileMenu, elementMenu, layoutMenu, settingsMenu);
+  }
+  
+  private Menu fileMenu(Stage stage, Scene scene) {    
+    Menu fileMenu = new Menu("File");
+    MenuItem openMenu = new MenuItem("Open");
+    openMenu.setAccelerator(new KeyCodeCombination(KeyCode.O, KeyCombination.CONTROL_DOWN));
+    openMenu.setOnAction(new EventHandler() {
+      @Override
+      public void handle(Event t) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Open MAT File");
+        currentFile = fileChooser.showOpenDialog(stage);
+        FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("MAT files (*.mat)", "*.mat");
+        fileChooser.getExtensionFilters().add(extFilter);
+
+        loadData(scene);
+      }
+    });
+    fileMenu.getItems().add(openMenu);
+    return fileMenu;
+  }
+  
+  private Menu elementMenu(Stage stage, Scene scene) {
     Menu elementMenu = new Menu("Elements");
     
     MenuItem newScatterMenu = new MenuItem("Add scatter-chart");
+    newScatterMenu.setAccelerator(new KeyCodeCombination(KeyCode.DIGIT1, KeyCombination.CONTROL_DOWN));
     newScatterMenu.setOnAction(new EventHandler() {
       @Override
       public void handle(Event t) {
@@ -176,6 +197,7 @@ public class Main extends Application {
     elementMenu.getItems().add(newScatterMenu);
     
     MenuItem newLineMenu = new MenuItem("Add line-chart");
+    newLineMenu.setAccelerator(new KeyCodeCombination(KeyCode.DIGIT2, KeyCombination.CONTROL_DOWN));
     newLineMenu.setOnAction(new EventHandler() {
       @Override
       public void handle(Event t) {
@@ -186,6 +208,7 @@ public class Main extends Application {
     elementMenu.getItems().add(newLineMenu);
     
     MenuItem newAgentMenu = new MenuItem("Add agent-chart");
+    newAgentMenu.setAccelerator(new KeyCodeCombination(KeyCode.DIGIT3, KeyCombination.CONTROL_DOWN));
     newAgentMenu.setOnAction(new EventHandler() {
       @Override
       public void handle(Event t) {
@@ -196,6 +219,7 @@ public class Main extends Application {
     elementMenu.getItems().add(newAgentMenu);
     
     MenuItem newCategoricalMenu = new MenuItem("Add categorical-chart");
+    newCategoricalMenu.setAccelerator(new KeyCodeCombination(KeyCode.DIGIT4, KeyCombination.CONTROL_DOWN));
     newCategoricalMenu.setOnAction(new EventHandler() {
       @Override
       public void handle(Event t) {
@@ -206,6 +230,7 @@ public class Main extends Application {
     elementMenu.getItems().add(newCategoricalMenu);
     
     MenuItem newFieldMenu = new MenuItem("Add field");
+    newFieldMenu.setAccelerator(new KeyCodeCombination(KeyCode.DIGIT5, KeyCombination.CONTROL_DOWN));
     newFieldMenu.setOnAction(new EventHandler() {
       @Override
       public void handle(Event t) {
@@ -215,6 +240,60 @@ public class Main extends Application {
     });
     elementMenu.getItems().add(newFieldMenu);
     
+    return elementMenu;
+  }
+  
+  private Menu layoutMenu(Stage stage, Scene scene) {
+    Menu layoutMenu = new Menu("Layout");
+    
+    MenuItem saveMenu = new MenuItem("Save current");
+    saveMenu.setOnAction(new EventHandler() {
+      @Override
+      public void handle(Event t) {
+        saveCurrentLayout(scene);
+      }
+    });
+    layoutMenu.getItems().add(saveMenu);
+    
+    loadMenu = new Menu("Load");
+    initLayoutMenu(scene);
+    layoutMenu.getItems().add(loadMenu);
+    
+    MenuItem manageMenu = new MenuItem("Manage");
+    layoutMenu.getItems().add(manageMenu);
+    
+    return layoutMenu;
+  }
+  
+  private void initLayoutMenu(Scene scene) {
+    loadMenu.getItems().clear();
+    for (File layout : getLayoutNames()) {
+      String filename = layout.getName();
+      String name = filename.substring(0, filename.indexOf('.'));
+      Menu layoutMenu = new Menu(name);
+      MenuItem layoutLoad = new MenuItem("Open");
+      layoutLoad.setOnAction(new EventHandler() {
+        @Override
+        public void handle(Event t) {
+          SortedMap.Entry<LayoutChart, SortedMap> layout = loadLayout(name + ".json");
+          clearLayout();
+          createLayout(scene, layout.getKey(), layout.getValue(), null);
+        }
+      });
+      MenuItem layoutDelete = new MenuItem("Remove");
+      layoutDelete.setOnAction(new EventHandler() {
+        @Override
+        public void handle(Event t) {
+          deleteLayout(scene, name + ".json");
+        }
+      });
+      layoutMenu.getItems().add(layoutLoad);
+      layoutMenu.getItems().add(layoutDelete);
+      loadMenu.getItems().add(layoutMenu);
+    }    
+  }
+  
+  private Menu settingsMenu(Stage stage, Scene scene) {    
     Menu settingsMenu = new Menu("Settings");
     MenuItem mappingMenu = new MenuItem("Data mapping");
     mappingMenu.setAccelerator(new KeyCodeCombination(KeyCode.M, KeyCombination.CONTROL_DOWN));
@@ -278,7 +357,7 @@ public class Main extends Application {
     });
     settingsMenu.getItems().add(configurationMenu);
     
-    menuBar.getMenus().addAll(fileMenu, elementMenu, settingsMenu);    
+    return settingsMenu;
   }
   
   private void loadData(Scene scene) {
@@ -290,6 +369,12 @@ public class Main extends Application {
         updateLayout(result);
       } catch (Exception ex) {
         ex.printStackTrace();
+        
+        Alert alert = new Alert(AlertType.INFORMATION);
+        alert.setTitle("Open file");
+        alert.setHeaderText("Something went wrong.");
+        alert.setContentText(ex.getMessage());
+        alert.showAndWait();
       } finally {
         //scene.getRoot().setCursor(Cursor.DEFAULT);
       }
@@ -308,7 +393,21 @@ public class Main extends Application {
     return true;
   }
   
-  private void saveLayout() {    
+  private void saveCurrentLayout(Scene scene) {
+    
+    TextInputDialog dialog = new TextInputDialog();
+    dialog.setTitle("Please enter a name");
+    dialog.setHeaderText("Enter the name of the layout");
+    dialog.setContentText("Layout name:");
+
+    Optional<String> result = dialog.showAndWait();
+    if (result.isPresent()){
+      saveLayout(result.get() + ".json");
+      initLayoutMenu(scene);
+    }
+  }
+  
+  private void saveLayout(String name) {    
     try
     {
       Map<DockNode, Map> nodeStructure = new HashMap();
@@ -358,7 +457,7 @@ public class Main extends Application {
       JsonElement je = jp.parse(layoutObject.toJSONString());
       String prettyJsonString = gson.toJson(je);
       
-      FileWriter file = new FileWriter(getDefaultLayoutFile());
+      FileWriter file = new FileWriter(getLayoutPath(name));
       file.write(prettyJsonString);
       file.close();      
     }
@@ -367,12 +466,32 @@ public class Main extends Application {
     }
   }
   
-  private SortedMap.Entry<LayoutChart, SortedMap> loadLayout() {
+  private void deleteLayout(Scene scene, String name) {
+    try
+    {
+      Alert alert = new Alert(AlertType.CONFIRMATION);
+      alert.setTitle("Confirmation Dialog");
+      alert.setHeaderText("Remove layout " + name + "?");
+      alert.setContentText("Sure about the removal?");
+
+      Optional<ButtonType> result = alert.showAndWait();
+      if (result.get() == ButtonType.OK){
+        File file = getLayoutPath(name);
+        if(file.exists())
+          file.delete();
+        initLayoutMenu(scene);
+      }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+  }
+  
+  private SortedMap.Entry<LayoutChart, SortedMap> loadLayout(String name) {    
     try
     {
       JSONParser parser = new JSONParser();
     
-      Object obj = parser.parse(new FileReader(getDefaultLayoutFile()));
+      Object obj = parser.parse(new FileReader(getLayoutPath(name)));
 
       JSONObject jsonObject = (JSONObject) obj;
       return loadJSON(jsonObject);
@@ -382,6 +501,25 @@ public class Main extends Application {
     }
     
     return null;
+  }
+  
+  private List<File> getLayoutNames() {
+    try {
+      File path = getLayoutPath("");      
+      File[] files = getWithExtension(path, ".json");
+      return Arrays.asList(files);
+    } catch (Exception ex) {
+      Logger.getLogger(Main.class.getName()).log(Level.SEVERE, null, ex);
+    }
+    return new ArrayList();
+  }
+  
+  private SortedMap.Entry<LayoutChart, SortedMap> loadDefaultLayout() {
+    return loadLayout("default");
+  }
+  
+  private File[] getWithExtension(File path, String extension) {
+    return path.listFiles((File dir, String filename) -> filename.endsWith(extension));
   }
   
   private SortedMap.Entry<LayoutChart, SortedMap> loadJSON(JSONObject root) {
@@ -554,12 +692,21 @@ public class Main extends Application {
     return array;
   }
   
-  private void createDefaultLayout(Scene scene) {
+  private void showDefaultLayout(Scene scene) {
     try {
-    SortedMap.Entry<LayoutChart, SortedMap> layout = loadLayout();
+    SortedMap.Entry<LayoutChart, SortedMap> layout = loadDefaultLayout();
+    clearLayout();
     createLayout(scene, layout.getKey(), layout.getValue(), null);
     } catch(Exception e) {
       e.printStackTrace();
+    }
+  }
+  
+  private void clearLayout() {
+    this.charts.clear();
+    while(this.nodeManager.getDockNodes().size() > 0) {
+      DockNode child = this.nodeManager.getDockNodes().get(0);
+      child.close();
     }
   }
   
@@ -589,12 +736,12 @@ public class Main extends Application {
       public void dockNodeSettings(DockNodeEvent e) {
         Chart chart = (Chart)e.getSource().getUserData();
         chart.showParameterDialog();
-        saveLayout();
+        saveLayout("default");
       }
 
       @Override
       public void dockUpdated(DockNodeEvent e) {
-        saveLayout();
+        saveLayout("default");
       }
       
       @Override public void dockNodeMaximized(DockNodeEvent e) {}
@@ -663,22 +810,22 @@ public class Main extends Application {
     }
   }
   
-  private static File getDefaultLayoutFile() throws Exception {
-    String fileName = "layout.json";    
+  private static File getLayoutPath(String filename) throws Exception {
     
     URL url = DataMapping.class.getProtectionDomain().getCodeSource().getLocation();
-    String jarPath = new File(url.toURI()).getParentFile() + File.separator + fileName;
+    String jarPath = new File(url.toURI()).getParentFile() + File.separator + "layouts";
+        
+    File jarLayoutPath = new File(jarPath);
+    if(jarLayoutPath.exists())
+      return new File(jarPath + File.separator + filename);
     
-    File jarFile = new File(jarPath);
-    if(jarFile.exists())
-      return jarFile;
-    
-    File localFile = new File(fileName);
-    String abs = localFile.getAbsolutePath();
+    File localFile = new File("layouts");
     if(localFile.exists())
-      return localFile;
+      return new File("layouts" + File.separator + filename);
     
-    return jarFile;
+    jarLayoutPath.mkdirs();
+    
+    return new File(jarPath + File.separator + filename);
   }
 
   public static void main(String[] args) {

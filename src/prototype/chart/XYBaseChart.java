@@ -586,8 +586,8 @@ public class XYBaseChart implements Chart {
             maxValue = Math.max(value.getValue(), maxValue);
           }
           
-          double xTolerance = values.size() / 500;
-          double yTolerance = (maxValue - minValue) / 500;
+          double xTolerance = values.size() / 300;
+          double yTolerance = (maxValue - minValue) / 100;
 
           List<DataPoint> sortedPoints = simplifyRadialDistance(values, xTolerance, yTolerance);
 

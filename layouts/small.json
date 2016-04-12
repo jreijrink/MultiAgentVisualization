@@ -1,0 +1,37 @@
+{
+  "charts": [
+    {
+      "charts": [
+        {
+          "charts": [],
+          "pos": "RIGHT",
+          "liveUpdate": true,
+          "selectedTurtles": [
+            0
+          ],
+          "parameter": "Refbox command",
+          "time": "2016-04-12T15:02:58.431",
+          "chart": "Categorical-chart",
+          "parameterIndex": 0,
+          "parameterValue": "goals"
+        }
+      ],
+      "pos": "BOTTOM",
+      "liveUpdate": true,
+      "selectedTurtles": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "parameter": "Robot in field",
+      "time": "2016-04-12T15:02:58.418",
+      "chart": "Agent-chart",
+      "parameterIndex": 0,
+      "parameterValue": "robot-in-field"
+    }
+  ]
+}
