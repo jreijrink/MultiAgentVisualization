@@ -558,14 +558,13 @@ public class DockNode extends VBox implements EventHandler<MouseEvent> {
 			stagePosition = stagePosition.add(translation);
 		}
 
-		// the border pane allows the dock node to
+        // the border pane allows the dock node to
 		// have a drop shadow effect on the border
 		// but also maintain the layout of contents
 		// such as a tab that has no content
 		borderPane = new BorderPane();
 		borderPane.getStyleClass().add("dock-node-border");
-		borderPane.setCenter(this);
-
+        borderPane.setCenter(this);        
 		Scene scene = new Scene(borderPane);
 
 		// apply the floating property so we can get its padding size

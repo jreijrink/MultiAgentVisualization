@@ -32,6 +32,7 @@ import java.time.LocalTime;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
@@ -450,6 +451,7 @@ public class DockPane extends VBox implements EventHandler<DockEvent> {
 		// finally dock the node to the correct split pane
 		ObservableList<Node> splitItems = split.getItems();
 
+        
 		double magnitude = 0;
 
 		if (splitItems.size() > 0) {
@@ -497,6 +499,40 @@ public class DockPane extends VBox implements EventHandler<DockEvent> {
 			}
 		}
 	}
+    
+    public void evenDividers() {      
+      SplitPane split = (SplitPane) root;
+      setDivider(split, split.getOrientation());
+    }
+    
+    public void clearRoot() {
+      SplitPane split = (SplitPane) root;
+      split.getItems().clear();
+    }
+    
+    private float setDivider(SplitPane split, Orientation rootOrientation) {
+      float rowCount = 0;
+      ObservableList<Node> splitItems = split.getItems();
+      
+      for(Node child : splitItems) {
+        if(child instanceof SplitPane)
+          rowCount += setDivider((SplitPane)child, rootOrientation);
+        else
+          rowCount++;
+      }
+
+      int splitters = splitItems.size();
+      double[] positions = new double[splitters];
+      for(int i = 0; i < splitters; i++) {
+        positions[i] = (1 / rowCount) + (i > 0 ? positions[i - 1] : 0);
+      }
+      Platform.runLater(()->split.setDividerPositions(positions));
+      
+      if (split.getOrientation() == rootOrientation)
+        return rowCount;
+      else
+        return 1;
+    }
 
 	/**
 	 * Dock the node into this dock pane at the given docking position relative

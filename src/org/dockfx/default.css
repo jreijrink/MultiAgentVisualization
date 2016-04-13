@@ -115,7 +115,7 @@
 
 .dock-node-border {
   -fx-padding: 10;
-  -fx-background-color: transparent;
+  /*-fx-background-color: transparent;*/
   -fx-effect: dropshadow( three-pass-box, rgba(0,0,0,0.4), 10,0.2,0,0 );
 }
 

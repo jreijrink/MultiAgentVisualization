@@ -192,6 +192,7 @@ public class Main extends Application {
       public void handle(Event t) {
         XYBaseChart chart = new XYBaseChart(scene, ChartType.Scatter);
         addChart(dockPane, null, null, chart);
+        chart.updateData(data);
       }
     });
     elementMenu.getItems().add(newScatterMenu);
@@ -203,6 +204,7 @@ public class Main extends Application {
       public void handle(Event t) {
         XYBaseChart chart = new XYBaseChart(scene, ChartType.Line);
         addChart(dockPane, null, null, chart);
+        chart.updateData(data);
       }
     });
     elementMenu.getItems().add(newLineMenu);
@@ -214,6 +216,7 @@ public class Main extends Application {
       public void handle(Event t) {
         AgentChart chart = new AgentChart(scene);
         addChart(dockPane, null, null, chart);
+        chart.updateData(data);
       }
     });
     elementMenu.getItems().add(newAgentMenu);
@@ -225,6 +228,7 @@ public class Main extends Application {
       public void handle(Event t) {
         CategoricalChart chart = new CategoricalChart(scene);
         addChart(dockPane, null, null, chart);
+        chart.updateData(data);
       }
     });
     elementMenu.getItems().add(newCategoricalMenu);
@@ -236,6 +240,7 @@ public class Main extends Application {
       public void handle(Event t) {
         FieldCanvas field = new FieldCanvas();
         addChart(dockPane, null, null, field);
+        field.updateData(data);
       }
     });
     elementMenu.getItems().add(newFieldMenu);
@@ -278,6 +283,8 @@ public class Main extends Application {
           SortedMap.Entry<LayoutChart, SortedMap> layout = loadLayout(name + ".json");
           clearLayout();
           createLayout(scene, layout.getKey(), layout.getValue(), null);
+          updateLayout(data);
+          dockPane.evenDividers();
         }
       });
       MenuItem layoutDelete = new MenuItem("Remove");
@@ -694,9 +701,11 @@ public class Main extends Application {
   
   private void showDefaultLayout(Scene scene) {
     try {
-    SortedMap.Entry<LayoutChart, SortedMap> layout = loadDefaultLayout();
-    clearLayout();
-    createLayout(scene, layout.getKey(), layout.getValue(), null);
+      SortedMap.Entry<LayoutChart, SortedMap> layout = loadDefaultLayout();
+      clearLayout();
+      createLayout(scene, layout.getKey(), layout.getValue(), null);
+      updateLayout(this.data);
+      dockPane.evenDividers();
     } catch(Exception e) {
       e.printStackTrace();
     }
@@ -708,11 +717,12 @@ public class Main extends Application {
       DockNode child = this.nodeManager.getDockNodes().get(0);
       child.close();
     }
+    this.dockPane.clearRoot();
   }
   
   private void createLayout(Scene scene, LayoutChart root, SortedMap<LayoutChart, SortedMap> children, DockNode sibling) {
     
-    Chart newChart = root.GetChart(scene, data);    
+    Chart newChart = root.GetChart(scene, new ArrayList());    
     DockPos position = root.GetPosition();
     
     DockNode newNode = null;
@@ -758,7 +768,6 @@ public class Main extends Application {
   private DockNode addChart(DockPane dockPane, DockPos position, DockNode sibling, Chart chart) {
     this.charts.add(chart);
 
-    chart.updateData(this.data);
     chart.selectFrames(this.startIndex, this.endIndex, this.drag);
     
     chart.addSelectionEventListener((int startIndex, int endIndex, boolean drag) -> {

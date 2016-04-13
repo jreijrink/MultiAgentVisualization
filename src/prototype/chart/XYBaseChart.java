@@ -1,11 +1,16 @@
 package prototype.chart;
 
+import java.util.AbstractMap.SimpleEntry;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ExecutorService;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -70,20 +75,25 @@ public class XYBaseChart implements Chart {
   
   private int selectedStartIndex;
   private int selectedEndIndex;
+    
+  private Timer resizeTimer;
+  private TimerTask resizeTask;
   
   public XYBaseChart(Scene scene, ChartType type, int[] selectedTurtles, String yParameter, int yParameterIndex, String yParameterValue, List<Turtle> data,  boolean liveUpdate) {
     this.scene = scene;
     this.type = type;
+    this.parameterMap = new ParameterMap();
     this.selectedTurtles = selectedTurtles;
     this.parameter = yParameter;
     this.parameterIndex = yParameterIndex;
     this.parameterValue = yParameterValue;
     this.data = data;
     this.liveUpdate = liveUpdate;
+    
     this.rootPane = new BorderPane();
     this.rootPane.getStylesheets().add("prototype/plot.css");
-    this.parameterMap = new ParameterMap();
-    
+    initRootPaneListeners();
+        
     initialize();
   }
   
@@ -106,6 +116,7 @@ public class XYBaseChart implements Chart {
     
     this.rootPane = new BorderPane();
     this.rootPane.getStylesheets().add("prototype/plot.css");
+    initRootPaneListeners();
     
     initialize();
   }
@@ -295,6 +306,52 @@ public class XYBaseChart implements Chart {
       initialize();
     }
   }
+    
+  private void initRootPaneListeners() {
+
+    resizeTimer = new Timer();
+    resizeTask = new TimerTask() {
+        @Override
+        public void run() {
+          System.out.println("schedule");
+          initialize();
+          resizeTimer.cancel();
+          resizeTimer.purge();
+        }
+      };
+
+    this.rootPane.widthProperty().addListener((ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) -> {
+      resizeTask.cancel();
+      resizeTask = new TimerTask() {
+        @Override
+        public void run() {
+          initialize();
+          resizeTimer.cancel();
+          resizeTimer.purge();
+        }
+      };
+      resizeTimer.cancel();
+      resizeTimer.purge();
+      resizeTimer = new Timer();
+      resizeTimer.schedule(resizeTask, 500);
+    });
+    
+    this.rootPane.heightProperty().addListener((ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) -> {  
+      resizeTask.cancel();
+      resizeTask = new TimerTask() {
+        @Override
+        public void run() {
+          initialize();
+          resizeTimer.cancel();
+          resizeTimer.purge();
+        }
+      };
+      resizeTimer.cancel();
+      resizeTimer.purge();
+      resizeTimer = new Timer();
+      resizeTimer.schedule(resizeTask, 500);
+    });    
+  }
   
   private void notifyListeners(int startIndex, int endIndex, boolean drag) {
     List<Integer> selectedTimeFrames = new ArrayList();
@@ -318,9 +375,13 @@ public class XYBaseChart implements Chart {
   
   private void initialize() {
     this.parameterMap = new ParameterMap();
-    createChart();
-    setMouseListeners();
-    selectFrames(selectedStartIndex, selectedEndIndex, false);
+    (new Thread() {
+      public void run() {
+        createChart();
+        Platform.runLater(()-> setMouseListeners());    
+        Platform.runLater(()-> selectFrames(selectedStartIndex, selectedEndIndex, false));
+      }
+    }).start();
   }
   
   private void createChart() {    
@@ -380,19 +441,16 @@ public class XYBaseChart implements Chart {
           }, 0);
     });
     
-    rootPane.getChildren().clear();
     
-    rootPane.setCenter(this.XYChart);
+    Platform.runLater(()->rootPane.getChildren().clear());
+    Platform.runLater(()->rootPane.setCenter(this.XYChart));
     
-    //if(data.size() > 0) {
-
     xAxis.setLabel("Time");
     yAxis.setLabel(this.parameter + " [" + parameterIndex + "] " + " (" + parameterValue + ")");
 
     Collection data = getData();
 
-    this.XYChart.getData().setAll(data);
-    //}
+    Platform.runLater(()-> this.XYChart.getData().setAll(data));
     
     Timer timer = new java.util.Timer();
     timer.schedule( 
@@ -443,10 +501,10 @@ public class XYBaseChart implements Chart {
   
   private void setMouseListeners() {
 
-    XYChart<Number,Number> XYChart = (XYChart<Number,Number>)rootPane.getCenter();
+    //XYChart<Number,Number> XYChart = (XYChart<Number,Number>)rootPane.getCenter();
     
-    NumberAxis xAxis = (NumberAxis) XYChart.getXAxis();
-    NumberAxis yAxis = (NumberAxis) XYChart.getYAxis();
+    NumberAxis xAxis = (NumberAxis) this.XYChart.getXAxis();
+    NumberAxis yAxis = (NumberAxis) this.XYChart.getYAxis();
 
     for(Series series : XYChart.getData()) {
       for (Node n : series.getChart().getChildrenUnmodifiable()) {
@@ -475,8 +533,16 @@ public class XYBaseChart implements Chart {
             .id("selection")
             .build();
     selectionRectangle.setUserData(new Object[]{ -1, -1 });
-    rootPane.getChildren().add(selectionRectangle);
-
+    
+    Platform.runLater(new Runnable() {
+      @Override
+      public void run() {
+      if(!rootPane.getChildren().contains(selectionRectangle))
+        rootPane.getChildren().add(selectionRectangle);
+      }
+    }
+    );
+    
     for(Node child : this.rootPane.getChildren()) {
       if(child.getClass() == Rectangle.class) {
         createRectangleSelectionEvents(child, xAxis, yAxis);
@@ -554,58 +620,64 @@ public class XYBaseChart implements Chart {
     
   private Collection getData() { 
     List<XYChart.Series> seriesList = new ArrayList<>();
-
+        
     if(data.size() > 0) {
       int turtles = data.size();
-      for(int turtle =  0; turtle < turtles; turtle++) {
-        boolean showData = (new ArrayList<Integer>() {{ for (int i : selectedTurtles) add(i); }}).contains(turtle);      
-        seriesList.add(getSeries(turtle, showData));
+      double minValue = Double.MAX_VALUE;
+      double maxValue = Double.MIN_VALUE;
+      int timeframes = 0;
+      int before = 0;
+      int after = 0;
+
+      Map<Integer, List<DataPoint>> datapoints = new HashMap();
+        for(int turtle =  0; turtle < turtles; turtle++) {
+        datapoints.put(turtle, new ArrayList());
       }
+      
+      for (int i : selectedTurtles) {
+        Turtle turtle = data.get(i);
+        List<DataPoint> values = turtle.GetAllValues(parameter, parameterIndex, parameterValue);
+        timeframes = values.size();
+        before += values.size();
+        datapoints.get(i).addAll(values);
+
+        for(DataPoint value : values) {
+          minValue = Math.min(value.getValue(), minValue);
+          maxValue = Math.max(value.getValue(), maxValue);
+        }
+      }
+
+      double xTolerance = (timeframes / rootPane.getWidth()) * 2.0f;
+      double yTolerance = ((maxValue - minValue) / rootPane.getHeight()) * 2.0f;
+      
+      Map<Integer, List<DataPoint>> filteredPoints = simplifyRadialDistance(datapoints, xTolerance, yTolerance);
+          
+      for(int turtleIndex : filteredPoints.keySet()) {
+        
+        XYChart.Series series = new XYChart.Series();
+        series.setName(String.format("Turtle %d", turtleIndex + 1));
+
+        List<XYChart.Data> elements = new ArrayList();
+        
+        after += filteredPoints.get(turtleIndex).size();
+      
+        for (int i = 0; i < filteredPoints.get(turtleIndex).size(); i++) {
+          DataPoint filteredPoint = filteredPoints.get(turtleIndex).get(i);
+          Point2D pos = filteredPoint.getLocation();
+          XYChart.Data element = new XYChart.Data(pos.getX(), pos.getY(), filteredPoint.getIndices());
+          elements.add(element);
+        }
+
+        ObservableList<XYChart.Data> data = series.getData();
+        data.addAll(elements);
+
+        seriesList.add(series);        
+      }
+      
+      System.out.println("FILTER BEFORE: " + before + " AFTER: " + after);
     }
 
     return seriesList;
-  }
-  
-  private XYChart.Series getSeries(int turtleIndex, boolean showData) {
-
-      XYChart.Series series = new XYChart.Series();
-      series.setName(String.format("Turtle %d", turtleIndex + 1));
-    
-      List<XYChart.Data> elements = new ArrayList();
-            
-      if(showData) {
-        try {
-          Turtle turtle = data.get(turtleIndex);
-          List<DataPoint> values = turtle.GetAllValues(parameter, parameterIndex, parameterValue);
-
-          double minValue = Double.MAX_VALUE;
-          double maxValue = Double.MIN_VALUE;
-          
-          for(DataPoint value : values) {
-            minValue = Math.min(value.getValue(), minValue);
-            maxValue = Math.max(value.getValue(), maxValue);
-          }
-          
-          double xTolerance = values.size() / 300;
-          double yTolerance = (maxValue - minValue) / 100;
-
-          List<DataPoint> sortedPoints = simplifyRadialDistance(values, xTolerance, yTolerance);
-
-          for (int i = 0; i < sortedPoints.size(); i++) {
-            DataPoint filteredPoint = sortedPoints.get(i);
-            Point2D pos = filteredPoint.getLocation();
-            XYChart.Data element = new XYChart.Data(pos.getX(), pos.getY(), filteredPoint.getIndices());
-            elements.add(element);
-          }
-        } catch(Exception ex) {
-          ex.printStackTrace();
-        }
-      }
-      
-      ObservableList<XYChart.Data> data = series.getData();
-      data.addAll(elements);
-                  
-      return series;
   }
   
   private void drawInvalidData() {
@@ -663,44 +735,55 @@ public class XYBaseChart implements Chart {
     }
   }
   
-  private List<DataPoint> simplifyRadialDistance(List<DataPoint> data, double xTolerance, double yTolerance) {
-    List<DataPoint> sortedPoints = new ArrayList();
+  private Map<Integer, List<DataPoint>> simplifyRadialDistance(Map<Integer, List<DataPoint>> data, double xTolerance, double yTolerance) {
+    List<SimpleEntry<Integer, DataPoint>> sortedPoints = new ArrayList();
 
-    for(DataPoint point : data) {
-      if(point.isVisible()) {
-        DataPoint validPoint = new DataPoint(point.getTimeframe(), point.getValue(), point.getIndices().get(0), point.aboveMin(), point.belowMax(), point.satisfiesFilter());
-        sortedPoints.add(validPoint);
+    for(Integer turtleIndex : data.keySet()) {
+      for(DataPoint point : data.get(turtleIndex)) {
+        if(point.isVisible()) {
+          DataPoint validPoint = new DataPoint(point.getTimeframe(), point.getValue(), point.getIndices().get(0), point.aboveMin(), point.belowMax(), point.satisfiesFilter());
+          sortedPoints.add(new SimpleEntry(turtleIndex, validPoint));
+        }
       }
     }
 
-    Collections.sort(sortedPoints, (DataPoint p1, DataPoint p2) -> Double.compare(p1.getLocation().getX(), p2.getLocation().getX()));     
+    Collections.sort(sortedPoints, (SimpleEntry<Integer, DataPoint> p1, SimpleEntry<Integer, DataPoint> p2) -> Double.compare(p1.getValue().getLocation().getX(), p2.getValue().getLocation().getX()));     
     sortedPoints = filterPoints(sortedPoints, xTolerance, yTolerance);    
 
-    Collections.sort(sortedPoints, (DataPoint p1, DataPoint p2) -> Double.compare(p1.getLocation().getY(), p2.getLocation().getY()));
+    Collections.sort(sortedPoints, (SimpleEntry<Integer, DataPoint> p1, SimpleEntry<Integer, DataPoint> p2) -> Double.compare(p1.getValue().getLocation().getY(), p2.getValue().getLocation().getY()));
     sortedPoints = filterPoints(sortedPoints, xTolerance, yTolerance);
-        
-    return sortedPoints;
+    
+    Map<Integer, List<DataPoint>> result = new HashMap();
+    for(Integer turtleIndex : data.keySet()) {
+      result.put(turtleIndex, new ArrayList());
+    }
+       
+    for(SimpleEntry<Integer, DataPoint> point : sortedPoints) {
+      result.get(point.getKey()).add(point.getValue());
+    }
+    
+    return result;
   }
   
-  private List<DataPoint> filterPoints(List<DataPoint> points, double xTolerance, double yTolerance) {
+  private List<SimpleEntry<Integer, DataPoint>> filterPoints(List<SimpleEntry<Integer, DataPoint>> points, double xTolerance, double yTolerance) {
     int len = points.size();
     
-    List<DataPoint> newPoints = new ArrayList();
+    List<SimpleEntry<Integer, DataPoint>> newPoints = new ArrayList();
     
     if(len > 0) {
-      DataPoint point;
-      DataPoint prevPoint = points.get(0);
+      SimpleEntry<Integer, DataPoint> point;
+      SimpleEntry<Integer, DataPoint> prevPoint = points.get(0);
 
       newPoints.add(prevPoint);
 
       for (int i = 1; i < len; i++) {
         point = points.get(i);
 
-        if (getDistance(point.getLocation().getX(), prevPoint.getLocation().getX()) > xTolerance || getDistance(point.getLocation().getY(), prevPoint.getLocation().getY()) > yTolerance) {
+        if (getDistance(point.getValue().getLocation().getX(), prevPoint.getValue().getLocation().getX()) > xTolerance || getDistance(point.getValue().getLocation().getY(), prevPoint.getValue().getLocation().getY()) > yTolerance) {
             newPoints.add(point);
             prevPoint = point;
         } else {
-          newPoints.get(newPoints.size() - 1).addIndices(point.getIndices());
+          newPoints.get(newPoints.size() - 1).getValue().addIndices(point.getValue().getIndices());
         }
       }
     }

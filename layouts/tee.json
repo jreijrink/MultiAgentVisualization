@@ -3,33 +3,6 @@
     {
       "charts": [
         {
-          "charts": [],
-          "pos": "RIGHT",
-          "liveUpdate": true,
-          "selectedTurtles": [
-            0
-          ],
-          "parameter": "Turtle",
-          "time": "2016-04-13T14:39:46.346",
-          "chart": "Scatter-chart",
-          "parameterIndex": 0,
-          "parameterValue": "x"
-        }
-      ],
-      "pos": "BOTTOM",
-      "liveUpdate": true,
-      "selectedTurtles": [
-        3
-      ],
-      "parameter": "Battery voltage",
-      "time": "2016-04-13T14:38:07.511",
-      "chart": "Scatter-chart",
-      "parameterIndex": 0,
-      "parameterValue": "battery-voltage"
-    },
-    {
-      "charts": [
-        {
           "charts": [
             {
               "charts": [
@@ -49,7 +22,7 @@
                         6
                       ],
                       "parameter": "Refbox role",
-                      "time": "2016-04-13T14:38:07.622",
+                      "time": "2016-04-13T11:19:58.933",
                       "chart": "Agent-chart",
                       "parameterIndex": 0,
                       "parameterValue": "refbox-role"
@@ -67,7 +40,7 @@
                     6
                   ],
                   "parameter": "Role ID",
-                  "time": "2016-04-13T14:38:07.616",
+                  "time": "2016-04-13T11:19:36.396",
                   "chart": "Agent-chart",
                   "parameterIndex": 0,
                   "parameterValue": "current"
@@ -85,7 +58,7 @@
                 6
               ],
               "parameter": "Blue is homegoal",
-              "time": "2016-04-13T14:38:07.610",
+              "time": "2016-04-13T11:19:36.389",
               "chart": "Agent-chart",
               "parameterIndex": 0,
               "parameterValue": "blue-is-homegoal"
@@ -97,7 +70,7 @@
             0
           ],
           "parameter": "Refbox command",
-          "time": "2016-04-13T14:38:07.605",
+          "time": "2016-04-13T11:19:36.383",
           "chart": "Categorical-chart",
           "parameterIndex": 0,
           "parameterValue": "goals"
@@ -115,7 +88,7 @@
         6
       ],
       "parameter": "Robot in field",
-      "time": "2016-04-13T14:38:07.596",
+      "time": "2016-04-13T11:19:36.373",
       "chart": "Agent-chart",
       "parameterIndex": 0,
       "parameterValue": "robot-in-field"
@@ -142,7 +115,7 @@
                         6
                       ],
                       "parameter": "Ball confidence",
-                      "time": "2016-04-13T14:38:07.560",
+                      "time": "2016-04-13T11:20:05.370",
                       "chart": "Scatter-chart",
                       "parameterIndex": 0,
                       "parameterValue": "confidence"
@@ -160,7 +133,7 @@
                     6
                   ],
                   "parameter": "Restart count worldmodel",
-                  "time": "2016-04-13T14:38:07.555",
+                  "time": "2016-04-13T11:19:36.324",
                   "chart": "Scatter-chart",
                   "parameterIndex": 0,
                   "parameterValue": "restart-count"
@@ -178,7 +151,7 @@
                 6
               ],
               "parameter": "Restart count vision",
-              "time": "2016-04-13T14:38:07.551",
+              "time": "2016-04-13T11:19:36.317",
               "chart": "Scatter-chart",
               "parameterIndex": 0,
               "parameterValue": "restart-count"
@@ -196,7 +169,7 @@
             6
           ],
           "parameter": "Restart count motion",
-          "time": "2016-04-13T14:38:07.547",
+          "time": "2016-04-13T11:19:36.311",
           "chart": "Scatter-chart",
           "parameterIndex": 0,
           "parameterValue": "restart-count"
@@ -214,7 +187,7 @@
         6
       ],
       "parameter": "Packetloss coach",
-      "time": "2016-04-13T14:38:07.541",
+      "time": "2016-04-13T11:19:36.304",
       "chart": "Scatter-chart",
       "parameterIndex": 0,
       "parameterValue": "packetloss-coach"
@@ -240,8 +213,107 @@
                         5,
                         6
                       ],
+                      "parameter": "Emergency status",
+                      "time": "2016-04-13T11:19:36.296",
+                      "chart": "Scatter-chart",
+                      "parameterIndex": 0,
+                      "parameterValue": "emergency-status"
+                    }
+                  ],
+                  "pos": "RIGHT",
+                  "liveUpdate": true,
+                  "selectedTurtles": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6
+                  ],
+                  "parameter": "Battery voltage",
+                  "time": "2016-04-13T11:19:36.287",
+                  "chart": "Scatter-chart",
+                  "parameterIndex": 0,
+                  "parameterValue": "battery-voltage"
+                }
+              ],
+              "pos": "RIGHT",
+              "liveUpdate": true,
+              "selectedTurtles": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              "parameter": "Motor temperature",
+              "time": "2016-04-13T11:19:36.261",
+              "chart": "Scatter-chart",
+              "parameterIndex": 0,
+              "parameterValue": "temperature"
+            }
+          ],
+          "pos": "RIGHT",
+          "liveUpdate": true,
+          "selectedTurtles": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "parameter": "Cpu1 load",
+          "time": "2016-04-13T11:19:36.251",
+          "chart": "Scatter-chart",
+          "parameterIndex": 0,
+          "parameterValue": "cpu1-load"
+        }
+      ],
+      "pos": "BOTTOM",
+      "liveUpdate": true,
+      "selectedTurtles": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "parameter": "Cpu0 load",
+      "time": "2016-04-13T11:19:36.241",
+      "chart": "Scatter-chart",
+      "parameterIndex": 0,
+      "parameterValue": "cpu0-load"
+    },
+    {
+      "charts": [
+        {
+          "charts": [
+            {
+              "charts": [
+                {
+                  "charts": [
+                    {
+                      "charts": [],
+                      "pos": "RIGHT",
+                      "liveUpdate": true,
+                      "selectedTurtles": [
+                        0,
+                        1,
+                        2,
+                        3,
+                        4,
+                        5,
+                        6
+                      ],
                       "parameter": "Worldmodel status",
-                      "time": "2016-04-13T14:38:07.589",
+                      "time": "2016-04-13T11:20:01.898",
                       "chart": "Agent-chart",
                       "parameterIndex": 0,
                       "parameterValue": "status"
@@ -259,7 +331,7 @@
                     6
                   ],
                   "parameter": "Vision status",
-                  "time": "2016-04-13T14:38:07.584",
+                  "time": "2016-04-13T11:19:36.359",
                   "chart": "Agent-chart",
                   "parameterIndex": 0,
                   "parameterValue": "status"
@@ -277,7 +349,7 @@
                 6
               ],
               "parameter": "Camera status",
-              "time": "2016-04-13T14:38:07.579",
+              "time": "2016-04-13T11:19:36.352",
               "chart": "Agent-chart",
               "parameterIndex": 0,
               "parameterValue": "status"
@@ -295,7 +367,7 @@
             6
           ],
           "parameter": "CPB",
-          "time": "2016-04-13T14:38:07.574",
+          "time": "2016-04-13T11:19:36.346",
           "chart": "Agent-chart",
           "parameterIndex": 0,
           "parameterValue": "CPB"
@@ -313,7 +385,7 @@
         6
       ],
       "parameter": "Active",
-      "time": "2016-04-13T14:38:07.569",
+      "time": "2016-04-13T11:19:36.340",
       "chart": "Agent-chart",
       "parameterIndex": 0,
       "parameterValue": "active"
