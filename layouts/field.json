@@ -1,0 +1,114 @@
+{
+  "charts": [
+    {
+      "charts": [
+        {
+          "charts": [],
+          "pos": "LEFT",
+          "liveUpdate": true,
+          "selectedTurtles": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "parameter": "Role ID",
+          "time": "2016-04-13T15:32:24.980",
+          "chart": "Categorical-chart",
+          "parameterIndex": 0,
+          "parameterValue": "current"
+        }
+      ],
+      "pos": "BOTTOM",
+      "liveUpdate": true,
+      "selectedTurtles": [
+        0
+      ],
+      "parameter": "Refbox command",
+      "time": "2016-04-13T15:29:36.761",
+      "chart": "Agent-chart",
+      "parameterIndex": 0,
+      "parameterValue": "goals"
+    },
+    {
+      "charts": [],
+      "ballHistory": false,
+      "turtleHistory": false,
+      "pos": "RIGHT",
+      "liveUpdate": true,
+      "selectedTurtles": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "opponentsHistory": false,
+      "time": "2016-04-13T15:29:36.773",
+      "chart": "Field",
+      "selectedBall": [
+        0
+      ],
+      "selectedOpponents": [
+        0
+      ]
+    },
+    {
+      "charts": [
+        {
+          "charts": [
+            {
+              "charts": [],
+              "pos": "BOTTOM",
+              "liveUpdate": true,
+              "selectedTurtles": [
+                3
+              ],
+              "parameter": "Battery voltage",
+              "time": "2016-04-13T15:32:01.881",
+              "chart": "Scatter-chart",
+              "parameterIndex": 0,
+              "parameterValue": "battery-voltage"
+            }
+          ],
+          "pos": "RIGHT",
+          "liveUpdate": true,
+          "selectedTurtles": [
+            0,
+            1,
+            2,
+            4,
+            5,
+            6
+          ],
+          "parameter": "Battery voltage",
+          "time": "2016-04-13T15:29:36.771",
+          "chart": "Scatter-chart",
+          "parameterIndex": 0,
+          "parameterValue": "battery-voltage"
+        }
+      ],
+      "pos": "TOP",
+      "liveUpdate": true,
+      "selectedTurtles": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "parameter": "Packetloss coach",
+      "time": "2016-04-13T15:29:36.768",
+      "chart": "Scatter-chart",
+      "parameterIndex": 0,
+      "parameterValue": "packetloss-coach"
+    }
+  ]
+}

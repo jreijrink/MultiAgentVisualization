@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ExecutorService;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -20,7 +19,6 @@ import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
@@ -48,7 +46,6 @@ import static prototype.chart.Chart.getTurtleListView;
 import prototype.object.Parameter;
 import prototype.object.Turtle;
 import prototype.object.Value;
-import prototype.settings.Configuration;
 import org.dockfx.DockNode;
 
 public class XYBaseChart implements Chart {  
@@ -333,7 +330,7 @@ public class XYBaseChart implements Chart {
       resizeTimer.cancel();
       resizeTimer.purge();
       resizeTimer = new Timer();
-      resizeTimer.schedule(resizeTask, 500);
+      resizeTimer.schedule(resizeTask, 1000);
     });
     
     this.rootPane.heightProperty().addListener((ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) -> {  
@@ -349,7 +346,7 @@ public class XYBaseChart implements Chart {
       resizeTimer.cancel();
       resizeTimer.purge();
       resizeTimer = new Timer();
-      resizeTimer.schedule(resizeTask, 500);
+      resizeTimer.schedule(resizeTask, 1000);
     });    
   }
   

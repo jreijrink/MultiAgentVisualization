@@ -3,185 +3,19 @@
     {
       "charts": [
         {
-          "charts": [],
-          "pos": "RIGHT",
-          "liveUpdate": true,
-          "selectedTurtles": [
-            0
-          ],
-          "parameter": "Turtle",
-          "time": "2016-04-13T14:39:46.346",
-          "chart": "Scatter-chart",
-          "parameterIndex": 0,
-          "parameterValue": "x"
-        }
-      ],
-      "pos": "BOTTOM",
-      "liveUpdate": true,
-      "selectedTurtles": [
-        3
-      ],
-      "parameter": "Battery voltage",
-      "time": "2016-04-13T14:38:07.511",
-      "chart": "Scatter-chart",
-      "parameterIndex": 0,
-      "parameterValue": "battery-voltage"
-    },
-    {
-      "charts": [
-        {
           "charts": [
             {
-              "charts": [
-                {
-                  "charts": [
-                    {
-                      "charts": [],
-                      "pos": "RIGHT",
-                      "liveUpdate": true,
-                      "selectedTurtles": [
-                        0,
-                        1,
-                        2,
-                        3,
-                        4,
-                        5,
-                        6
-                      ],
-                      "parameter": "Refbox role",
-                      "time": "2016-04-13T14:38:07.622",
-                      "chart": "Agent-chart",
-                      "parameterIndex": 0,
-                      "parameterValue": "refbox-role"
-                    }
-                  ],
-                  "pos": "RIGHT",
-                  "liveUpdate": true,
-                  "selectedTurtles": [
-                    0,
-                    1,
-                    2,
-                    3,
-                    4,
-                    5,
-                    6
-                  ],
-                  "parameter": "Role ID",
-                  "time": "2016-04-13T14:38:07.616",
-                  "chart": "Agent-chart",
-                  "parameterIndex": 0,
-                  "parameterValue": "current"
-                }
-              ],
-              "pos": "RIGHT",
+              "charts": [],
+              "pos": "BOTTOM",
               "liveUpdate": true,
               "selectedTurtles": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6
+                3
               ],
-              "parameter": "Blue is homegoal",
-              "time": "2016-04-13T14:38:07.610",
-              "chart": "Agent-chart",
-              "parameterIndex": 0,
-              "parameterValue": "blue-is-homegoal"
-            }
-          ],
-          "pos": "RIGHT",
-          "liveUpdate": true,
-          "selectedTurtles": [
-            0
-          ],
-          "parameter": "Refbox command",
-          "time": "2016-04-13T14:38:07.605",
-          "chart": "Categorical-chart",
-          "parameterIndex": 0,
-          "parameterValue": "goals"
-        }
-      ],
-      "pos": "BOTTOM",
-      "liveUpdate": true,
-      "selectedTurtles": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6
-      ],
-      "parameter": "Robot in field",
-      "time": "2016-04-13T14:38:07.596",
-      "chart": "Agent-chart",
-      "parameterIndex": 0,
-      "parameterValue": "robot-in-field"
-    },
-    {
-      "charts": [
-        {
-          "charts": [
-            {
-              "charts": [
-                {
-                  "charts": [
-                    {
-                      "charts": [],
-                      "pos": "RIGHT",
-                      "liveUpdate": true,
-                      "selectedTurtles": [
-                        0,
-                        1,
-                        2,
-                        3,
-                        4,
-                        5,
-                        6
-                      ],
-                      "parameter": "Ball confidence",
-                      "time": "2016-04-13T14:38:07.560",
-                      "chart": "Scatter-chart",
-                      "parameterIndex": 0,
-                      "parameterValue": "confidence"
-                    }
-                  ],
-                  "pos": "RIGHT",
-                  "liveUpdate": true,
-                  "selectedTurtles": [
-                    0,
-                    1,
-                    2,
-                    3,
-                    4,
-                    5,
-                    6
-                  ],
-                  "parameter": "Restart count worldmodel",
-                  "time": "2016-04-13T14:38:07.555",
-                  "chart": "Scatter-chart",
-                  "parameterIndex": 0,
-                  "parameterValue": "restart-count"
-                }
-              ],
-              "pos": "RIGHT",
-              "liveUpdate": true,
-              "selectedTurtles": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6
-              ],
-              "parameter": "Restart count vision",
-              "time": "2016-04-13T14:38:07.551",
+              "parameter": "Battery voltage",
+              "time": "2016-04-13T15:32:39.236",
               "chart": "Scatter-chart",
               "parameterIndex": 0,
-              "parameterValue": "restart-count"
+              "parameterValue": "battery-voltage"
             }
           ],
           "pos": "RIGHT",
@@ -190,19 +24,18 @@
             0,
             1,
             2,
-            3,
             4,
             5,
             6
           ],
-          "parameter": "Restart count motion",
-          "time": "2016-04-13T14:38:07.547",
+          "parameter": "Battery voltage",
+          "time": "2016-04-13T15:32:39.233",
           "chart": "Scatter-chart",
           "parameterIndex": 0,
-          "parameterValue": "restart-count"
+          "parameterValue": "battery-voltage"
         }
       ],
-      "pos": "BOTTOM",
+      "pos": "TOP",
       "liveUpdate": true,
       "selectedTurtles": [
         0,
@@ -214,7 +47,7 @@
         6
       ],
       "parameter": "Packetloss coach",
-      "time": "2016-04-13T14:38:07.541",
+      "time": "2016-04-13T15:32:39.230",
       "chart": "Scatter-chart",
       "parameterIndex": 0,
       "parameterValue": "packetloss-coach"
@@ -222,68 +55,8 @@
     {
       "charts": [
         {
-          "charts": [
-            {
-              "charts": [
-                {
-                  "charts": [
-                    {
-                      "charts": [],
-                      "pos": "RIGHT",
-                      "liveUpdate": true,
-                      "selectedTurtles": [
-                        0,
-                        1,
-                        2,
-                        3,
-                        4,
-                        5,
-                        6
-                      ],
-                      "parameter": "Worldmodel status",
-                      "time": "2016-04-13T14:38:07.589",
-                      "chart": "Agent-chart",
-                      "parameterIndex": 0,
-                      "parameterValue": "status"
-                    }
-                  ],
-                  "pos": "RIGHT",
-                  "liveUpdate": true,
-                  "selectedTurtles": [
-                    0,
-                    1,
-                    2,
-                    3,
-                    4,
-                    5,
-                    6
-                  ],
-                  "parameter": "Vision status",
-                  "time": "2016-04-13T14:38:07.584",
-                  "chart": "Agent-chart",
-                  "parameterIndex": 0,
-                  "parameterValue": "status"
-                }
-              ],
-              "pos": "RIGHT",
-              "liveUpdate": true,
-              "selectedTurtles": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6
-              ],
-              "parameter": "Camera status",
-              "time": "2016-04-13T14:38:07.579",
-              "chart": "Agent-chart",
-              "parameterIndex": 0,
-              "parameterValue": "status"
-            }
-          ],
-          "pos": "RIGHT",
+          "charts": [],
+          "pos": "LEFT",
           "liveUpdate": true,
           "selectedTurtles": [
             0,
@@ -294,14 +67,29 @@
             5,
             6
           ],
-          "parameter": "CPB",
-          "time": "2016-04-13T14:38:07.574",
-          "chart": "Agent-chart",
+          "parameter": "Role ID",
+          "time": "2016-04-13T15:32:39.226",
+          "chart": "Categorical-chart",
           "parameterIndex": 0,
-          "parameterValue": "CPB"
+          "parameterValue": "current"
         }
       ],
       "pos": "BOTTOM",
+      "liveUpdate": true,
+      "selectedTurtles": [
+        0
+      ],
+      "parameter": "Refbox command",
+      "time": "2016-04-13T15:32:39.220",
+      "chart": "Agent-chart",
+      "parameterIndex": 0,
+      "parameterValue": "goals"
+    },
+    {
+      "charts": [],
+      "ballHistory": false,
+      "turtleHistory": false,
+      "pos": "RIGHT",
       "liveUpdate": true,
       "selectedTurtles": [
         0,
@@ -312,11 +100,15 @@
         5,
         6
       ],
-      "parameter": "Active",
-      "time": "2016-04-13T14:38:07.569",
-      "chart": "Agent-chart",
-      "parameterIndex": 0,
-      "parameterValue": "active"
+      "opponentsHistory": false,
+      "time": "2016-04-13T15:32:39.238",
+      "chart": "Field",
+      "selectedBall": [
+        0
+      ],
+      "selectedOpponents": [
+        0
+      ]
     }
   ]
 }
