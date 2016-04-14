@@ -68,6 +68,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import prototype.chart.CategoricalChart;
+import prototype.listener.SelectionEventListener;
 import prototype.object.DateComparator;
 import prototype.object.LayoutChart;
 import prototype.settings.DataMapping;
@@ -260,10 +261,7 @@ public class Main extends Application {
     loadMenu = new Menu("Load");
     initLayoutMenu(scene);
     layoutMenu.getItems().add(loadMenu);
-    
-    MenuItem manageMenu = new MenuItem("Manage");
-    layoutMenu.getItems().add(manageMenu);
-    
+        
     return layoutMenu;
   }
   
@@ -736,6 +734,7 @@ public class Main extends Application {
     nodeManager.addEventListener(new DockNodeEventListenerInterface() {
       @Override public void dockNodeClosed(DockNodeEvent e) {
         Chart chart = (Chart)e.getSource().getUserData();
+        chart.clearFilter();
         charts.remove(chart);
       }
 
@@ -774,13 +773,25 @@ public class Main extends Application {
 
     chart.selectFrames(this.startIndex, this.endIndex, this.drag);
     
-    chart.addSelectionEventListener((int startIndex, int endIndex, boolean drag) -> {
-      for (Chart exisintg : this.charts) {
-        this.startIndex = startIndex;
-        this.endIndex = endIndex;
-        this.drag = drag;
-        exisintg.selectFrames(startIndex, endIndex, drag);
+    chart.addSelectionEventListener(new SelectionEventListener() {
+
+      @Override
+      public void timeFrameSelected(int startIndex, int endIndex, boolean drag) {        
+        for (Chart chart : charts) {
+          Main.this.startIndex = startIndex;
+          Main.this.endIndex = endIndex;
+          Main.this.drag = drag;
+          chart.selectFrames(startIndex, endIndex, drag);
+        }
       }
+
+      @Override
+      public void update() {
+        for (Chart chart : charts) {
+          chart.update();
+        }
+      }
+      
     });
     
     Image dockImage = new Image(DockPane.class.getResource("docknode.png").toExternalForm());

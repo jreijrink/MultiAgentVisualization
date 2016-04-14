@@ -17,6 +17,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.chart.LineChart;
@@ -37,6 +38,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.RectangleBuilder;
+import org.apache.pivot.util.Console;
 import prototype.object.ParameterMap;
 import prototype.listener.SelectionEventListener;
 import prototype.object.StringValuePair;
@@ -47,6 +49,7 @@ import prototype.object.Parameter;
 import prototype.object.Turtle;
 import prototype.object.Value;
 import org.dockfx.DockNode;
+import prototype.object.Filter;
 
 public class XYBaseChart implements Chart {  
   public enum ChartType { Scatter, Line };
@@ -54,6 +57,7 @@ public class XYBaseChart implements Chart {
   private Scene scene;
   private List<Turtle> data;
   private ChartType type;
+  private List<SelectionEventListener> listenerList = new ArrayList();
   
   public int[] selectedTurtles;
   public String parameter;
@@ -68,6 +72,8 @@ public class XYBaseChart implements Chart {
   private BorderPane rootPane; 
   private Point2D selectionPoint;
   private Rectangle selectionRectangle;
+  private Point2D filterPoint;
+  private Rectangle filterRectangle;
   private XYChart<Number,Number> XYChart;
   
   private int selectedStartIndex;
@@ -141,7 +147,7 @@ public class XYBaseChart implements Chart {
   
   @Override
   public void addSelectionEventListener(SelectionEventListener listener) {
-    listenerList.add(SelectionEventListener.class, listener);
+    listenerList.add(listener);
   }
   
   @Override
@@ -171,6 +177,31 @@ public class XYBaseChart implements Chart {
       }
       
       setDockTitle();
+    }
+  }
+  
+  @Override
+  public void update() {
+    initialize();
+  }
+  
+  @Override
+  public void clearFilter() {
+    boolean hadFilter = false;
+    for(Turtle turtle : data) {
+      boolean filtersRemove = turtle.removeFilters(this);
+      if(filtersRemove)
+        hadFilter = true;
+    }
+
+    if(hadFilter) {
+      filterRectangle.setY(0);
+      filterRectangle.setHeight(0);
+      filterRectangle.setUserData(new Object[]{ 0.0, 0.0 });
+
+      for(SelectionEventListener listener : listenerList) {
+        listener.update();
+      }
     }
   }
   
@@ -288,6 +319,8 @@ public class XYBaseChart implements Chart {
         }
         
         if(parameterChoiceBox.getSelectionModel().getSelectedItem() != null) {
+          clearFilter();
+          
           parameter = parameterChoiceBox.getSelectionModel().getSelectedItem();
           parameterIndex = indexChoiceBox.getSelectionModel().getSelectedItem();
           parameterValue = valueChoiceBox.getSelectionModel().getSelectedItem();
@@ -356,12 +389,8 @@ public class XYBaseChart implements Chart {
   }
   
   private void notifyListeners(int startIndex, int endIndex, boolean drag) {
-    List<Integer> selectedTimeFrames = new ArrayList();
-    Object[] listeners = listenerList.getListenerList();
-    for (int i = 0; i < listeners.length; i = i+2) {
-      if (listeners[i] == SelectionEventListener.class) {
-        ((SelectionEventListener) listeners[i+1]).timeFrameSelected(startIndex, endIndex, drag);
-      }
+    for(SelectionEventListener listener : listenerList) {
+      listener.timeFrameSelected(startIndex, endIndex, drag);
     }
   }
   
@@ -397,13 +426,29 @@ public class XYBaseChart implements Chart {
     } catch(Exception ex) { }
     
     NumberAxis yAxis = new NumberAxis();
-            
+    try {
+      double min = Double.MAX_VALUE;
+      double max = Double.MIN_VALUE;
+      for(Turtle turlte : data) {
+        for(DataPoint value : turlte.GetAllValues(parameter, parameterIndex, parameterValue)) {
+          if(!value.outOfRange()) {
+            min = Math.min(value.getValue(), min);
+            max = Math.max(value.getValue(), max);
+          }
+        }
+      }
+      if(min != Double.MAX_VALUE && max != Double.MIN_VALUE) {
+        double scale = getScale(max - min);
+        yAxis = new NumberAxis(min, max, scale);
+      }
+    } catch(Exception ex) { }
+    
     switch(type) {
       case Scatter:
-        this.XYChart = new ScatterChart<>(xAxis,yAxis);
+        this.XYChart = new ScatterChart<>(xAxis, yAxis);
         break;
       case Line:
-        this.XYChart = new LineChart<>(xAxis,yAxis);
+        this.XYChart = new LineChart<>(xAxis, yAxis);
         break;
     }
     
@@ -444,8 +489,7 @@ public class XYBaseChart implements Chart {
             }
           }, 0);
     });
-    
-    
+        
     Platform.runLater(()->rootPane.getChildren().clear());
     Platform.runLater(()->rootPane.setCenter(this.XYChart));
     
@@ -480,11 +524,6 @@ public class XYBaseChart implements Chart {
     double xAxisShift = getSceneXShift(xAxis);
     double yAxisShift = getSceneYShift(yAxis);
     
-    double height = yAxis.getHeight();
-
-    double minY = Double.MAX_VALUE;
-    double maxY = Double.MIN_VALUE;  
-
     if(selectionRectangle != null) {
       Object[] userData = (Object[])selectionRectangle.getUserData();
       int startFrame = (int)userData[0];
@@ -498,6 +537,21 @@ public class XYBaseChart implements Chart {
 
       selectionRectangle.setY(yAxisShift);
       selectionRectangle.setHeight(yAxis.getHeight());
+    }    
+
+    if(filterRectangle != null) {
+      Object[] userData = (Object[])filterRectangle.getUserData();
+      double minValue = (double)userData[0];
+      double maxValue = (double)userData[1];
+
+      double start = yAxis.getDisplayPosition(maxValue);
+      double end = yAxis.getDisplayPosition(minValue);
+
+      filterRectangle.setY(yAxisShift + start);
+      filterRectangle.setHeight(end - start);
+
+      filterRectangle.setX(xAxisShift);
+      filterRectangle.setWidth(xAxis.getWidth());
     }
     
     drawInvalidData();
@@ -527,16 +581,18 @@ public class XYBaseChart implements Chart {
       }
     }
 
-    selectionRectangle = RectangleBuilder.create()
-            .x(0)
-            .y(0)
-            .height(yAxis.getHeight())
-            .width(0)
-            .fill(Color.web("0x222222"))
-            .opacity(0.3)
-            .id("selection")
-            .build();
-    selectionRectangle.setUserData(new Object[]{ -1, -1 });
+    if(selectionRectangle == null) {
+      selectionRectangle = RectangleBuilder.create()
+              .x(0)
+              .y(0)
+              .height(yAxis.getHeight())
+              .width(0)
+              .fill(Color.web("0x222222"))
+              .opacity(0.3)
+              .id("selection")
+              .build();
+      selectionRectangle.setUserData(new Object[]{ -1, -1 });
+    }
     
     Platform.runLater(new Runnable() {
       @Override
@@ -544,14 +600,101 @@ public class XYBaseChart implements Chart {
       if(!rootPane.getChildren().contains(selectionRectangle))
         rootPane.getChildren().add(selectionRectangle);
       }
-    }
-    );
+    });
     
     for(Node child : this.rootPane.getChildren()) {
       if(child.getClass() == Rectangle.class) {
         createRectangleSelectionEvents(child, xAxis, yAxis);
       }
     }
+    
+    createAxisFilter();
+  }
+  
+  private void createAxisFilter() {
+    
+    NumberAxis xAxis = (NumberAxis) this.XYChart.getXAxis();
+    NumberAxis yAxis = (NumberAxis) this.XYChart.getYAxis();
+    
+    if(filterRectangle == null) {
+      filterRectangle = RectangleBuilder.create()
+              .x(getSceneXShift(xAxis))
+              .y(0)
+              .height(0)
+              .width(xAxis.getWidth())
+              .fill(Color.web("0x222222"))
+              .opacity(0.3)
+              .id("filter")
+              .build();
+      filterRectangle.setUserData(new Object[]{ 0.0, 0.0 });
+    }
+
+    Platform.runLater(new Runnable() {
+      @Override
+      public void run() {
+      if(!rootPane.getChildren().contains(filterRectangle))
+        rootPane.getChildren().add(filterRectangle);
+      }
+    });
+    
+    yAxis.setOnMouseEntered((MouseEvent event) -> {
+      scene.setCursor(Cursor.CROSSHAIR);
+    });
+    yAxis.setOnMouseExited((MouseEvent event) -> {
+      scene.setCursor(Cursor.DEFAULT);
+    });
+    
+    yAxis.setOnMousePressed((MouseEvent event) -> {
+      scene.setCursor(Cursor.V_RESIZE);
+
+      double xChartShift = getSceneXShift(yAxis);
+      double yChartShift = getSceneYShift(yAxis);
+      double xAxisShift = getSceneXShift(xAxis);
+      double yAxisShift = getSceneYShift(yAxis);
+      
+      filterPoint = new Point2D(event.getX() + xAxisShift, event.getY() + yAxisShift);
+
+      Rectangle selection = getSelectionRectangle(filterPoint, event.getX(), event.getY(), xChartShift, yChartShift, xAxis.getWidth() + xAxisShift - xChartShift, yAxis.getHeight() + yAxisShift- yChartShift);
+            
+      filterRectangle.setY(selection.getY());
+      filterRectangle.setHeight(selection.getHeight());
+    });
+
+    yAxis.setOnMouseDragged((MouseEvent event) -> {
+      scene.setCursor(Cursor.V_RESIZE);
+      
+      double xChartShift = getSceneXShift(yAxis);
+      double yChartShift = getSceneYShift(yAxis);
+      double xAxisShift = getSceneXShift(xAxis);
+      double yAxisShift = getSceneYShift(yAxis);
+      
+      Rectangle selection = getSelectionRectangle(filterPoint, event.getX(), event.getY(), xChartShift, yChartShift, xAxis.getWidth() + xAxisShift - xChartShift, yAxis.getHeight() + yAxisShift- yChartShift);
+      
+      filterRectangle.setY(selection.getY());
+      filterRectangle.setHeight(selection.getHeight());
+    });
+    
+    yAxis.setOnMouseReleased((MouseEvent event) -> {
+      scene.setCursor(Cursor.DEFAULT);
+
+      double xChartShift = getSceneXShift(yAxis);
+      double yChartShift = getSceneYShift(yAxis);
+      double xAxisShift = getSceneXShift(xAxis);
+      double yAxisShift = getSceneYShift(yAxis);
+      
+      Rectangle selection = getSelectionRectangle(filterPoint, event.getX(), event.getY(), xChartShift, yChartShift, xAxis.getWidth() + xAxisShift - xChartShift, yAxis.getHeight() + yAxisShift- yChartShift);
+      
+      filterRectangle.setY(selection.getY());
+      filterRectangle.setHeight(selection.getHeight());
+      
+      double minValue = yAxis.getValueForDisplay(selection.getY() + selection.getHeight() - yAxisShift).doubleValue();
+      double maxValue= yAxis.getValueForDisplay(selection.getY() - yAxisShift).doubleValue();
+      
+      filterRectangle.setUserData(new Object[]{ minValue, maxValue });
+      
+      filter(minValue, maxValue);
+    });    
+    
   }
   
   private void createRectangleSelectionEvents(Node node, NumberAxis xAxis, NumberAxis yAxis) {    
@@ -563,7 +706,7 @@ public class XYBaseChart implements Chart {
 
       selectionPoint = new Point2D(event.getX() + xChartShift, event.getY() + yChartShift);
       
-      Rectangle selection = getSelectionRectangle(event.getX(), event.getY(), xChartShift, yChartShift, xAxis.getWidth() + xAxisShift - xChartShift, yAxis.getHeight() + yAxisShift- yChartShift);
+      Rectangle selection = getSelectionRectangle(selectionPoint, event.getX(), event.getY(), xChartShift, yChartShift, xAxis.getWidth() + xAxisShift - xChartShift, yAxis.getHeight() + yAxisShift- yChartShift);
             
       int start = xAxis.getValueForDisplay(selection.getX() - xAxisShift).intValue();
       int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xAxisShift).intValue();
@@ -577,7 +720,7 @@ public class XYBaseChart implements Chart {
       double xAxisShift = getSceneXShift(xAxis);
       double yAxisShift = getSceneYShift(yAxis);
 
-      Rectangle selection = getSelectionRectangle(event.getX(), event.getY(), xChartShift, yChartShift, xAxis.getWidth() + xAxisShift - xChartShift, yAxis.getHeight() + yAxisShift- yChartShift);
+      Rectangle selection = getSelectionRectangle(selectionPoint, event.getX(), event.getY(), xChartShift, yChartShift, xAxis.getWidth() + xAxisShift - xChartShift, yAxis.getHeight() + yAxisShift- yChartShift);
             
       int start = xAxis.getValueForDisplay(selection.getX() - xAxisShift).intValue();
       int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xAxisShift).intValue();
@@ -594,7 +737,7 @@ public class XYBaseChart implements Chart {
       double xAxisShift = getSceneXShift(xAxis);
       double yAxisShift = getSceneYShift(yAxis);
 
-      Rectangle selection = getSelectionRectangle(event.getX(), event.getY(), xChartShift, yChartShift, xAxis.getWidth() + xAxisShift - xChartShift, yAxis.getHeight() + yAxisShift- yChartShift);
+      Rectangle selection = getSelectionRectangle(selectionPoint, event.getX(), event.getY(), xChartShift, yChartShift, xAxis.getWidth() + xAxisShift - xChartShift, yAxis.getHeight() + yAxisShift- yChartShift);
       
       int start = xAxis.getValueForDisplay(selection.getX() - xAxisShift).intValue();
       int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xAxisShift).intValue();
@@ -606,7 +749,7 @@ public class XYBaseChart implements Chart {
     });
   }
   
-  private Rectangle getSelectionRectangle(double mouseX, double mouseY, double xShift, double yShift, double chartWidth, double chartHeight) {
+  private Rectangle getSelectionRectangle(Point2D start, double mouseX, double mouseY, double xShift, double yShift, double chartWidth, double chartHeight) {
     
     //Bound the rectangle to be only within the chart
     mouseX = Math.max(mouseX, 0);
@@ -614,10 +757,10 @@ public class XYBaseChart implements Chart {
     mouseY = Math.max(mouseY, 0);
     mouseY = Math.min(mouseY, chartHeight);
     
-    double width = mouseX - selectionPoint.getX() + xShift;    
-    double height = mouseY - selectionPoint.getY() + yShift;
-    double x = Math.max(0, selectionPoint.getX() + Math.min(width, 0));
-    double y = selectionPoint.getY() + Math.min(height, 0);
+    double width = mouseX - start.getX() + xShift;    
+    double height = mouseY - start.getY() + yShift;
+    double x = Math.max(0, start.getX() + Math.min(width, 0));
+    double y = start.getY() + Math.min(height, 0);
     
     return new Rectangle(x, y, Math.abs(width), Math.abs(height));
   }
@@ -739,6 +882,22 @@ public class XYBaseChart implements Chart {
     }
   }
   
+  private void filter(double minValue, double maxValue) {    
+    if(minValue != maxValue) {
+      Filter filter = new Filter(this, parameter, parameterIndex, parameterValue, minValue, maxValue);
+
+      for(Turtle turtle : data) {
+        turtle.setFilter(filter);
+      }
+
+      for(SelectionEventListener listener : listenerList) {
+        listener.update();
+      }
+    } else{
+      clearFilter();
+    }
+  }
+    
   private Map<Integer, List<DataPoint>> simplifyRadialDistance(Map<Integer, List<DataPoint>> data, double xTolerance, double yTolerance) {
     List<SimpleEntry<Integer, DataPoint>> sortedPoints = new ArrayList();
 

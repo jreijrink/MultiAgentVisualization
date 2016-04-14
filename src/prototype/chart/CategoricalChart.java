@@ -29,7 +29,6 @@ import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.RectangleBuilder;
@@ -51,6 +50,7 @@ public class CategoricalChart implements Chart {
   
   private Scene scene;
   private List<Turtle> data;
+  private List<SelectionEventListener> listenerList = new ArrayList();
   
   public int[] selectedTurtles;
   public String parameter;
@@ -136,7 +136,7 @@ public class CategoricalChart implements Chart {
   
   @Override
   public void addSelectionEventListener(SelectionEventListener listener) {
-    listenerList.add(SelectionEventListener.class, listener);
+    listenerList.add(listener);
   }
   
   @Override
@@ -145,6 +145,11 @@ public class CategoricalChart implements Chart {
     initialize();
   }
   
+  @Override
+  public void clearFilter() {
+  
+  }
+
   @Override
   public void selectFrames(int startIndex, int endIndex, boolean drag) {
     if((!drag || liveUpdate) && data.size() > 0) {
@@ -172,6 +177,11 @@ public class CategoricalChart implements Chart {
   }
   
   @Override
+  public void update() {
+    initialize();
+  }
+  
+  @Override
   public void setDockNode(DockNode dockNode) {
     this.dockNode = dockNode;
     setDockTitle();
@@ -184,12 +194,8 @@ public class CategoricalChart implements Chart {
   }
   
   private void notifyListeners(int startIndex, int endIndex, boolean drag) {
-    List<Integer> selectedTimeFrames = new ArrayList();
-    Object[] listeners = listenerList.getListenerList();
-    for (int i = 0; i < listeners.length; i = i+2) {
-      if (listeners[i] == SelectionEventListener.class) {
-        ((SelectionEventListener) listeners[i+1]).timeFrameSelected(startIndex, endIndex, drag);
-      }
+    for(SelectionEventListener listener : listenerList) {
+      listener.timeFrameSelected(startIndex, endIndex, drag);
     }
   }
   

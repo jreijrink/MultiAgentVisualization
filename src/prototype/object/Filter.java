@@ -1,19 +1,24 @@
 package prototype.object;
 
 import java.util.List;
+import prototype.chart.Chart;
 
 public class Filter {
 
+  private final Chart chart;
   private final String parameterName;
   private final int parameterIndex;
   private final String valueName;
-  private double[] filterValues;
+  private double minValue;
+  private double maxValue;
 
-  public Filter(String parameterName, int parameterIndex, String valueName, double[] filterValues) {
-      this.parameterName = parameterName;
-      this.parameterIndex = parameterIndex;
-      this.valueName = valueName;
-      this.filterValues = filterValues;
+  public Filter(Chart chart, String parameterName, int parameterIndex, String valueName, double minValue, double maxValue) {
+    this.chart = chart;
+    this.parameterName = parameterName;
+    this.parameterIndex = parameterIndex;
+    this.valueName = valueName;
+    this.minValue = minValue;
+    this.maxValue = maxValue;
   }
   
   public String ParameterName() {
@@ -27,16 +32,16 @@ public class Filter {
   public String ValueName() {
     return this.valueName;
   }
-  
-  public double[] FilterValues() {
-    return this.filterValues;
+    
+  public boolean SatisfiesFilter(double value) {
+    return value >= minValue && value <= maxValue;
   }
   
-  public boolean ContainsFilterValue(double value) {
-    for(int i = 0; i < filterValues.length; i++) {
-      if(filterValues[i] == value)
-      return true;
-    }
-    return false;
+  public Chart GetChart() {
+    return this.chart;
+  }
+  
+  public boolean Equals(Chart chart) {
+    return this.chart == chart;
   }
 }

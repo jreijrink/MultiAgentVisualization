@@ -8,7 +8,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Dialog;
@@ -42,6 +41,7 @@ public class FieldCanvas extends Pane implements Chart{
   private List<Turtle> data;
   private Range selection;
   private Rectangle field;
+  private List<SelectionEventListener> listenerList = new ArrayList();
   
   public boolean liveUpdate;  
   public int[] selectedTurtles;
@@ -153,9 +153,20 @@ public class FieldCanvas extends Pane implements Chart{
     
   @Override
   public void addSelectionEventListener(SelectionEventListener listener) {
-    listenerList.add(SelectionEventListener.class, listener);
+    listenerList.add(listener);
   }
   
+  @Override
+  public void update() {
+    initField();
+    drawField();   
+  }
+  
+  @Override
+  public void clearFilter() {
+  
+  }
+
   @Override
   public void setDockNode(DockNode dockNode) {
     this.dockNode = dockNode;

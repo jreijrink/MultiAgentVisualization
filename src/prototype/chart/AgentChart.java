@@ -50,6 +50,7 @@ public class AgentChart implements Chart {
   
   private Scene scene;
   private List<Turtle> data;
+  private List<SelectionEventListener> listenerList = new ArrayList();
   
   public int[] selectedTurtles;
   public String parameter;
@@ -135,7 +136,7 @@ public class AgentChart implements Chart {
   
   @Override
   public void addSelectionEventListener(SelectionEventListener listener) {
-    listenerList.add(SelectionEventListener.class, listener);
+    listenerList.add(listener);
   }
   
   @Override
@@ -171,6 +172,16 @@ public class AgentChart implements Chart {
   }
   
   @Override
+  public void update() {
+    initialize();
+  }
+  
+  @Override
+  public void clearFilter() {
+  
+  }
+
+  @Override
   public void setDockNode(DockNode dockNode) {
     this.dockNode = dockNode;
     setDockTitle();
@@ -183,12 +194,8 @@ public class AgentChart implements Chart {
   }
   
   private void notifyListeners(int startIndex, int endIndex, boolean drag) {
-    List<Integer> selectedTimeFrames = new ArrayList();
-    Object[] listeners = listenerList.getListenerList();
-    for (int i = 0; i < listeners.length; i = i+2) {
-      if (listeners[i] == SelectionEventListener.class) {
-        ((SelectionEventListener) listeners[i+1]).timeFrameSelected(startIndex, endIndex, drag);
-      }
+    for(SelectionEventListener listener : listenerList) {
+      listener.timeFrameSelected(startIndex, endIndex, drag);
     }
   }
   

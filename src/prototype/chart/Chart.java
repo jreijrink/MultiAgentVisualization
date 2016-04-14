@@ -5,30 +5,32 @@
  */
 package prototype.chart;
 
+import java.util.ArrayList;
 import java.util.EventListener;
 import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
-import javax.swing.event.EventListenerList;
 import prototype.listener.SelectionEventListener;
 import prototype.object.StringValuePair;
 import prototype.object.Turtle;
 import prototype.settings.Configuration;
 import org.dockfx.DockNode;
 
-public interface Chart extends EventListener {  
-  EventListenerList listenerList = new EventListenerList();
+public interface Chart extends EventListener {
   
   public void updateData(List<Turtle> data);
   
   public String getName();  
   public Node getNode();
+  
   public Chart getCopy();
+  
+  public void update();
+  public void clearFilter();
   
   public void setDockNode(DockNode dockNode);
   

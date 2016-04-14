@@ -3,6 +3,7 @@ package prototype.object;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import prototype.chart.Chart;
 import prototype.chart.DataPoint;
 
 public class Turtle {
@@ -10,18 +11,16 @@ public class Turtle {
   public final double[][] data;
   private ParameterMap parameterMap;
   private boolean[] filterMap;
+  private List<Filter> filters;
   
   public Turtle(int turtleID, double[][] data) {
     this.turtleID = turtleID;
     this.data = data;
     this.parameterMap = new ParameterMap();
-    
-    //List<Filter> filters = new ArrayList();
-    //filters.add(new Filter("Role ID", 0, "current", new double[] { 1, 2 }));
-    //applyFilter(filters);
+    this.filters = new ArrayList();
   }
   
-  private void applyFilter(List<Filter> filters) {
+  private void applyFilters(List<Filter> filters) {
     try {
       this.filterMap = new boolean[this.data[0].length];
       for(int i = 0; i < this.data[0].length; i++) {
@@ -33,7 +32,7 @@ public class Turtle {
         int valueIndex = this.parameterMap.GetValueIndex(filter.ParameterName(), filter.ParameterIndex(), filter.ValueName());
         double[] dataset = this.data[valueIndex];
         for(int i = 0; i < dataset.length; i++) {
-          if(!filter.ContainsFilterValue(dataset[i])) {
+          if(!filter.SatisfiesFilter(dataset[i])) {
             this.filterMap[i] = false;
           }
         }
@@ -43,6 +42,29 @@ public class Turtle {
     }
   }
   
+  public void setFilter(Filter newFilter) {    
+    removeFilters(newFilter.GetChart());    
+    filters.add(newFilter);
+    applyFilters(filters);
+  }
+  
+  public boolean removeFilters(Chart chart) {
+    List<Filter> removeList = new ArrayList();
+    for(Filter filter : filters) {
+      if(filter.Equals(chart))
+        removeList.add(filter);
+    }
+    
+    if(removeList.size() > 0) {
+      for(Filter filter : removeList) {
+        filters.remove(filter);
+      }
+      applyFilters(filters);
+      return true;
+    }
+    return false;
+  }
+    
   public DataPoint GetValue(String parameterName, int parameterIndex, String valueName, int index) {
     try {
       Value value = this.parameterMap.GetParameter(parameterName).getValue(valueName);
