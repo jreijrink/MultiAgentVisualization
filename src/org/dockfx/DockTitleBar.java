@@ -78,7 +78,7 @@ public class DockTitleBar extends HBox implements EventHandler<MouseEvent> {
   /**
    * State manipulation buttons including close, maximize, detach, and restore.
    */
-  private Button closeButton, stateButton, minimizeButton, settingsButton;
+  private Button closeButton, stateButton, minimizeButton, copyButton, settingsButton;
 
   /**
    * Creates a default DockTitleBar with captions and dragging behavior.
@@ -106,14 +106,13 @@ public class DockTitleBar extends HBox implements EventHandler<MouseEvent> {
 
     closeButton = new Button();
     closeButton.setOnAction(new EventHandler<ActionEvent>() {
-
       @Override
       public void handle(ActionEvent event) {
         dockNode.close();
       }
     });
     closeButton.visibleProperty().bind(dockNode.closableProperty());
-                
+    
     settingsButton = new Button();
     settingsButton.setOnAction(new EventHandler<ActionEvent>() {
 
@@ -123,6 +122,15 @@ public class DockTitleBar extends HBox implements EventHandler<MouseEvent> {
       }
     });
 
+    copyButton = new Button();
+    copyButton.setOnAction(new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent event) {
+        dockNode.copy();
+      }
+    });
+    copyButton.visibleProperty().bind(dockNode.floatingProperty().not());
+    
     minimizeButton = new Button();
     minimizeButton.setOnAction(new EventHandler<ActionEvent>() {
       public void handle(ActionEvent event) {
@@ -134,7 +142,7 @@ public class DockTitleBar extends HBox implements EventHandler<MouseEvent> {
     Pane fillPane = new Pane();
     HBox.setHgrow(fillPane, Priority.ALWAYS);
 
-    getChildren().addAll(label, fillPane, settingsButton, minimizeButton, stateButton, closeButton);
+    getChildren().addAll(label, fillPane, copyButton, settingsButton, minimizeButton, stateButton, closeButton);
 
     this.addEventHandler(MouseEvent.MOUSE_PRESSED, this);
     this.addEventHandler(MouseEvent.DRAG_DETECTED, this);
@@ -145,6 +153,7 @@ public class DockTitleBar extends HBox implements EventHandler<MouseEvent> {
     closeButton.getStyleClass().add("dock-close-button");
     stateButton.getStyleClass().add("dock-state-button");
     minimizeButton.getStyleClass().add("dock-minimize-button");
+    copyButton.getStyleClass().add("dock-copy-button");
     settingsButton.getStyleClass().add("dock-settings-button");
     this.getStyleClass().add("dock-title-bar");
   }

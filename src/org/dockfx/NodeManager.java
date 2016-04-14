@@ -211,6 +211,13 @@ public class NodeManager {
 			}
             
 			@Override
+			public void dockNodeCopy(DockNodeEvent e) {
+				for (DockNodeEventListenerInterface listener : listeners) {
+					listener.dockNodeCopy(e);
+				}
+			}
+            
+			@Override
 			public void dockNodeDocked(DockNodeEvent e) {
 				for (DockNodeEventListenerInterface listener : listeners) {
 					listener.dockNodeDocked(e);

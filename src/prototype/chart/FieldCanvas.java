@@ -8,6 +8,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Dialog;
@@ -22,7 +23,6 @@ import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
 import javafx.scene.shape.Polygon;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.RectangleBuilder;
 import javafx.scene.text.Text;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
@@ -35,11 +35,10 @@ import static prototype.chart.Chart.getCheckbox;
 import static prototype.chart.Chart.getTurtleListView;
 import prototype.object.Parameter;
 import prototype.object.Range;
-import prototype.object.Value;
 import prototype.settings.Configuration;
 import org.dockfx.DockNode;
 
-public class FieldCanvas extends Pane implements Chart{  
+public class FieldCanvas extends Pane implements Chart{
   private List<Turtle> data;
   private Range selection;
   private Rectangle field;
@@ -146,7 +145,12 @@ public class FieldCanvas extends Pane implements Chart{
   public String getName() {
     return "Field";
   }
-
+  
+  @Override
+  public Chart getCopy() {
+    return new FieldCanvas(data, liveUpdate, selectedTurtles, turtleHistory, selectedBall, ballHistory, selectedOpponents, opponentsHistory);
+  }
+    
   @Override
   public void addSelectionEventListener(SelectionEventListener listener) {
     listenerList.add(SelectionEventListener.class, listener);

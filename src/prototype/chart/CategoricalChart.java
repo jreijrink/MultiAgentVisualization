@@ -130,6 +130,11 @@ public class CategoricalChart implements Chart {
   }
   
   @Override
+  public Chart getCopy() {
+    return new CategoricalChart(scene, selectedTurtles, parameter, parameterIndex, parameterValue, data, liveUpdate);
+  }
+  
+  @Override
   public void addSelectionEventListener(SelectionEventListener listener) {
     listenerList.add(SelectionEventListener.class, listener);
   }

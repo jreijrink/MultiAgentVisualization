@@ -339,6 +339,16 @@ public class DockNode extends VBox implements EventHandler<MouseEvent> {
 	/**
 	 * Fires DockNode close event.
 	 */
+	private void fireCopyEvent() {
+		DockNodeEvent e = new DockNodeEvent(this);
+		for (DockNodeEventListenerInterface listener : listeners) {
+			listener.dockNodeCopy(e);
+		}
+	}
+
+	/**
+	 * Fires DockNode close event.
+	 */
 	private void fireSettingsEvent() {
 		DockNodeEvent e = new DockNodeEvent(this);
 		for (DockNodeEventListenerInterface listener : listeners) {
@@ -1150,8 +1160,12 @@ public class DockNode extends VBox implements EventHandler<MouseEvent> {
         fireDockUpdatedEvent();
 	}
     
+	public void copy() {
+      fireCopyEvent();
+	}
+    
 	public void settings() {
-		fireSettingsEvent();
+      fireSettingsEvent();
 	}
     
 	/**

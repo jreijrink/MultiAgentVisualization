@@ -3,6 +3,50 @@
     {
       "charts": [
         {
+          "charts": [],
+          "pos": "BOTTOM",
+          "liveUpdate": true,
+          "selectedTurtles": [
+            0,
+            1,
+            2,
+            4,
+            5,
+            6
+          ],
+          "parameter": "Battery voltage",
+          "time": "2016-04-14T10:49:13.465",
+          "chart": "Scatter-chart",
+          "parameterIndex": 0,
+          "parameterValue": "battery-voltage"
+        }
+      ],
+      "ballHistory": false,
+      "turtleHistory": false,
+      "pos": "RIGHT",
+      "liveUpdate": true,
+      "selectedTurtles": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "opponentsHistory": false,
+      "time": "2016-04-14T10:49:04.333",
+      "chart": "Field",
+      "selectedBall": [
+        0
+      ],
+      "selectedOpponents": [
+        0
+      ]
+    },
+    {
+      "charts": [
+        {
           "charts": [
             {
               "charts": [],
@@ -12,7 +56,7 @@
                 3
               ],
               "parameter": "Battery voltage",
-              "time": "2016-04-13T15:32:39.236",
+              "time": "2016-04-14T10:49:04.316",
               "chart": "Scatter-chart",
               "parameterIndex": 0,
               "parameterValue": "battery-voltage"
@@ -29,7 +73,7 @@
             6
           ],
           "parameter": "Battery voltage",
-          "time": "2016-04-13T15:32:39.233",
+          "time": "2016-04-14T10:49:04.308",
           "chart": "Scatter-chart",
           "parameterIndex": 0,
           "parameterValue": "battery-voltage"
@@ -47,7 +91,7 @@
         6
       ],
       "parameter": "Packetloss coach",
-      "time": "2016-04-13T15:32:39.230",
+      "time": "2016-04-14T10:49:04.298",
       "chart": "Scatter-chart",
       "parameterIndex": 0,
       "parameterValue": "packetloss-coach"
@@ -68,7 +112,7 @@
             6
           ],
           "parameter": "Role ID",
-          "time": "2016-04-13T15:32:39.226",
+          "time": "2016-04-14T10:49:04.276",
           "chart": "Categorical-chart",
           "parameterIndex": 0,
           "parameterValue": "current"
@@ -80,35 +124,10 @@
         0
       ],
       "parameter": "Refbox command",
-      "time": "2016-04-13T15:32:39.220",
+      "time": "2016-04-14T10:49:04.208",
       "chart": "Agent-chart",
       "parameterIndex": 0,
       "parameterValue": "goals"
-    },
-    {
-      "charts": [],
-      "ballHistory": false,
-      "turtleHistory": false,
-      "pos": "RIGHT",
-      "liveUpdate": true,
-      "selectedTurtles": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6
-      ],
-      "opponentsHistory": false,
-      "time": "2016-04-13T15:32:39.238",
-      "chart": "Field",
-      "selectedBall": [
-        0
-      ],
-      "selectedOpponents": [
-        0
-      ]
     }
   ]
 }

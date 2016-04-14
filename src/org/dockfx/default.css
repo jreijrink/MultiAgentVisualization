@@ -199,6 +199,10 @@
   -fx-graphic: url(close.png);
 }
 
+.dock-copy-button {
+  -fx-graphic: url(copy.png);
+}
+
 .dock-settings-button {
   -fx-graphic: url(settings.png);
 }

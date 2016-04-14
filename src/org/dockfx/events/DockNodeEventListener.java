@@ -89,6 +89,8 @@ public class DockNodeEventListener implements DockNodeEventListenerInterface {
    */
   public void dockNodeDefocused(DockNodeEvent e) {}
 
+  public void dockNodeCopy(DockNodeEvent e) {}
+
   public void dockNodeSettings(DockNodeEvent e) {}
 
   public void dockUpdated(DockNodeEvent e) { }

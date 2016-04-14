@@ -10,6 +10,7 @@ import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
@@ -27,6 +28,7 @@ public interface Chart extends EventListener {
   
   public String getName();  
   public Node getNode();
+  public Chart getCopy();
   
   public void setDockNode(DockNode dockNode);
   

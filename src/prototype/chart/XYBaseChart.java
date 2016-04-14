@@ -135,6 +135,11 @@ public class XYBaseChart implements Chart {
   }
   
   @Override
+  public Chart getCopy() {
+    return new XYBaseChart(scene, type, selectedTurtles, parameter, parameterIndex,parameterValue, data,  liveUpdate);
+  }
+  
+  @Override
   public void addSelectionEventListener(SelectionEventListener listener) {
     listenerList.add(SelectionEventListener.class, listener);
   }
@@ -147,7 +152,7 @@ public class XYBaseChart implements Chart {
   
   @Override
   public void selectFrames(int startIndex, int endIndex, boolean drag) {    
-    if((!drag || liveUpdate) && data.size() > 0) {
+    if((!drag || liveUpdate) && data.size() > 0 && XYChart != null) {
       
       selectedStartIndex = startIndex;
       selectedEndIndex = endIndex;
@@ -361,13 +366,15 @@ public class XYBaseChart implements Chart {
   }
   
   private void clearSelection() {    
-    NumberAxis yAxis = (NumberAxis) XYChart.getYAxis();
-    double yAxisShift = getSceneYShift(yAxis);
-  
-    selectionRectangle.setX(0);
-    selectionRectangle.setY(yAxisShift);
-    selectionRectangle.setWidth(0);
-    selectionRectangle.setHeight(yAxis.getHeight());
+    if(XYChart != null) {
+      NumberAxis yAxis = (NumberAxis) XYChart.getYAxis();
+      double yAxisShift = getSceneYShift(yAxis);
+
+      selectionRectangle.setX(0);
+      selectionRectangle.setY(yAxisShift);
+      selectionRectangle.setWidth(0);
+      selectionRectangle.setHeight(yAxis.getHeight());
+    }
   }
   
   private void initialize() {

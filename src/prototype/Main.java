@@ -11,11 +11,8 @@ import prototype.chart.AgentChart;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.AbstractMap.SimpleEntry;
 import javafx.scene.image.Image;
@@ -749,6 +746,13 @@ public class Main extends Application {
         saveLayout("default");
       }
 
+      @Override
+      public void dockNodeCopy(DockNodeEvent e) {
+        Chart originalChart = (Chart)e.getSource().getUserData();
+        DockNode node = addChart(dockPane, null, null, originalChart.getCopy());
+        node.maximizedProperty().set(true);
+      }
+      
       @Override
       public void dockUpdated(DockNodeEvent e) {
         saveLayout("default");
