@@ -126,7 +126,7 @@ public class AgentChart implements Chart {
   
   @Override
   public String getName() {
-    return "Agent-chart";
+    return "Turtle-chart";
   }
     
   @Override

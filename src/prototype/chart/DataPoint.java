@@ -59,6 +59,6 @@ public class DataPoint {
   }
   
   public boolean isVisible() {
-    return (this.aboveMin && this.belowMax && this.satisfiesFilter);
+    return !outOfRange() && satisfiesFilter();
   }
 }

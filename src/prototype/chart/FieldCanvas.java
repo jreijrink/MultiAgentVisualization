@@ -158,8 +158,7 @@ public class FieldCanvas extends Pane implements Chart{
   
   @Override
   public void update() {
-    initField();
-    drawField();   
+    drawMovingShapes();
   }
   
   @Override

@@ -21,10 +21,10 @@
 package org.dockfx;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Predicate;
+import javafx.application.Platform;
 
 import org.dockfx.events.DockNodeEvent;
 import org.dockfx.events.DockNodeEventListenerInterface;
@@ -58,6 +58,7 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
+import javafx.stage.WindowEvent;
 
 /**
  * Base class for a dock node that provides the layout of the content along with
@@ -76,7 +77,7 @@ public class DockNode extends VBox implements EventHandler<MouseEvent> {
 	 * The stage that this dock node is currently using when floating.
 	 */
 	private Stage stage;
-
+    private Scene scene;
 	/**
 	 * The contents of the dock node, i.e. a TreeView or ListView.
 	 */
@@ -98,6 +99,9 @@ public class DockNode extends VBox implements EventHandler<MouseEvent> {
     private DockPos dockPos;
     private Node sibling;
     private LocalDateTime time;
+    
+    private DockNode enlargedNode;
+    private DockNode enlargingNode;
     
 	/**
 	 * View controller of node inside this DockNode
@@ -124,6 +128,11 @@ public class DockNode extends VBox implements EventHandler<MouseEvent> {
 	 * maximized.
 	 */
 	private static final PseudoClass MAXIMIZED_PSEUDO_CLASS = PseudoClass.getPseudoClass("maximized");
+    
+	private static final PseudoClass ENLARGED_PSEUDO_CLASS = PseudoClass.getPseudoClass("enlarged");
+    
+	private static final PseudoClass ENLARGING_PSEUDO_CLASS = PseudoClass.getPseudoClass("enlarging");
+    
 
 	/**
 	 * Contains listeners for DockNode events
@@ -186,8 +195,8 @@ public class DockNode extends VBox implements EventHandler<MouseEvent> {
 	 *            The caption graphic of this dock node which maintains
 	 *            bidirectional state with the title bar and stage.
 	 */
-	public DockNode(Node contents, String title, Node graphic) {
-		initializeDockNode(contents, title, graphic);
+	public DockNode(Scene scene, Node contents, String title, Node graphic) {
+		initializeDockNode(scene, contents, title, graphic);
 	}
 
 	/**
@@ -200,8 +209,8 @@ public class DockNode extends VBox implements EventHandler<MouseEvent> {
 	 *            The caption title of this dock node which maintains
 	 *            bidirectional state with the title bar and stage.
 	 */
-	public DockNode(Node contents, String title) {
-		this(contents, title, null);
+	public DockNode(Scene scene, Node contents, String title) {
+		this(scene, contents, title, null);
 	}
 
 	/**
@@ -211,8 +220,8 @@ public class DockNode extends VBox implements EventHandler<MouseEvent> {
 	 *            The contents of the dock node which may be a tree or another
 	 *            scene graph node.
 	 */
-	public DockNode(Node contents) {
-		this(contents, null, null);
+	public DockNode(Scene scene, Node contents) {
+		this(scene, contents, null, null);
 	}
 
 	/**
@@ -229,9 +238,9 @@ public class DockNode extends VBox implements EventHandler<MouseEvent> {
 	 *            The caption title of this dock node which maintains
 	 *            bidirectional state with the title bar and stage.
 	 */
-	public DockNode(String FXMLPath, String title, Node graphic) {
+	public DockNode(Scene scene, String FXMLPath, String title, Node graphic) {
 		FXMLLoader loader = loadNode(FXMLPath);
-		initializeDockNode(loader.getRoot(), title, graphic);
+		initializeDockNode(scene, loader.getRoot(), title, graphic);
 		viewController = loader.getController();
 		currentCursor = Cursor.DEFAULT;
 	}
@@ -246,8 +255,8 @@ public class DockNode extends VBox implements EventHandler<MouseEvent> {
 	 *            The caption title of this dock node which maintains
 	 *            bidirectional state with the title bar and stage.
 	 */
-	public DockNode(String FXMLPath, String title) {
-		this(FXMLPath, title, null);
+	public DockNode(Scene scene, String FXMLPath, String title) {
+		this(scene, FXMLPath, title, null);
 	}
 
 	/**
@@ -257,8 +266,8 @@ public class DockNode extends VBox implements EventHandler<MouseEvent> {
 	 * @param FXMLPath
 	 *            path to fxml file.
 	 */
-	public DockNode(String FXMLPath) {
-		this(FXMLPath, null, null);
+	public DockNode(Scene scene, String FXMLPath) {
+		this(scene, FXMLPath, null, null);
 	}
 
 	/**
@@ -293,7 +302,8 @@ public class DockNode extends VBox implements EventHandler<MouseEvent> {
 	 *            The caption title of this dock node which maintains
 	 *            bidirectional state with the title bar and stage.
 	 */
-	private void initializeDockNode(Node contents, String title, Node graphic) {
+	private void initializeDockNode(Scene scene, Node contents, String title, Node graphic) {
+        this.scene = scene;
 		this.titleProperty.setValue(title);
 		this.graphicProperty.setValue(graphic);
 		this.contents = contents;
@@ -336,13 +346,10 @@ public class DockNode extends VBox implements EventHandler<MouseEvent> {
 		}
 	}
 
-	/**
-	 * Fires DockNode close event.
-	 */
-	private void fireCopyEvent() {
+	private void fireEnlargeEvent() {
 		DockNodeEvent e = new DockNodeEvent(this);
 		for (DockNodeEventListenerInterface listener : listeners) {
-			listener.dockNodeCopy(e);
+			listener.dockNodeEnlarge(e);
 		}
 	}
 
@@ -470,7 +477,12 @@ public class DockNode extends VBox implements EventHandler<MouseEvent> {
 	 *            The new contents of this dock node.
 	 */
 	public void setContents(Node contents) {
-		this.getChildren().set(this.getChildren().indexOf(this.contents), contents);
+      this.enlargingProperty.set(false);
+      
+      if(this.getChildren().contains(this.contents))
+        this.getChildren().set(this.getChildren().indexOf(this.contents), contents);
+      else
+        this.getChildren().add(contents);
 		this.contents = contents;
 	}
 
@@ -515,14 +527,30 @@ public class DockNode extends VBox implements EventHandler<MouseEvent> {
 	}
 
 	public void floatNode(Point2D translation, DockPane dockPane) {
-		floatNode(translation, dockPane, false);
+		floatNode(translation, dockPane, false, false);
 	}
 
-	public void floatNode(DockPane dockPane, boolean centerInStage) {
-		floatNode(null, dockPane, centerInStage);
+	public void floatNode(DockPane dockPane, boolean centerInStage, boolean maximized) {
+		floatNode(null, dockPane, centerInStage, maximized);
 	}
 
-	public void floatNode(Point2D translation, DockPane dockPane, boolean centerInStage) {
+	public void floatNode(Point2D translation, DockPane dockPane, boolean centerInStage, boolean maximized) {
+      scene.setCursor(Cursor.WAIT);
+      
+      (new Thread() {
+        public void run() {
+          try {
+            Platform.runLater(()-> floatNodeWork(translation, dockPane, centerInStage, maximized));
+          } catch (Exception ex) {          
+            ex.printStackTrace();
+          } finally {
+            Platform.runLater(()-> scene.setCursor(Cursor.DEFAULT));
+          }
+        }
+      }).start();
+	}
+    
+    private void floatNodeWork(Point2D translation, DockPane dockPane, boolean centerInStage, boolean maximized) { 
 		// position the new stage relative to the old scene offset
 		Point2D floatScene = this.localToScene(0, 0);
 		Point2D floatScreen = this.localToScreen(0, 0);
@@ -546,6 +574,15 @@ public class DockNode extends VBox implements EventHandler<MouseEvent> {
 		}
 
 		stage.initStyle(stageStyle);
+        
+        
+        stage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+          public void handle(WindowEvent we) {
+            if(isEnlarged()) {
+              fireCloseEvent();              
+            }
+          }
+        });        
 
 		// offset the new stage to cover exactly the area the dock was local to
 		// the scene
@@ -623,6 +660,9 @@ public class DockNode extends VBox implements EventHandler<MouseEvent> {
 		// size
 		stage.sizeToScene();
 		stage.show();
+        
+        if(maximized)
+          this.maximizedProperty().set(true);
 
 		getDockTitleBar().getStyleClass().add("dock-title-bar-focused");
 		stage.focusedProperty().addListener(new ChangeListener<Boolean>() {
@@ -637,8 +677,8 @@ public class DockNode extends VBox implements EventHandler<MouseEvent> {
 				}
 			}
 		});
-		setCssFocused();
-	}
+		setCssFocused();      
+    }
 
 	private void setCssFocused() {
 		// this removes all occurrences of undesired css class in css classes
@@ -852,7 +892,6 @@ public class DockNode extends VBox implements EventHandler<MouseEvent> {
 	public final BooleanProperty floatingProperty() {
 		return floatingProperty;
 	}
-
 	private BooleanProperty floatingProperty = new SimpleBooleanProperty(false) {
 		@Override
 		protected void invalidated() {
@@ -867,6 +906,7 @@ public class DockNode extends VBox implements EventHandler<MouseEvent> {
 			return "floating";
 		}
 	};
+    
 
 	public final boolean isFloating() {
 		return floatingProperty.get();
@@ -899,6 +939,52 @@ public class DockNode extends VBox implements EventHandler<MouseEvent> {
 		this.floatableProperty.set(floatable);
 	}
 
+	public final BooleanProperty enlargedProperty() {
+		return enlargedProperty;
+	}
+
+    private BooleanProperty enlargedProperty = new SimpleBooleanProperty(false) {
+		@Override
+		protected void invalidated() {
+			DockNode.this.pseudoClassStateChanged(ENLARGED_PSEUDO_CLASS, get());
+			if (borderPane != null) {
+				borderPane.pseudoClassStateChanged(ENLARGED_PSEUDO_CLASS, get());
+			}
+		}
+
+		@Override
+		public String getName() {
+			return "enlarged";
+		}
+	};    
+
+	public final boolean isEnlarged() {
+		return enlargedProperty.get();
+	}
+    
+	public final BooleanProperty enlargingProperty() {
+		return enlargingProperty;
+	}
+
+    private BooleanProperty enlargingProperty = new SimpleBooleanProperty(false) {
+		@Override
+		protected void invalidated() {
+			DockNode.this.pseudoClassStateChanged(ENLARGING_PSEUDO_CLASS, get());
+			if (borderPane != null) {
+				borderPane.pseudoClassStateChanged(ENLARGING_PSEUDO_CLASS, get());
+			}
+		}
+
+		@Override
+		public String getName() {
+			return "enlarging";
+		}
+	};    
+
+	public final boolean isEnlarging() {
+		return enlargingProperty.get();
+	}
+        
 	/**
 	 * Boolean property maintaining whether this node is minimizable.
 	 *
@@ -1160,8 +1246,26 @@ public class DockNode extends VBox implements EventHandler<MouseEvent> {
         fireDockUpdatedEvent();
 	}
     
-	public void copy() {
-      fireCopyEvent();
+    public void setEnlargedDockNode(DockNode node) {
+      this.enlargedNode = node;
+      this.enlargedProperty.set(true);
+    }
+    
+    public DockNode getEnlargedDockNode() {
+      return this.enlargedNode;
+    }
+    
+    public void setEnlargingDockNode(DockNode node) {
+      this.enlargingNode = node;
+      this.enlargingProperty.set(true);
+    }
+    
+    public DockNode getEnlargingDockNode() {
+      return this.enlargingNode;
+    }
+    
+	public void enlarge() {
+      fireEnlargeEvent();
 	}
     
 	public void settings() {

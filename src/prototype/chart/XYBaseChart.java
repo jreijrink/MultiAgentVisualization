@@ -81,6 +81,7 @@ public class XYBaseChart implements Chart {
     
   private Timer resizeTimer;
   private TimerTask resizeTask;
+  private int visibleDataPoints;
   
   public XYBaseChart(Scene scene, ChartType type, int[] selectedTurtles, String yParameter, int yParameterIndex, String yParameterValue, List<Turtle> data,  boolean liveUpdate) {
     this.scene = scene;
@@ -95,9 +96,11 @@ public class XYBaseChart implements Chart {
     
     this.rootPane = new BorderPane();
     this.rootPane.getStylesheets().add("prototype/plot.css");
+    this.visibleDataPoints = 0;
+    
     initRootPaneListeners();
         
-    initialize();
+    initialize(false);
   }
   
   public XYBaseChart(Scene scene, ChartType type) {
@@ -119,9 +122,11 @@ public class XYBaseChart implements Chart {
     
     this.rootPane = new BorderPane();
     this.rootPane.getStylesheets().add("prototype/plot.css");
+    this.visibleDataPoints = 0;
+    
     initRootPaneListeners();
     
-    initialize();
+    initialize(false);
   }
   
   @Override
@@ -153,7 +158,7 @@ public class XYBaseChart implements Chart {
   @Override
   public void updateData(List<Turtle> data) {
     this.data = data;
-    initialize();
+    initialize(false);
   }
   
   @Override
@@ -182,7 +187,7 @@ public class XYBaseChart implements Chart {
   
   @Override
   public void update() {
-    initialize();
+    initialize(false);
   }
   
   @Override
@@ -338,7 +343,7 @@ public class XYBaseChart implements Chart {
     Optional<Boolean> result = dialog.showAndWait();
 
     if(result.isPresent() && result.get() != null) {
-      initialize();
+      initialize(false);
     }
   }
     
@@ -348,8 +353,7 @@ public class XYBaseChart implements Chart {
     resizeTask = new TimerTask() {
         @Override
         public void run() {
-          System.out.println("schedule");
-          initialize();
+          initialize(true);
           resizeTimer.cancel();
           resizeTimer.purge();
         }
@@ -360,7 +364,7 @@ public class XYBaseChart implements Chart {
       resizeTask = new TimerTask() {
         @Override
         public void run() {
-          initialize();
+          initialize(true);
           resizeTimer.cancel();
           resizeTimer.purge();
         }
@@ -376,7 +380,7 @@ public class XYBaseChart implements Chart {
       resizeTask = new TimerTask() {
         @Override
         public void run() {
-          initialize();
+          initialize(true);
           resizeTimer.cancel();
           resizeTimer.purge();
         }
@@ -406,18 +410,48 @@ public class XYBaseChart implements Chart {
     }
   }
   
-  private void initialize() {
+  private void initialize(boolean resize) {
+    setCursor(Cursor.WAIT);
+    
     this.parameterMap = new ParameterMap();
     (new Thread() {
       public void run() {
-        createChart();
-        Platform.runLater(()-> setMouseListeners());    
-        Platform.runLater(()-> selectFrames(selectedStartIndex, selectedEndIndex, false));
+        List<XYChart.Series> datapoints = getData();
+        if(!resize || dataIncreaseAchieved(datapoints)) {
+          visibleDataPoints = getDataSize(datapoints);
+          Console.log("visibleDataPoints: " + visibleDataPoints);
+          createChart(datapoints);
+          Platform.runLater(()-> setMouseListeners());    
+          Platform.runLater(()-> selectFrames(selectedStartIndex, selectedEndIndex, false));
+        }
+        Platform.runLater(()->  setCursor(Cursor.DEFAULT));
       }
     }).start();
   }
   
-  private void createChart() {    
+  private void setCursor(Cursor cursor) {
+    scene.setCursor(cursor);
+    rootPane.setCursor(cursor);    
+  }
+  
+  private boolean dataIncreaseAchieved(List<XYChart.Series> data) {
+    int newSize = getDataSize(data);
+    double difference = Math.abs(newSize - visibleDataPoints);
+    double threshold = ((double)visibleDataPoints) * 0.2;
+    
+    return difference > threshold; 
+  }
+  
+  private int getDataSize(List<XYChart.Series> data) {
+    int totalSize = 0;
+    for(XYChart.Series series : data) {
+      totalSize += series.getData().size();
+    }    
+    return totalSize;
+  }
+  
+  private void createChart(Collection datapoints) {
+    
     NumberAxis xAxis = new NumberAxis();
     try {
         int timeframes = this.data.get(0).getTimeFrameCount();
@@ -496,9 +530,7 @@ public class XYBaseChart implements Chart {
     xAxis.setLabel("Time");
     yAxis.setLabel(this.parameter + " [" + parameterIndex + "] " + " (" + parameterValue + ")");
 
-    Collection data = getData();
-
-    Platform.runLater(()-> this.XYChart.getData().setAll(data));
+    Platform.runLater(()-> this.XYChart.getData().setAll(datapoints));
     
     Timer timer = new java.util.Timer();
     timer.schedule( 
@@ -638,14 +670,17 @@ public class XYBaseChart implements Chart {
     });
     
     yAxis.setOnMouseEntered((MouseEvent event) -> {
-      scene.setCursor(Cursor.CROSSHAIR);
+      if(scene.getCursor() != Cursor.WAIT)
+        setCursor(Cursor.CROSSHAIR);
     });
     yAxis.setOnMouseExited((MouseEvent event) -> {
-      scene.setCursor(Cursor.DEFAULT);
+      if(scene.getCursor() != Cursor.WAIT)
+        setCursor(Cursor.DEFAULT);
     });
     
     yAxis.setOnMousePressed((MouseEvent event) -> {
-      scene.setCursor(Cursor.V_RESIZE);
+      if(scene.getCursor() != Cursor.WAIT)
+        setCursor(Cursor.V_RESIZE);
 
       double xChartShift = getSceneXShift(yAxis);
       double yChartShift = getSceneYShift(yAxis);
@@ -661,7 +696,7 @@ public class XYBaseChart implements Chart {
     });
 
     yAxis.setOnMouseDragged((MouseEvent event) -> {
-      scene.setCursor(Cursor.V_RESIZE);
+      setCursor(Cursor.V_RESIZE);
       
       double xChartShift = getSceneXShift(yAxis);
       double yChartShift = getSceneYShift(yAxis);
@@ -675,7 +710,7 @@ public class XYBaseChart implements Chart {
     });
     
     yAxis.setOnMouseReleased((MouseEvent event) -> {
-      scene.setCursor(Cursor.DEFAULT);
+      setCursor(Cursor.DEFAULT);
 
       double xChartShift = getSceneXShift(yAxis);
       double yChartShift = getSceneYShift(yAxis);
@@ -765,7 +800,7 @@ public class XYBaseChart implements Chart {
     return new Rectangle(x, y, Math.abs(width), Math.abs(height));
   }
     
-  private Collection getData() { 
+  private List<XYChart.Series> getData() { 
     List<XYChart.Series> seriesList = new ArrayList<>();
         
     if(data.size() > 0) {
@@ -794,8 +829,8 @@ public class XYBaseChart implements Chart {
         }
       }
 
-      double xTolerance = (timeframes / rootPane.getWidth()) * 2.0f;
-      double yTolerance = ((maxValue - minValue) / rootPane.getHeight()) * 2.0f;
+      double xTolerance = (timeframes / rootPane.getWidth()) * 3.0f;
+      double yTolerance = ((maxValue - minValue) / rootPane.getHeight()) * 3.0f;
       
       Map<Integer, List<DataPoint>> filteredPoints = simplifyRadialDistance(datapoints, xTolerance, yTolerance);
           

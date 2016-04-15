@@ -29,13 +29,8 @@ public interface DockNodeEventListenerInterface {
    */
   public void dockNodeClosed(DockNodeEvent e);
 
-  /**
-   * Fired when node copy is selected
-   *
-   * @param e Event object
-   */
-  public void dockNodeCopy(DockNodeEvent e);
-  
+  public void dockNodeEnlarge(DockNodeEvent e);
+    
   /**
    * Fired when node settings is selected
    *

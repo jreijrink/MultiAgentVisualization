@@ -35,8 +35,10 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
@@ -53,6 +55,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.apache.pivot.util.Console;
 import prototype.chart.XYBaseChart.ChartType;
 import prototype.object.Turtle;
 import prototype.settings.Configuration;
@@ -98,7 +101,7 @@ public class Main extends Application {
     this.dockPane = new DockPane();
     this.nodeManager = new NodeManager(dockPane);
         
-    setEventListener();
+    setEventListener(scene);
     
     root.setCenter(dockPane);
     
@@ -117,7 +120,7 @@ public class Main extends Application {
     showDefaultLayout(scene);
   }
   
-  private void  createMenu(Stage stage, Scene scene, BorderPane root) {
+  private void createMenu(Stage stage, Scene scene, BorderPane root) {
     MenuBar menuBar = new MenuBar();
     menuBar.setUseSystemMenuBar(true);
     menuBar.prefWidthProperty().bind(stage.widthProperty());
@@ -189,7 +192,7 @@ public class Main extends Application {
       @Override
       public void handle(Event t) {
         XYBaseChart chart = new XYBaseChart(scene, ChartType.Scatter);
-        addChart(dockPane, null, null, chart);
+        addChart(scene, dockPane, null, null, chart, false);
         chart.updateData(data);
       }
     });
@@ -201,19 +204,19 @@ public class Main extends Application {
       @Override
       public void handle(Event t) {
         XYBaseChart chart = new XYBaseChart(scene, ChartType.Line);
-        addChart(dockPane, null, null, chart);
+        addChart(scene, dockPane, null, null, chart, false);
         chart.updateData(data);
       }
     });
     elementMenu.getItems().add(newLineMenu);
     
-    MenuItem newAgentMenu = new MenuItem("Add agent-chart");
+    MenuItem newAgentMenu = new MenuItem("Add turtle-chart");
     newAgentMenu.setAccelerator(new KeyCodeCombination(KeyCode.DIGIT3, KeyCombination.CONTROL_DOWN));
     newAgentMenu.setOnAction(new EventHandler() {
       @Override
       public void handle(Event t) {
         AgentChart chart = new AgentChart(scene);
-        addChart(dockPane, null, null, chart);
+        addChart(scene, dockPane, null, null, chart, false);
         chart.updateData(data);
       }
     });
@@ -225,7 +228,7 @@ public class Main extends Application {
       @Override
       public void handle(Event t) {
         CategoricalChart chart = new CategoricalChart(scene);
-        addChart(dockPane, null, null, chart);
+        addChart(scene, dockPane, null, null, chart, false);
         chart.updateData(data);
       }
     });
@@ -237,7 +240,7 @@ public class Main extends Application {
       @Override
       public void handle(Event t) {
         FieldCanvas field = new FieldCanvas();
-        addChart(dockPane, null, null, field);
+        addChart(scene, dockPane, null, null, field, false);
         field.updateData(data);
       }
     });
@@ -364,22 +367,31 @@ public class Main extends Application {
   
   private void loadData(Scene scene) {
     if (currentFile != null && configurationComplete()) {
-      try {
-        //scene.getRoot().setCursor(Cursor.WAIT);
-        Parser parser = new Parser();
-        List<Turtle> result = parser.parse(currentFile.getAbsolutePath());
-        updateLayout(result);
-      } catch (Exception ex) {
-        ex.printStackTrace();
-        
-        Alert alert = new Alert(AlertType.INFORMATION);
-        alert.setTitle("Open file");
-        alert.setHeaderText("Something went wrong.");
-        alert.setContentText(ex.getMessage());
-        alert.showAndWait();
-      } finally {
-        //scene.getRoot().setCursor(Cursor.DEFAULT);
-      }
+      scene.setCursor(Cursor.WAIT);
+
+      (new Thread() {
+        public void run() {
+          try {
+            Parser parser = new Parser();
+            List<Turtle> result = parser.parse(currentFile.getAbsolutePath());
+            Platform.runLater(()-> updateLayout(result));
+          } catch (Exception ex) {          
+            ex.printStackTrace();            
+            Platform.runLater(new Runnable() {
+              @Override
+              public void run() {
+                Alert alert = new Alert(AlertType.INFORMATION);
+                alert.setTitle("Open file");
+                alert.setHeaderText("Something went wrong.");
+                alert.setContentText(ex.getMessage());
+                alert.showAndWait();
+              }              
+            });
+          } finally {
+            Platform.runLater(()-> scene.setCursor(Cursor.DEFAULT));
+          }
+        }
+      }).start();
     }    
   }
   
@@ -441,8 +453,9 @@ public class Main extends Application {
         
         if(selected != null) {
           if(sibling == null) {
-          loopList.remove(selected);
-          nodeStructure.put(selected, new HashMap());
+            loopList.remove(selected);
+            if(!selected.isEnlarged())
+              nodeStructure.put(selected, new HashMap());
           } else {
             loopList.remove(selected);
             insertInMap(nodeStructure, sibling, selected);
@@ -722,7 +735,7 @@ public class Main extends Application {
     
     DockNode newNode = null;
     if(newChart != null)
-      newNode = addChart(dockPane, position, sibling, newChart);
+      newNode = addChart(scene, dockPane, position, sibling, newChart, false);
     
     //SORT ON TIME
     for(Map.Entry<LayoutChart, SortedMap> entry : children.entrySet()) {
@@ -730,12 +743,22 @@ public class Main extends Application {
     }
   }
   
-  private void setEventListener() {
+  private void setEventListener(Scene scene) {
     nodeManager.addEventListener(new DockNodeEventListenerInterface() {
-      @Override public void dockNodeClosed(DockNodeEvent e) {
+      @Override public void dockNodeClosed(DockNodeEvent e) {  
         Chart chart = (Chart)e.getSource().getUserData();
-        chart.clearFilter();
-        charts.remove(chart);
+        if(e.getSource().isEnlarged()) {
+          DockNode node = e.getSource().getEnlargedDockNode();      
+          chart.setDockNode(node);
+          node.setContents(chart.getNode());
+          node.enlargedProperty().set(false);
+        } else {
+          if(e.getSource().isEnlarging()) {
+            e.getSource().getEnlargingDockNode().close();
+          }
+          chart.clearFilter();
+          charts.remove(chart);
+        }
       }
 
       @Override
@@ -746,10 +769,11 @@ public class Main extends Application {
       }
 
       @Override
-      public void dockNodeCopy(DockNodeEvent e) {
-        Chart originalChart = (Chart)e.getSource().getUserData();
-        DockNode node = addChart(dockPane, null, null, originalChart.getCopy());
-        node.maximizedProperty().set(true);
+      public void dockNodeEnlarge(DockNodeEvent e) {
+        Chart chart = (Chart)e.getSource().getUserData();
+        DockNode node = addChart(scene, dockPane, null, null, chart, true);        
+        node.setEnlargedDockNode(e.getSource());
+        e.getSource().setEnlargingDockNode(node);
       }
       
       @Override
@@ -761,19 +785,20 @@ public class Main extends Application {
       @Override public void dockNodeWindowed(DockNodeEvent e) {}
       @Override public void dockNodeMinimized(DockNodeEvent e) {}
       @Override public void dockNodeRestored(DockNodeEvent e) {}
-      @Override public void dockNodeDocked(DockNodeEvent e) {}
+      @Override public void dockNodeDocked(DockNodeEvent e) { }
       @Override public void dockNodeFloated(DockNodeEvent e) {}
       @Override public void dockNodeFocused(DockNodeEvent e) {}
       @Override public void dockNodeDefocused(DockNodeEvent e) {}
     });
   }
     
-  private DockNode addChart(DockPane dockPane, DockPos position, DockNode sibling, Chart chart) {
-    this.charts.add(chart);
+  private DockNode addChart(Scene scene, DockPane dockPane, DockPos position, DockNode sibling, Chart chart, boolean enlarged) {
+    if(!enlarged) {
+      this.charts.add(chart);
 
-    chart.selectFrames(this.startIndex, this.endIndex, this.drag);
-    
-    chart.addSelectionEventListener(new SelectionEventListener() {
+      chart.selectFrames(this.startIndex, this.endIndex, this.drag);
+
+      chart.addSelectionEventListener(new SelectionEventListener() {
 
       @Override
       public void timeFrameSelected(int startIndex, int endIndex, boolean drag) {        
@@ -793,10 +818,11 @@ public class Main extends Application {
       }
       
     });
+    }
     
     Image dockImage = new Image(DockPane.class.getResource("docknode.png").toExternalForm());
     
-    DockNode chartDock = nodeManager.getDockNode(chart.getNode(), chart.getName(), new ImageView(dockImage));
+    DockNode chartDock = nodeManager.getDockNode(scene, chart.getNode(), chart.getName(), new ImageView(dockImage));
     chartDock.setUserData(chart);
     chartDock.setPrefSize(500, 1500);
     chartDock.floatingProperty().addListener(new ChangeListener() {
@@ -812,7 +838,7 @@ public class Main extends Application {
     chart.setDockNode(chartDock);
     
     if(position == null) {
-      chartDock.floatNode(dockPane, true);
+      chartDock.floatNode(dockPane, true, enlarged);
     } else {
       if(sibling == null) {
         chartDock.dock(dockPane, position);

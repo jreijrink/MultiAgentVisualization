@@ -26,6 +26,7 @@ import java.util.Stack;
 import org.dockfx.events.DockEvent;
 
 import com.sun.javafx.stage.StageHelper;
+import javafx.beans.binding.Bindings;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -78,7 +79,7 @@ public class DockTitleBar extends HBox implements EventHandler<MouseEvent> {
   /**
    * State manipulation buttons including close, maximize, detach, and restore.
    */
-  private Button closeButton, stateButton, minimizeButton, copyButton, settingsButton;
+  private Button closeButton, stateButton, minimizeButton, enlargeButton, settingsButton;
 
   /**
    * Creates a default DockTitleBar with captions and dragging behavior.
@@ -103,7 +104,6 @@ public class DockTitleBar extends HBox implements EventHandler<MouseEvent> {
         }
       }
     });
-
     closeButton = new Button();
     closeButton.setOnAction(new EventHandler<ActionEvent>() {
       @Override
@@ -121,15 +121,6 @@ public class DockTitleBar extends HBox implements EventHandler<MouseEvent> {
         dockNode.settings();
       }
     });
-
-    copyButton = new Button();
-    copyButton.setOnAction(new EventHandler<ActionEvent>() {
-      @Override
-      public void handle(ActionEvent event) {
-        dockNode.copy();
-      }
-    });
-    copyButton.visibleProperty().bind(dockNode.floatingProperty().not());
     
     minimizeButton = new Button();
     minimizeButton.setOnAction(new EventHandler<ActionEvent>() {
@@ -138,11 +129,20 @@ public class DockTitleBar extends HBox implements EventHandler<MouseEvent> {
       }
     });
 
+    enlargeButton = new Button();
+    enlargeButton.setOnAction(new EventHandler<ActionEvent>() {
+      @Override
+      public void handle(ActionEvent event) {
+        dockNode.enlarge();
+      }
+    });
+    enlargeButton.visibleProperty().bind(Bindings.and(dockNode.enlargedProperty().not(), Bindings.and(dockNode.floatingProperty().not(), dockNode.enlargingProperty().not())));
+    
     // create a pane that will stretch to make the buttons right aligned
     Pane fillPane = new Pane();
     HBox.setHgrow(fillPane, Priority.ALWAYS);
 
-    getChildren().addAll(label, fillPane, copyButton, settingsButton, minimizeButton, stateButton, closeButton);
+    getChildren().addAll(label, fillPane, enlargeButton, settingsButton, minimizeButton, stateButton, closeButton);
 
     this.addEventHandler(MouseEvent.MOUSE_PRESSED, this);
     this.addEventHandler(MouseEvent.DRAG_DETECTED, this);
@@ -153,7 +153,7 @@ public class DockTitleBar extends HBox implements EventHandler<MouseEvent> {
     closeButton.getStyleClass().add("dock-close-button");
     stateButton.getStyleClass().add("dock-state-button");
     minimizeButton.getStyleClass().add("dock-minimize-button");
-    copyButton.getStyleClass().add("dock-copy-button");
+    enlargeButton.getStyleClass().add("dock-enlarge-button");
     settingsButton.getStyleClass().add("dock-settings-button");
     this.getStyleClass().add("dock-title-bar");
   }

@@ -33,6 +33,7 @@ import org.dockfx.events.DockNodeEventListenerInterface;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
+import javafx.scene.Scene;
 import javafx.stage.Window;
 
 /**
@@ -97,8 +98,8 @@ public class NodeManager {
 	 *            bidirectional state with the title bar and stage.
 	 * @return DockNode instance
 	 */
-	public DockNode getDockNode(Node contents, String title, Node graphic) {
-		DockNode dockNode = new DockNode(contents, title, graphic);
+	public DockNode getDockNode(Scene scene, Node contents, String title, Node graphic) {
+		DockNode dockNode = new DockNode(scene, contents, title, graphic);
 		handleNodeCreated(dockNode);
 		return dockNode;
 	}
@@ -115,8 +116,8 @@ public class NodeManager {
 	 *            bidirectional state with the title bar and stage.
 	 * @return DockNode instance
 	 */
-	public DockNode getDockNode(Node contents, String title) {
-		return getDockNode(contents, title, null);
+	public DockNode getDockNode(Scene scene, Node contents, String title) {
+		return getDockNode(scene, contents, title, null);
 	}
 
 	/**
@@ -128,8 +129,8 @@ public class NodeManager {
 	 *            scene graph node.
 	 * @return DockNode instance
 	 */
-	public DockNode getDockNode(Node contents) {
-		return getDockNode(contents, null, null);
+	public DockNode getDockNode(Scene scene, Node contents) {
+		return getDockNode(scene, contents, null, null);
 	}
 
 	/**
@@ -146,8 +147,8 @@ public class NodeManager {
 	 *            bidirectional state with the title bar and stage.
 	 * @return DockNode instance
 	 */
-	public DockNode getDockNode(String fxmlPath, String title, Node graphic) {
-		DockNode dockNode = new DockNode(fxmlPath, title, graphic);
+	public DockNode getDockNode(Scene scene, String fxmlPath, String title, Node graphic) {
+		DockNode dockNode = new DockNode(scene, fxmlPath, title, graphic);
 		handleNodeCreated(dockNode);
 		return dockNode;
 	}
@@ -163,8 +164,8 @@ public class NodeManager {
 	 *            bidirectional state with the title bar and stage.
 	 * @return DockNode instance
 	 */
-	public DockNode getDockNode(String fxmlPath, String title) {
-		DockNode dockNode = new DockNode(fxmlPath, title);
+	public DockNode getDockNode(Scene scene, String fxmlPath, String title) {
+		DockNode dockNode = new DockNode(scene, fxmlPath, title);
 		handleNodeCreated(dockNode);
 		return dockNode;
 	}
@@ -177,8 +178,8 @@ public class NodeManager {
 	 *            path to fxml file.
 	 * @return DockNode instance
 	 */
-	public DockNode getDockNode(String fxmlPath) {
-		DockNode dockNode = new DockNode(fxmlPath);
+	public DockNode getDockNode(Scene scene, String fxmlPath) {
+		DockNode dockNode = new DockNode(scene, fxmlPath);
 		handleNodeCreated(dockNode);
 		return dockNode;
 	}
@@ -211,12 +212,12 @@ public class NodeManager {
 			}
             
 			@Override
-			public void dockNodeCopy(DockNodeEvent e) {
+			public void dockNodeEnlarge(DockNodeEvent e) {
 				for (DockNodeEventListenerInterface listener : listeners) {
-					listener.dockNodeCopy(e);
+					listener.dockNodeEnlarge(e);
 				}
 			}
-            
+                        
 			@Override
 			public void dockNodeDocked(DockNodeEvent e) {
 				for (DockNodeEventListenerInterface listener : listeners) {
