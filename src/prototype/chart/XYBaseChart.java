@@ -175,6 +175,9 @@ public class XYBaseChart implements Chart {
       double start = xAxis.getDisplayPosition(startIndex);
       double end = xAxis.getDisplayPosition(endIndex);
       
+      if(start == end)
+        end +=1;
+      
       if(selectionRectangle != null) {
         selectionRectangle.setX(xAxisShift + start);
         selectionRectangle.setWidth(end - start);
@@ -564,6 +567,9 @@ public class XYBaseChart implements Chart {
       double start = xAxis.getDisplayPosition(startFrame);
       double end = xAxis.getDisplayPosition(endFrame);
 
+      if(start == end)
+        end +=1;
+      
       selectionRectangle.setX(xAxisShift + start);
       selectionRectangle.setWidth(end - start);
 
@@ -778,9 +784,6 @@ public class XYBaseChart implements Chart {
       int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xAxisShift).intValue();
       
       notifyListeners(start, end, false);
-      
-      //selectionRectangle.setX(0);
-      //selectionRectangle.setWidth(0);
     });
   }
   

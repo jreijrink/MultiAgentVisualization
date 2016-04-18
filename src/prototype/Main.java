@@ -568,22 +568,10 @@ public class Main extends Application {
     boolean turtleHistory = false;
     if(root.containsKey("turtleHistory"))
       turtleHistory = (boolean)root.get("turtleHistory");
-    int[] selectedBall = new int[0];
-    if(root.containsKey("selectedBall"))
-      selectedBall = jsonToArray((JSONArray)root.get("selectedBall"));
-    boolean ballHistory = false;
-    if(root.containsKey("ballHistory"))
-      ballHistory = (boolean)root.get("ballHistory");
-    int[] selectedOpponents = new int[0];
-    if(root.containsKey("selectedOpponents"))
-      selectedOpponents = jsonToArray((JSONArray)root.get("selectedOpponents"));
-    boolean opponentsHistory = false;
-    if(root.containsKey("opponentsHistory"))
-      opponentsHistory = (boolean)root.get("opponentsHistory");
     
     LayoutChart node = new LayoutChart(type, pos, time, selectedTurtles, liveUpdate,
                                       parameter, parameterIndex, parameterValue,
-                                      turtleHistory, selectedBall, ballHistory, selectedOpponents, opponentsHistory);
+                                      turtleHistory);
     
     Comparator comparator = new DateComparator();
     SortedMap<LayoutChart, SortedMap> children = new TreeMap(comparator);
@@ -638,10 +626,6 @@ public class Main extends Application {
       root.put("liveUpdate", implChart.liveUpdate);
         root.put("selectedTurtles", arrayToJson(implChart.selectedTurtles));
       root.put("turtleHistory", implChart.turtleHistory);
-      root.put("selectedBall", arrayToJson(implChart.selectedBall));
-      root.put("ballHistory", implChart.ballHistory);
-      root.put("selectedOpponents", arrayToJson(implChart.selectedOpponents));
-      root.put("opponentsHistory", implChart.opponentsHistory);
         
       }
       if(chart.getClass() ==  AgentChart.class) {

@@ -3,28 +3,39 @@
     {
       "charts": [
         {
-          "charts": [],
-          "pos": "TOP",
+          "charts": [
+            {
+              "charts": [],
+              "pos": "BOTTOM",
+              "liveUpdate": true,
+              "selectedTurtles": [
+                3
+              ],
+              "parameter": "Battery voltage",
+              "time": "2016-04-18T14:38:48.464",
+              "chart": "Scatter-chart",
+              "parameterIndex": 0,
+              "parameterValue": "battery-voltage"
+            }
+          ],
+          "pos": "RIGHT",
           "liveUpdate": true,
           "selectedTurtles": [
             0,
             1,
             2,
-            3,
             4,
             5,
             6
           ],
-          "parameter": "Role ID",
-          "time": "2016-04-15T15:02:18.669",
-          "chart": "Categorical-chart",
+          "parameter": "Battery voltage",
+          "time": "2016-04-18T14:38:48.442",
+          "chart": "Scatter-chart",
           "parameterIndex": 0,
-          "parameterValue": "current"
+          "parameterValue": "battery-voltage"
         }
       ],
-      "ballHistory": false,
-      "turtleHistory": true,
-      "pos": "RIGHT",
+      "pos": "TOP",
       "liveUpdate": true,
       "selectedTurtles": [
         0,
@@ -35,15 +46,41 @@
         5,
         6
       ],
-      "opponentsHistory": false,
-      "time": "2016-04-15T15:01:52.194",
-      "chart": "Field",
-      "selectedBall": [
-        0
+      "parameter": "Packetloss coach",
+      "time": "2016-04-18T14:38:48.423",
+      "chart": "Scatter-chart",
+      "parameterIndex": 0,
+      "parameterValue": "packetloss-coach"
+    },
+    {
+      "charts": [],
+      "turtleHistory": true,
+      "pos": "RIGHT",
+      "liveUpdate": true,
+      "selectedTurtles": [
+        3
       ],
-      "selectedOpponents": [
-        0
-      ]
+      "time": "2016-04-18T14:38:48.485",
+      "chart": "Field"
+    },
+    {
+      "charts": [],
+      "pos": "LEFT",
+      "liveUpdate": true,
+      "selectedTurtles": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "parameter": "Role ID",
+      "time": "2016-04-18T14:38:48.327",
+      "chart": "Categorical-chart",
+      "parameterIndex": 0,
+      "parameterValue": "current"
     }
   ]
 }

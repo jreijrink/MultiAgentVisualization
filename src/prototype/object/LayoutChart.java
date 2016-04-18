@@ -22,14 +22,10 @@ public class LayoutChart {
   private final String parameterValue;
   
   private final boolean turtleHistory;
-  private final int[] selectedBall;
-  private final boolean ballHistory;
-  private final int[] selectedOpponents;
-  private final boolean opponentsHistory;
   
   public LayoutChart(String type, String position, String time, int[] selectedTurtles, boolean liveUpdate,
           String parameter, int parameterIndex, String parameterValue,
-          boolean turtleHistory, int[] selectedBall, boolean ballHistory, int[] selectedOpponents, boolean opponentsHistory) {
+          boolean turtleHistory) {
     this.type = type;
     this.position = position;
     this.time = time;
@@ -41,17 +37,13 @@ public class LayoutChart {
     this.parameterValue = parameterValue;
     
     this.turtleHistory = turtleHistory;
-    this.selectedBall = selectedBall;
-    this.ballHistory = ballHistory;
-    this.selectedOpponents = selectedOpponents;
-    this.opponentsHistory = opponentsHistory;
   }
   
   public Chart GetChart(Scene scene, List<Turtle> data) {
     switch(this.type)
     {
       case "Field":
-        return new FieldCanvas(data, liveUpdate, selectedTurtles, turtleHistory, selectedBall, ballHistory, selectedOpponents, opponentsHistory);
+        return new FieldCanvas(data, liveUpdate, selectedTurtles, turtleHistory);
       case "Agent-chart":
         return new AgentChart(scene, selectedTurtles, parameter, parameterIndex, parameterValue, data,  liveUpdate);
       case "Categorical-chart":
