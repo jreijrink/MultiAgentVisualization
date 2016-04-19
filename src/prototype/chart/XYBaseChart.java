@@ -611,8 +611,11 @@ public class XYBaseChart implements Chart {
           ObservableList<Node> children = chart.getChildren();
           
           for(Node child : children) {
-            if(child.getStyleClass().contains("chart-plot-background") || child.getClass().getName().equals("javafx.scene.chart.XYChart$1")) {
-              createRectangleSelectionEvents(child, xAxis, yAxis);
+            if(child.getStyleClass().contains("chart-plot-background")) {
+              createRectangleSelectionEvents(child, null, xAxis, yAxis);
+            }
+            if(child.getClass().getName().equals("javafx.scene.chart.XYChart$1")) {
+              createRectangleSelectionEvents(child, chart, xAxis, yAxis);
             }
           }
         }
@@ -637,14 +640,9 @@ public class XYBaseChart implements Chart {
       public void run() {
       if(!rootPane.getChildren().contains(selectionRectangle))
         rootPane.getChildren().add(selectionRectangle);
+        createRectangleSelectionEvents(selectionRectangle, rootPane, xAxis, yAxis);
       }
     });
-    
-    for(Node child : this.rootPane.getChildren()) {
-      if(child.getClass() == Rectangle.class) {
-        createRectangleSelectionEvents(child, xAxis, yAxis);
-      }
-    }
     
     createAxisFilter();
   }
@@ -688,48 +686,45 @@ public class XYBaseChart implements Chart {
       if(scene.getCursor() != Cursor.WAIT)
         setCursor(Cursor.V_RESIZE);
 
-      double xChartShift = getSceneXShift(yAxis);
-      double yChartShift = getSceneYShift(yAxis);
-      double xAxisShift = getSceneXShift(xAxis);
-      double yAxisShift = getSceneYShift(yAxis);
+      double yAxisShift = getSceneYShift(yAxis);    
+      double xShift = getXShift(yAxis, null, xAxis);
+      double yShift = getYShift(yAxis, null, yAxis);
       
-      filterPoint = new Point2D(event.getX() + xAxisShift, event.getY() + yAxisShift);
+      filterPoint = new Point2D(event.getX(), event.getY());
 
-      Rectangle selection = getSelectionRectangle(filterPoint, event.getX(), event.getY(), xChartShift, yChartShift, xAxis.getWidth() + xAxisShift - xChartShift, yAxis.getHeight() + yAxisShift- yChartShift);
-            
-      filterRectangle.setY(selection.getY());
+      Rectangle selection = getSelectionRectangle(filterPoint, event.getX(), event.getY(), xShift, yShift, xAxis.getWidth(), yAxis.getHeight());
+      
+      filterRectangle.setY(selection.getY() + yAxisShift);
       filterRectangle.setHeight(selection.getHeight());
     });
 
     yAxis.setOnMouseDragged((MouseEvent event) -> {
       setCursor(Cursor.V_RESIZE);
       
-      double xChartShift = getSceneXShift(yAxis);
-      double yChartShift = getSceneYShift(yAxis);
-      double xAxisShift = getSceneXShift(xAxis);
-      double yAxisShift = getSceneYShift(yAxis);
+      double yAxisShift = getSceneYShift(yAxis);    
+      double xShift = getXShift(yAxis, null, xAxis);
+      double yShift = getYShift(yAxis, null, yAxis);
       
-      Rectangle selection = getSelectionRectangle(filterPoint, event.getX(), event.getY(), xChartShift, yChartShift, xAxis.getWidth() + xAxisShift - xChartShift, yAxis.getHeight() + yAxisShift- yChartShift);
+      Rectangle selection = getSelectionRectangle(filterPoint, event.getX(), event.getY(), xShift, yShift, xAxis.getWidth(), yAxis.getHeight());
       
-      filterRectangle.setY(selection.getY());
+      filterRectangle.setY(selection.getY() + yAxisShift);
       filterRectangle.setHeight(selection.getHeight());
     });
     
     yAxis.setOnMouseReleased((MouseEvent event) -> {
       setCursor(Cursor.DEFAULT);
 
-      double xChartShift = getSceneXShift(yAxis);
-      double yChartShift = getSceneYShift(yAxis);
-      double xAxisShift = getSceneXShift(xAxis);
-      double yAxisShift = getSceneYShift(yAxis);
+      double yAxisShift = getSceneYShift(yAxis);    
+      double xShift = getXShift(yAxis, null, xAxis);
+      double yShift = getYShift(yAxis, null, yAxis);
       
-      Rectangle selection = getSelectionRectangle(filterPoint, event.getX(), event.getY(), xChartShift, yChartShift, xAxis.getWidth() + xAxisShift - xChartShift, yAxis.getHeight() + yAxisShift- yChartShift);
+      Rectangle selection = getSelectionRectangle(filterPoint, event.getX(), event.getY(), xShift, yShift, xAxis.getWidth(), yAxis.getHeight());
       
-      filterRectangle.setY(selection.getY());
+      filterRectangle.setY(selection.getY() + yAxisShift);
       filterRectangle.setHeight(selection.getHeight());
       
-      double minValue = yAxis.getValueForDisplay(selection.getY() + selection.getHeight() - yAxisShift).doubleValue();
-      double maxValue= yAxis.getValueForDisplay(selection.getY() - yAxisShift).doubleValue();
+      double minValue = yAxis.getValueForDisplay(selection.getY() + selection.getHeight()).doubleValue();
+      double maxValue = yAxis.getValueForDisplay(selection.getY()).doubleValue();
       
       filterRectangle.setUserData(new Object[]{ minValue, maxValue });
       
@@ -738,50 +733,43 @@ public class XYBaseChart implements Chart {
     
   }
   
-  private void createRectangleSelectionEvents(Node node, NumberAxis xAxis, NumberAxis yAxis) {    
+  private void createRectangleSelectionEvents(Node node, Node parent, NumberAxis xAxis, NumberAxis yAxis) {    
     node.setOnMousePressed((MouseEvent event) -> {
-      double xChartShift = getSceneXShift(node);
-      double yChartShift = getSceneYShift(node);
-      double xAxisShift = getSceneXShift(xAxis);
-      double yAxisShift = getSceneYShift(yAxis);
-
-      selectionPoint = new Point2D(event.getX() + xChartShift, event.getY() + yChartShift);
+      double xShift = getXShift(node, parent, xAxis);
+      double yShift = getYShift(node, parent, yAxis);
       
-      Rectangle selection = getSelectionRectangle(selectionPoint, event.getX(), event.getY(), xChartShift, yChartShift, xAxis.getWidth() + xAxisShift - xChartShift, yAxis.getHeight() + yAxisShift- yChartShift);
+      selectionPoint = new Point2D(event.getX(), event.getY());
+      
+      Rectangle selection = getSelectionRectangle(selectionPoint, event.getX(), event.getY(), xShift, yShift, xAxis.getWidth(), xAxis.getHeight());
             
-      int start = xAxis.getValueForDisplay(selection.getX() - xAxisShift).intValue();
-      int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xAxisShift).intValue();
+      int start = xAxis.getValueForDisplay(selection.getX()).intValue();
+      int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth()).intValue();
       
       notifyListeners(start, end, false);
     });
 
     node.setOnMouseDragged((MouseEvent event) -> {
-      double xChartShift = getSceneXShift(node);
-      double yChartShift = getSceneYShift(node);
-      double xAxisShift = getSceneXShift(xAxis);
-      double yAxisShift = getSceneYShift(yAxis);
-
-      Rectangle selection = getSelectionRectangle(selectionPoint, event.getX(), event.getY(), xChartShift, yChartShift, xAxis.getWidth() + xAxisShift - xChartShift, yAxis.getHeight() + yAxisShift- yChartShift);
+      double xShift = getXShift(node, parent, xAxis);
+      double yShift = getYShift(node, parent, yAxis);
+      
+      Rectangle selection = getSelectionRectangle(selectionPoint, event.getX(), event.getY(), xShift, yShift, xAxis.getWidth(), xAxis.getHeight());
             
-      int start = xAxis.getValueForDisplay(selection.getX() - xAxisShift).intValue();
-      int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xAxisShift).intValue();
+      int start = xAxis.getValueForDisplay(selection.getX()).intValue();
+      int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth()).intValue();
       
       notifyListeners(start, end, true);
       
-      selectionRectangle.setX(selection.getX());
-      selectionRectangle.setWidth(selection.getWidth());
+      selectFrames(start, end, false);      
     });
     
     node.setOnMouseReleased((MouseEvent event) -> {
-      double xChartShift = getSceneXShift(node);
-      double yChartShift = getSceneYShift(node);
-      double xAxisShift = getSceneXShift(xAxis);
-      double yAxisShift = getSceneYShift(yAxis);
+      double xShift = getXShift(node, parent, xAxis);
+      double yShift = getYShift(node, parent, yAxis);
 
-      Rectangle selection = getSelectionRectangle(selectionPoint, event.getX(), event.getY(), xChartShift, yChartShift, xAxis.getWidth() + xAxisShift - xChartShift, yAxis.getHeight() + yAxisShift- yChartShift);
-      
-      int start = xAxis.getValueForDisplay(selection.getX() - xAxisShift).intValue();
-      int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xAxisShift).intValue();
+      Rectangle selection = getSelectionRectangle(selectionPoint, event.getX(), event.getY(), xShift, yShift, xAxis.getWidth(), xAxis.getHeight());
+            
+      int start = xAxis.getValueForDisplay(selection.getX()).intValue();
+      int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth()).intValue();
       
       notifyListeners(start, end, false);
     });
@@ -789,18 +777,25 @@ public class XYBaseChart implements Chart {
   
   private Rectangle getSelectionRectangle(Point2D start, double mouseX, double mouseY, double xShift, double yShift, double chartWidth, double chartHeight) {
     
+    mouseX = (mouseX - xShift);
+    mouseY = (mouseY - yShift);
+    
     //Bound the rectangle to be only within the chart
     mouseX = Math.max(mouseX, 0);
-    mouseX = Math.min(mouseX, chartWidth);    
+    mouseX = Math.min(mouseX, chartWidth);
+    
     mouseY = Math.max(mouseY, 0);
     mouseY = Math.min(mouseY, chartHeight);
     
-    double width = mouseX - start.getX() + xShift;    
-    double height = mouseY - start.getY() + yShift;
-    double x = Math.max(0, start.getX() + Math.min(width, 0));
-    double y = start.getY() + Math.min(height, 0);
+    double startX = start.getX() - xShift;
+    double endX = mouseX;
+    double width = Math.abs(endX - startX);
     
-    return new Rectangle(x, y, Math.abs(width), Math.abs(height));
+    double startY = start.getY() - yShift;
+    double endY = mouseY;
+    double height = Math.abs(endY - startY);
+    
+    return new Rectangle(Math.min(startX, endX), Math.min(startY, endY), width, height);
   }
     
   private List<XYChart.Series> getData() { 
@@ -995,6 +990,22 @@ public class XYBaseChart implements Chart {
     return Math.sqrt((p1 - p2) * (p1 - p2));
   }
 
+  private double getXShift(Node node, Node parent, Node axis) {
+    double xChartShift = getSceneXShift(node);
+    double xAxisShift = getSceneXShift(axis);
+    double xParentShift = parent != null ? getSceneXShift(parent) : 0;
+    double xShift = xAxisShift - (xChartShift - xParentShift);
+    return xShift;
+  }
+  
+  private double getYShift(Node node, Node parent, Node axis) {
+    double yChartShift = getSceneYShift(node);
+    double yAxisShift = getSceneYShift(axis);
+    double yParentShift = parent != null ? getSceneYShift(parent) : 0;
+    double yShift = yAxisShift - (yChartShift - yParentShift);
+    return yShift;
+  }
+  
   private double getSceneXShift(Node node) { 
     double shift = 0; 
     do {  

@@ -9,85 +9,37 @@
               "pos": "BOTTOM",
               "liveUpdate": true,
               "selectedTurtles": [
-                3
+                0
               ],
-              "parameter": "Battery voltage",
-              "time": "2016-04-19T12:03:54.308",
+              "parameter": "Cpu1 load",
+              "time": "2016-04-19T15:09:03.771",
               "chart": "Scatter-chart",
               "parameterIndex": 0,
-              "parameterValue": "battery-voltage"
+              "parameterValue": "cpu1-load"
             }
           ],
           "pos": "RIGHT",
           "liveUpdate": true,
           "selectedTurtles": [
-            0,
-            1,
-            2,
-            3,
-            4,
-            5,
-            6
+            0
           ],
-          "parameter": "Turtle",
-          "time": "2016-04-19T12:03:54.286",
+          "parameter": "Battery voltage",
+          "time": "2016-04-19T15:09:03.756",
           "chart": "Scatter-chart",
           "parameterIndex": 0,
-          "parameterValue": "y"
+          "parameterValue": "battery-voltage"
         }
       ],
-      "pos": "TOP",
+      "pos": "BOTTOM",
       "liveUpdate": true,
       "selectedTurtles": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6
+        0
       ],
-      "parameter": "Packetloss coach",
-      "time": "2016-04-19T12:03:54.271",
+      "parameter": "Cpu0 load",
+      "time": "2016-04-19T15:09:03.703",
       "chart": "Scatter-chart",
       "parameterIndex": 0,
-      "parameterValue": "packetloss-coach"
-    },
-    {
-      "charts": [],
-      "turtleHistory": true,
-      "pos": "RIGHT",
-      "liveUpdate": true,
-      "selectedTurtles": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6
-      ],
-      "time": "2016-04-19T12:03:54.327",
-      "chart": "Field"
-    },
-    {
-      "charts": [],
-      "pos": "LEFT",
-      "liveUpdate": true,
-      "selectedTurtles": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6
-      ],
-      "parameter": "Role ID",
-      "time": "2016-04-19T12:03:54.194",
-      "chart": "Categorical-chart",
-      "parameterIndex": 0,
-      "parameterValue": "current"
+      "parameterValue": "cpu0-load"
     }
   ]
 }
