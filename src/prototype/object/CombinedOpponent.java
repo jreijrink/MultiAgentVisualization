@@ -1,24 +1,27 @@
 package prototype.object;
 
-import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.geometry.Point2D;
-import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import prototype.settings.Configuration;
 
 public class CombinedOpponent {
-  private List<Point2D> positions;
-  private List<Integer> turtles;
-  private List<Rectangle> shapes;
-  private Configuration configuration;
+  private final List<Point2D> positions;
+  private final List<Integer> turtles;
+  private final double id;
+  private final List<Rectangle> shapes;
+  private final Configuration configuration;
   
-  public CombinedOpponent() {
+  public CombinedOpponent(double id, int turtle, Point2D position) {
     this.positions = new ArrayList();
     this.turtles = new ArrayList();
     this.shapes = new ArrayList();
     this.configuration = new Configuration();
+    
+    this.id = id;
+    this.turtles.add(turtle);
+    this.positions.add(position);
   }
 
   public Point2D getAveragePosition() {
@@ -38,6 +41,10 @@ public class CombinedOpponent {
       return null;
   }
   
+  public double getId() {
+    return id;
+  }
+  
   public float distance(Point2D destination) {
     Point2D source = getAveragePosition();
     
@@ -47,15 +54,24 @@ public class CombinedOpponent {
       return 0;
   }
   
-  public boolean containtTurtle(int turtle) {
+  public boolean containsTurtle(int turtle) {
     return turtles.contains(turtle);    
   }
   
   public void addTurtle(int turtle, Point2D position) throws Exception {
-    if(containtTurtle(turtle))
-      throw new Exception("Turtle already in set");      
+    if(containsTurtle(turtle))
+      throw new Exception("Turtle already in set");
+    
     this.turtles.add(turtle);
     this.positions.add(position);
+  }
+  
+  public int[] getTurtles() {
+    int[] turtlesArray = new int[this.turtles.size()];
+    for(int i = 0; i < this.turtles.size(); i++) {
+      turtlesArray[i] = this.turtles.get(i);
+    }
+    return turtlesArray;
   }
 
   public List<Rectangle> createShape() {
@@ -74,7 +90,7 @@ public class CombinedOpponent {
       double height = (rectSize - offsetY) / this.configuration.MaxTurtles;
       
       for(int index = 0; index < this.configuration.MaxTurtles; index++) {
-        if(containtTurtle(index)) {
+        if(containsTurtle(index)) {
           Rectangle turtleRect = new Rectangle(position.getX() - ((rectSize - offsetX) / 2), (position.getY() - ((rectSize - offsetY) / 2)) + (height * index) , rectSize - offsetX, height);
           turtleRect.getStyleClass().add(String.format("default-color%d-opponent-combined", index));
           this.shapes.add(turtleRect);

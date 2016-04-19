@@ -12,7 +12,7 @@
                 3
               ],
               "parameter": "Battery voltage",
-              "time": "2016-04-18T14:38:48.464",
+              "time": "2016-04-19T12:03:54.308",
               "chart": "Scatter-chart",
               "parameterIndex": 0,
               "parameterValue": "battery-voltage"
@@ -24,15 +24,16 @@
             0,
             1,
             2,
+            3,
             4,
             5,
             6
           ],
-          "parameter": "Battery voltage",
-          "time": "2016-04-18T14:38:48.442",
+          "parameter": "Turtle",
+          "time": "2016-04-19T12:03:54.286",
           "chart": "Scatter-chart",
           "parameterIndex": 0,
-          "parameterValue": "battery-voltage"
+          "parameterValue": "y"
         }
       ],
       "pos": "TOP",
@@ -47,7 +48,7 @@
         6
       ],
       "parameter": "Packetloss coach",
-      "time": "2016-04-18T14:38:48.423",
+      "time": "2016-04-19T12:03:54.271",
       "chart": "Scatter-chart",
       "parameterIndex": 0,
       "parameterValue": "packetloss-coach"
@@ -58,9 +59,15 @@
       "pos": "RIGHT",
       "liveUpdate": true,
       "selectedTurtles": [
-        3
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
       ],
-      "time": "2016-04-18T14:38:48.485",
+      "time": "2016-04-19T12:03:54.327",
       "chart": "Field"
     },
     {
@@ -77,7 +84,7 @@
         6
       ],
       "parameter": "Role ID",
-      "time": "2016-04-18T14:38:48.327",
+      "time": "2016-04-19T12:03:54.194",
       "chart": "Categorical-chart",
       "parameterIndex": 0,
       "parameterValue": "current"
