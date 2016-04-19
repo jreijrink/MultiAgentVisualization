@@ -23,7 +23,7 @@
                       ],
                       "parameter": "Refbox role",
                       "time": "2016-04-12T10:49:14.450",
-                      "chart": "Agent-chart",
+                      "chart": "Turtle-chart",
                       "parameterIndex": 0,
                       "parameterValue": "refbox-role"
                     }
@@ -41,7 +41,7 @@
                   ],
                   "parameter": "Role ID",
                   "time": "2016-04-12T10:49:14.435",
-                  "chart": "Agent-chart",
+                  "chart": "Turtle-chart",
                   "parameterIndex": 0,
                   "parameterValue": "current"
                 }
@@ -59,7 +59,7 @@
               ],
               "parameter": "Blue is homegoal",
               "time": "2016-04-12T10:49:14.419",
-              "chart": "Agent-chart",
+              "chart": "Turtle-chart",
               "parameterIndex": 0,
               "parameterValue": "blue-is-homegoal"
             }
@@ -89,7 +89,7 @@
       ],
       "parameter": "Robot in field",
       "time": "2016-04-12T10:49:14.390",
-      "chart": "Agent-chart",
+      "chart": "Turtle-chart",
       "parameterIndex": 0,
       "parameterValue": "robot-in-field"
     },
@@ -215,7 +215,7 @@
                       ],
                       "parameter": "Worldmodel status",
                       "time": "2016-04-12T10:49:14.379",
-                      "chart": "Agent-chart",
+                      "chart": "Turtle-chart",
                       "parameterIndex": 0,
                       "parameterValue": "status"
                     }
@@ -233,7 +233,7 @@
                   ],
                   "parameter": "Vision status",
                   "time": "2016-04-12T10:49:14.367",
-                  "chart": "Agent-chart",
+                  "chart": "Turtle-chart",
                   "parameterIndex": 0,
                   "parameterValue": "status"
                 }
@@ -251,7 +251,7 @@
               ],
               "parameter": "Camera status",
               "time": "2016-04-12T10:49:14.356",
-              "chart": "Agent-chart",
+              "chart": "Turtle-chart",
               "parameterIndex": 0,
               "parameterValue": "status"
             }
@@ -269,7 +269,7 @@
           ],
           "parameter": "CPB",
           "time": "2016-04-12T10:49:14.344",
-          "chart": "Agent-chart",
+          "chart": "Turtle-chart",
           "parameterIndex": 0,
           "parameterValue": "CPB"
         }
@@ -287,7 +287,7 @@
       ],
       "parameter": "Active",
       "time": "2016-04-12T10:49:14.322",
-      "chart": "Agent-chart",
+      "chart": "Turtle-chart",
       "parameterIndex": 0,
       "parameterValue": "active"
     },

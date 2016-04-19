@@ -44,7 +44,7 @@ public class LayoutChart {
     {
       case "Field":
         return new FieldCanvas(data, liveUpdate, selectedTurtles, turtleHistory);
-      case "Agent-chart":
+      case "Turtle-chart":
         return new AgentChart(scene, selectedTurtles, parameter, parameterIndex, parameterValue, data,  liveUpdate);
       case "Categorical-chart":
         return new CategoricalChart(scene, selectedTurtles, parameter, parameterIndex, parameterValue, data, liveUpdate);

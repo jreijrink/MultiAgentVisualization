@@ -29,7 +29,7 @@
       ],
       "parameter": "Robot in field",
       "time": "2016-04-12T15:02:58.418",
-      "chart": "Agent-chart",
+      "chart": "Turtle-chart",
       "parameterIndex": 0,
       "parameterValue": "robot-in-field"
     }

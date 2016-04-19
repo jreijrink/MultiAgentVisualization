@@ -29,7 +29,7 @@
       ],
       "parameter": "Refbox command",
       "time": "2016-04-13T15:29:36.761",
-      "chart": "Agent-chart",
+      "chart": "Turtle-chart",
       "parameterIndex": 0,
       "parameterValue": "goals"
     },

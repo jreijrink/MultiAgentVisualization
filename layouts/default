@@ -1,6 +1,23 @@
 {
   "charts": [
     {
+      "charts": [],
+      "turtleHistory": false,
+      "pos": "RIGHT",
+      "liveUpdate": true,
+      "selectedTurtles": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "time": "2016-04-19T15:23:00.364",
+      "chart": "Field"
+    },
+    {
       "charts": [
         {
           "charts": [
@@ -9,25 +26,69 @@
               "pos": "BOTTOM",
               "liveUpdate": true,
               "selectedTurtles": [
-                0
+                3
               ],
-              "parameter": "Cpu1 load",
-              "time": "2016-04-19T15:09:03.771",
+              "parameter": "Battery voltage",
+              "time": "2016-04-19T15:23:00.350",
               "chart": "Scatter-chart",
               "parameterIndex": 0,
-              "parameterValue": "cpu1-load"
+              "parameterValue": "battery-voltage"
             }
           ],
           "pos": "RIGHT",
           "liveUpdate": true,
           "selectedTurtles": [
-            0
+            0,
+            1,
+            2,
+            4,
+            5,
+            6
           ],
           "parameter": "Battery voltage",
-          "time": "2016-04-19T15:09:03.756",
+          "time": "2016-04-19T15:23:00.340",
           "chart": "Scatter-chart",
           "parameterIndex": 0,
           "parameterValue": "battery-voltage"
+        }
+      ],
+      "pos": "TOP",
+      "liveUpdate": true,
+      "selectedTurtles": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "parameter": "Packetloss coach",
+      "time": "2016-04-19T15:23:00.329",
+      "chart": "Scatter-chart",
+      "parameterIndex": 0,
+      "parameterValue": "packetloss-coach"
+    },
+    {
+      "charts": [
+        {
+          "charts": [],
+          "pos": "LEFT",
+          "liveUpdate": true,
+          "selectedTurtles": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "parameter": "Role ID",
+          "time": "2016-04-19T15:23:00.304",
+          "chart": "Categorical-chart",
+          "parameterIndex": 0,
+          "parameterValue": "current"
         }
       ],
       "pos": "BOTTOM",
@@ -35,11 +96,11 @@
       "selectedTurtles": [
         0
       ],
-      "parameter": "Cpu0 load",
-      "time": "2016-04-19T15:09:03.703",
-      "chart": "Scatter-chart",
+      "parameter": "Refbox command",
+      "time": "2016-04-19T15:23:00.228",
+      "chart": "Turtle-chart",
       "parameterIndex": 0,
-      "parameterValue": "cpu0-load"
+      "parameterValue": "goals"
     }
   ]
 }
