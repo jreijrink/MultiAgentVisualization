@@ -48,7 +48,7 @@ import prototype.object.CombinedOpponent;
 
 public class FieldCanvas extends Pane implements Chart{
   private List<Turtle> data;
-  private Range selection;
+  private Range<Integer> selection;
   private Rectangle field;
   private List<SelectionEventListener> listenerList = new ArrayList();
   

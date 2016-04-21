@@ -2,38 +2,52 @@ package prototype.object;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import prototype.chart.Chart;
 import prototype.chart.DataPoint;
 
 public class Turtle {
   public final int turtleID;
   public final double[][] data;
-  private ParameterMap parameterMap;
+  private final ParameterMap parameterMap;
   private boolean[] filterMap;
-  private List<Filter> filters;
+  private final Map<Chart, List<Filter>> filters;
   
   public Turtle(int turtleID, double[][] data) {
     this.turtleID = turtleID;
     this.data = data;
     this.parameterMap = new ParameterMap();
-    this.filters = new ArrayList();
+    this.filters = new HashMap();
   }
   
-  private void applyFilters(List<Filter> filters) {
+  private void applyFilters() {
     try {
       this.filterMap = new boolean[this.data[0].length];
       for(int i = 0; i < this.data[0].length; i++) {
         this.filterMap[i] = true;
       }
       
-      //STREAM
-      for(Filter filter : filters) {
-        int valueIndex = this.parameterMap.GetValueIndex(filter.ParameterName(), filter.ParameterIndex(), filter.ValueName());
-        double[] dataset = this.data[valueIndex];
-        for(int i = 0; i < dataset.length; i++) {
-          if(!filter.SatisfiesFilter(dataset[i])) {
-            this.filterMap[i] = false;
+      for(Chart chart : filters.keySet()) {
+        if(filters.get(chart).size() > 0) {
+          boolean[] localFilterMap = new boolean[this.data[0].length];
+          for(int i = 0; i < this.data[0].length; i++) {
+            localFilterMap[i] = false;
+          }
+
+          for(Filter filter : filters.get(chart)) {          
+            int valueIndex = this.parameterMap.GetValueIndex(filter.ParameterName(), filter.ParameterIndex(), filter.ValueName());
+            double[] dataset = this.data[valueIndex];
+            for(int i = 0; i < this.data[0].length; i++) {
+              if(filter.SatisfiesFilter(dataset[i])) {
+                localFilterMap[i] = true;
+              }
+            }
+          }
+
+          for(int i = 0; i < this.data[0].length; i++) {
+            this.filterMap[i] = this.filterMap[i] && localFilterMap[i];
           }
         }
       }
@@ -42,29 +56,36 @@ public class Turtle {
     }
   }
   
-  public void setFilter(Filter newFilter) {    
-    removeFilters(newFilter.GetChart());    
-    filters.add(newFilter);
-    applyFilters(filters);
+  public void setFilter(Filter newFilter) {
+    Chart chart = newFilter.GetChart();
+    if(!filters.containsKey(chart))
+      filters.put(chart, new ArrayList());
+    filters.get(chart).add(newFilter);
+    applyFilters();
   }
   
   public boolean removeFilters(Chart chart) {
-    List<Filter> removeList = new ArrayList();
-    for(Filter filter : filters) {
-      if(filter.Equals(chart))
-        removeList.add(filter);
-    }
-    
-    if(removeList.size() > 0) {
-      for(Filter filter : removeList) {
-        filters.remove(filter);
-      }
-      applyFilters(filters);
+    if(filters.containsKey(chart)) {
+      filters.remove(chart);
+      applyFilters();
       return true;
     }
     return false;
   }
     
+  public boolean removeFilter(Filter filter) {
+    Chart chart = filter.GetChart();
+    boolean success = false;
+    
+    if(filters.containsKey(chart)) {
+      success = filters.get(chart).remove(filter);
+      if(success) 
+        applyFilters();
+    }
+    
+    return success;
+  }
+  
   public DataPoint GetValue(String parameterName, int parameterIndex, String valueName, int index) {
     try {
       Value value = this.parameterMap.GetParameter(parameterName).getValue(valueName);

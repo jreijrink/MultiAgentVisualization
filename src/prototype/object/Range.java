@@ -1,24 +1,24 @@
 package prototype.object;
 
-public class Range {
+public class Range<T extends Number>  {
 
-    private int low;
-    private int high;
+    private final T low;
+    private final T high;
 
-    public Range(int low, int high){
+    public Range(T low, T high){
         this.low = low;
         this.high = high;
     }
 
-    public boolean contains(int number){
-        return (number >= low && number <= high);
+    public boolean contains(T number){
+        return (number.doubleValue() >= low.doubleValue() && number.doubleValue() <= high.doubleValue());
     }
     
-    public int GetMin() {
+    public T GetMin() {
       return low;
     }
     
-    public int GetMax() {
+    public T GetMax() {
       return high;
     }
 }

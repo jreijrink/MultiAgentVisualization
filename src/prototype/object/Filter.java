@@ -9,16 +9,23 @@ public class Filter {
   private final String parameterName;
   private final int parameterIndex;
   private final String valueName;
-  private double minValue;
-  private double maxValue;
+  private Range range;
+  private List<Double> values;
 
-  public Filter(Chart chart, String parameterName, int parameterIndex, String valueName, double minValue, double maxValue) {
+  public Filter(Chart chart, String parameterName, int parameterIndex, String valueName, Range range) {
     this.chart = chart;
     this.parameterName = parameterName;
     this.parameterIndex = parameterIndex;
     this.valueName = valueName;
-    this.minValue = minValue;
-    this.maxValue = maxValue;
+    this.range = range;
+  }
+  
+  public Filter(Chart chart, String parameterName, int parameterIndex, String valueName, List<Double> values) {
+    this.chart = chart;
+    this.parameterName = parameterName;
+    this.parameterIndex = parameterIndex;
+    this.valueName = valueName;
+    this.values = values;
   }
   
   public String ParameterName() {
@@ -34,7 +41,13 @@ public class Filter {
   }
     
   public boolean SatisfiesFilter(double value) {
-    return value >= minValue && value <= maxValue;
+    if(range != null) {
+      return range.contains(value);
+    }
+    if(values != null) {
+      return values.contains(value);
+    }
+    return false;
   }
   
   public Chart GetChart() {
