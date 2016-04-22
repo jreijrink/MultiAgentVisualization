@@ -75,6 +75,7 @@ public class AgentChart implements Chart {
   
   private int selectedStartIndex;
   private int selectedEndIndex;
+  private boolean forward;
   
   public AgentChart(Scene scene, int[] selectedTurtles, String yParameter, int yParameterIndex, String yParameterValue, List<Turtle> data, boolean liveUpdate) {
     this.scene = scene;
@@ -91,10 +92,14 @@ public class AgentChart implements Chart {
     initialize();
   }
   
-  public AgentChart(Scene scene) {
+  public AgentChart(Scene scene, List<Turtle> data, int selectionStart, int selectionEnd, boolean forward) {
     this.scene = scene;
     
-    this.parameterMap = new ParameterMap();
+    this.parameterMap = new ParameterMap();    
+    
+    this.selectedStartIndex = selectionStart;    
+    this.selectedEndIndex = selectionEnd;    
+    this.forward = forward;
     
     Configuration configuration = new Configuration();
     this.selectedTurtles = new int[configuration.MaxTurtles];
@@ -103,7 +108,7 @@ public class AgentChart implements Chart {
     }
     
     this.parameterIndex = 0;
-    this.data = new ArrayList();
+    this.data = data;
     this.liveUpdate = true;
     
     if(this.parameterMap.GetParametersOfType(Type.Categorical).size() > 0) {
@@ -152,6 +157,7 @@ public class AgentChart implements Chart {
       
       selectedStartIndex = startIndex;
       selectedEndIndex = endIndex;
+      this.forward = forward;
       
       NumberAxis xAxis = (NumberAxis) scattterChart.getXAxis();
       double xAxisShift = getSceneXShift(xAxis);
@@ -176,8 +182,8 @@ public class AgentChart implements Chart {
           selectionFrame.setX(xAxisShift + end);
         else
           selectionFrame.setX(xAxisShift + start);
+        selectionFrame.setUserData(forward);
       }
-      selectionFrame.setUserData(forward);
       
       setDockTitle();
     }
@@ -285,7 +291,7 @@ public class AgentChart implements Chart {
               @Override
               public void run() {
                 plotData();
-                selectFrames(selectedStartIndex, selectedEndIndex, false, true);
+                selectFrames(selectedStartIndex, selectedEndIndex, false, forward);
                 timer.cancel();
                 timer.purge();
               }
@@ -497,6 +503,9 @@ public class AgentChart implements Chart {
         }
       }
 
+      if(selectionRectangle != null) 
+        rootPane.getChildren().remove(selectionRectangle);
+      
       selectionRectangle = RectangleBuilder.create()
               .x(initSelectionX)
               .y(yAxisShift + 5)
@@ -509,27 +518,26 @@ public class AgentChart implements Chart {
               .build();    
       rootPane.getChildren().add(selectionRectangle);
       
+      if(selectionFrame != null) 
+        rootPane.getChildren().remove(selectionFrame);
+      
+      selectionFrame = RectangleBuilder.create()
+              .x(0)
+              .y(0)
+              .height(yAxis.getHeight())
+              .width(2)
+              .fill(Color.web("0x222222"))
+              .opacity(0.6)
+              .id("selection")
+              .build();
+      selectionFrame.setUserData(true);
+      rootPane.getChildren().add(selectionFrame);
+      
       for(Node child : this.rootPane.getChildren()) {
         if(child.getClass() == Rectangle.class) {
           createRectangleSelectionEvents(child, xAxis, yAxis);
         }
       }
-
-      if(selectionFrame == null) {
-        selectionFrame = RectangleBuilder.create()
-                .x(0)
-                .y(0)
-                .height(yAxis.getHeight())
-                .width(2)
-                .fill(Color.web("0x222222"))
-                .opacity(0.6)
-                .id("selection")
-                .build();
-        selectionFrame.setUserData(true);
-      }
-
-      if(!rootPane.getChildren().contains(selectionFrame))
-        rootPane.getChildren().add(selectionFrame);
       
       createLegend();
     }

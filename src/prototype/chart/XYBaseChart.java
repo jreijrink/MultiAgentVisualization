@@ -83,6 +83,7 @@ public class XYBaseChart implements Chart {
   
   private int selectedStartIndex;
   private int selectedEndIndex;
+  private boolean forward;
     
   private Timer resizeTimer;
   private TimerTask resizeTask;
@@ -109,14 +110,18 @@ public class XYBaseChart implements Chart {
     initialize(false);
   }
   
-  public XYBaseChart(Scene scene, ChartType type) {
+  public XYBaseChart(Scene scene, ChartType type, List<Turtle> data, int selectionStart, int selectionEnd, boolean forward) {
     this.scene = scene;
     this.type = type;
+    this.data = data;
     this.parameterMap = new ParameterMap();
     this.selectedTurtles = new int[]{ 0 };    
     this.parameterIndex = 0;
-    this.data = new ArrayList();
     this.liveUpdate = true;
+    
+    this.selectedStartIndex = selectionStart;    
+    this.selectedEndIndex = selectionEnd;
+    this.forward = forward;
     
     if(this.parameterMap.GetParameters().size() > 0) {
     Parameter firstParameter = this.parameterMap.GetParameters().get(0);
@@ -176,6 +181,7 @@ public class XYBaseChart implements Chart {
       
       selectedStartIndex = startIndex;
       selectedEndIndex = endIndex;
+      this.forward = forward;
       
       clearSelection();
       
@@ -198,8 +204,8 @@ public class XYBaseChart implements Chart {
           selectionFrame.setX(xAxisShift + end);
         else
           selectionFrame.setX(xAxisShift + start);
+        selectionFrame.setUserData(forward);
       }
-      selectionFrame.setUserData(forward);
       
       setDockTitle();
     }
@@ -422,14 +428,18 @@ public class XYBaseChart implements Chart {
       NumberAxis yAxis = (NumberAxis) XYChart.getYAxis();
       double yAxisShift = getSceneYShift(yAxis);
 
-      selectionRectangle.setX(0);
-      selectionRectangle.setY(yAxisShift);
-      selectionRectangle.setWidth(0);
-      selectionRectangle.setHeight(yAxis.getHeight());
+      if(selectionRectangle != null) {
+        selectionRectangle.setX(0);
+        selectionRectangle.setY(yAxisShift);
+        selectionRectangle.setWidth(0);
+        selectionRectangle.setHeight(yAxis.getHeight());
+      }
       
-      selectionFrame.setX(0);
-      selectionFrame.setY(yAxisShift);
-      selectionFrame.setHeight(yAxis.getHeight());      
+      if(selectionFrame != null) {
+        selectionFrame.setX(0);
+        selectionFrame.setY(yAxisShift);
+        selectionFrame.setHeight(yAxis.getHeight());      
+      }
     }
   }
   
@@ -442,10 +452,10 @@ public class XYBaseChart implements Chart {
         List<XYChart.Series> datapoints = getData();
         if(!resize || dataIncreaseAchieved(datapoints)) {
           visibleDataPoints = getDataSize(datapoints);
-          Console.log("visibleDataPoints: " + visibleDataPoints);
           createChart(datapoints);
           Platform.runLater(()-> setMouseListeners());    
-          Platform.runLater(()-> selectFrames(selectedStartIndex, selectedEndIndex, false, true));
+          Platform.runLater(()-> selectFrames(selectedStartIndex, selectedEndIndex, false, forward));
+          //selectFrames(selectedStartIndex, selectedEndIndex, false, forward);
         }
         Platform.runLater(()->  setCursor(Cursor.DEFAULT));
       }
@@ -682,7 +692,7 @@ public class XYBaseChart implements Chart {
               .opacity(0.6)
               .id("selection")
               .build();
-      selectionFrame.setUserData(true);
+      selectionFrame.setUserData(forward);
     }
     
     Platform.runLater(new Runnable() {
@@ -690,6 +700,7 @@ public class XYBaseChart implements Chart {
       public void run() {
       if(!rootPane.getChildren().contains(selectionFrame))
         rootPane.getChildren().add(selectionFrame);
+        createRectangleSelectionEvents(selectionFrame, rootPane, xAxis, yAxis);
       }
     });
     
@@ -858,7 +869,7 @@ public class XYBaseChart implements Chart {
       
       notifyListeners(start, end, true, forward);
       
-      selectFrames(start, end, false, forward);      
+      //selectFrames(start, end, false, forward);      
     });
     
     node.setOnMouseReleased((MouseEvent event) -> {
@@ -871,7 +882,7 @@ public class XYBaseChart implements Chart {
       int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth()).intValue();
       
       boolean forward = true;
-      if( selectionPoint.getX() == (selection.getX() + selection.getWidth())) {
+      if(selectionPoint.getX() == (selection.getX() + selection.getWidth() + xShift)) {
         //Backward selection
         forward = false;
       }

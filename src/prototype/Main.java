@@ -192,9 +192,8 @@ public class Main extends Application {
     newScatterMenu.setOnAction(new EventHandler() {
       @Override
       public void handle(Event t) {
-        XYBaseChart chart = new XYBaseChart(scene, ChartType.Scatter);
+        XYBaseChart chart = new XYBaseChart(scene, ChartType.Scatter, data, startIndex, endIndex, forward);
         addChart(scene, dockPane, null, null, chart, false);
-        chart.updateData(data);
       }
     });
     elementMenu.getItems().add(newScatterMenu);
@@ -204,9 +203,8 @@ public class Main extends Application {
     newLineMenu.setOnAction(new EventHandler() {
       @Override
       public void handle(Event t) {
-        XYBaseChart chart = new XYBaseChart(scene, ChartType.Line);
+        XYBaseChart chart = new XYBaseChart(scene, ChartType.Line, data, startIndex, endIndex, forward);
         addChart(scene, dockPane, null, null, chart, false);
-        chart.updateData(data);
       }
     });
     elementMenu.getItems().add(newLineMenu);
@@ -216,9 +214,8 @@ public class Main extends Application {
     newAgentMenu.setOnAction(new EventHandler() {
       @Override
       public void handle(Event t) {
-        AgentChart chart = new AgentChart(scene);
+        AgentChart chart = new AgentChart(scene, data, startIndex, endIndex, forward);
         addChart(scene, dockPane, null, null, chart, false);
-        chart.updateData(data);
       }
     });
     elementMenu.getItems().add(newAgentMenu);
@@ -228,9 +225,8 @@ public class Main extends Application {
     newCategoricalMenu.setOnAction(new EventHandler() {
       @Override
       public void handle(Event t) {
-        CategoricalChart chart = new CategoricalChart(scene);
+        CategoricalChart chart = new CategoricalChart(scene, data, startIndex, endIndex, forward);
         addChart(scene, dockPane, null, null, chart, false);
-        chart.updateData(data);
       }
     });
     elementMenu.getItems().add(newCategoricalMenu);
@@ -240,9 +236,8 @@ public class Main extends Application {
     newFieldMenu.setOnAction(new EventHandler() {
       @Override
       public void handle(Event t) {
-        FieldCanvas field = new FieldCanvas();
+        FieldCanvas field = new FieldCanvas(data, startIndex, endIndex, forward);
         addChart(scene, dockPane, null, null, field, false);
-        field.updateData(data);
       }
     });
     elementMenu.getItems().add(newFieldMenu);
@@ -782,7 +777,7 @@ public class Main extends Application {
     if(!enlarged) {
       this.charts.add(chart);
 
-      chart.selectFrames(this.startIndex, this.endIndex, this.drag, this.forward);
+      //chart.selectFrames(this.startIndex, this.endIndex, false, this.forward);
 
       chart.addSelectionEventListener(new SelectionEventListener() {
 

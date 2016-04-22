@@ -74,8 +74,7 @@ public class FieldCanvas extends Pane implements Chart{
   private Circle shape_penaltyspot2;
   private Rectangle shape_fieldcenter;
   private Circle shape_fieldcenteroval;
-  
-  
+    
   private double initial_width;
   private double initial_height;
   
@@ -89,6 +88,9 @@ public class FieldCanvas extends Pane implements Chart{
 
   public FieldCanvas(List<Turtle> data, boolean liveUpdate, int[] selectedTurtles, boolean turtleHistory) {
     this.data = data;
+    
+    this.selection = new Range(0, 0);
+    this.forward = true;
     
     this.liveUpdate = liveUpdate;
     this.turtleHistory = turtleHistory;
@@ -120,8 +122,12 @@ public class FieldCanvas extends Pane implements Chart{
     drawField();    
   }
     
-  public FieldCanvas() {
-    this(new ArrayList(), true, new int[]{0, 1, 2, 3, 4, 5, 6 }, false);
+  public FieldCanvas(List<Turtle> data, int selectionStart, int selectionEnd, boolean forward) {    
+    this(data, true, new int[]{0, 1, 2, 3, 4, 5, 6 }, false);
+    
+    this.selection = new Range(selectionStart, selectionEnd);
+    this.forward = forward;
+    drawMovingShapes();
   }
   
   @Override
@@ -337,7 +343,7 @@ public class FieldCanvas extends Pane implements Chart{
               @Override
               public void handle(Event event) {
                 if(!showTurtlePerspective) {
-                  viewTurtleIds = new int[] { index };
+                  viewTurtleIds = new int[] { turtleId };
                   showTurtlePerspective = true;
                   drawMovingShapes();
                 }
