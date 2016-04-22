@@ -33,6 +33,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.RectangleBuilder;
+import org.apache.pivot.util.Console;
 import static prototype.chart.Chart.getCheckbox;
 import static prototype.chart.Chart.getScale;
 import static prototype.chart.Chart.getTurtleListView;
@@ -70,6 +71,8 @@ public class CategoricalChart implements Chart {
   
   private Rectangle selectionRectangle;
   private Point2D selectionPoint;
+  private Rectangle selectionFrame;
+  
   private Point2D basePoint;
   private List<Rectangle> filterRectangles;
   private int selectedFilterIndex;
@@ -197,6 +200,14 @@ public class CategoricalChart implements Chart {
         initSelectionWidth = end - start;
         initSelectionData = new Object[]{ startIndex, endIndex };
       }
+      
+      if(selectionFrame != null) {
+        if(forward)
+          selectionFrame.setX(xAxisShift + end);
+        else
+          selectionFrame.setX(xAxisShift + start);
+      }
+      selectionFrame.setUserData(forward);
       
       setDockTitle();
     }
@@ -559,6 +570,22 @@ public class CategoricalChart implements Chart {
           createRectangleSelectionEvents(child, xAxis, yAxis);
         }
       }
+
+      if(selectionFrame == null) {
+        selectionFrame = RectangleBuilder.create()
+                .x(0)
+                .y(0)
+                .height(yAxis.getHeight())
+                .width(2)
+                .fill(Color.web("0x222222"))
+                .opacity(0.6)
+                .id("selection")
+                .build();
+        selectionFrame.setUserData(true);
+      }
+
+      if(!rootPane.getChildren().contains(selectionFrame))
+        rootPane.getChildren().add(selectionFrame);
       
       createAxisFilter();
       
@@ -833,6 +860,15 @@ public class CategoricalChart implements Chart {
 
       selectionRectangle.setY(yAxisShift + 5);
       selectionRectangle.setHeight(yAxis.getHeight() - 10);
+      
+      boolean forward = (boolean)selectionFrame.getUserData();
+      if(forward)
+        selectionFrame.setX(xAxisShift + end);
+      else
+        selectionFrame.setX(xAxisShift + start);
+      
+      selectionFrame.setY(yAxisShift);
+      selectionFrame.setHeight(yAxis.getHeight());
     }     
     
     for(Rectangle filterRectangle : filterRectangles) {
@@ -897,7 +933,7 @@ public class CategoricalChart implements Chart {
         //Backward selection
         forward = false;
       }
-      
+            
       notifyListeners(start, end, true, forward);
       
       selectionRectangle.setX(selection.getX());

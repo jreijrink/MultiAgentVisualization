@@ -11,19 +11,13 @@
                   "pos": "TOP",
                   "liveUpdate": true,
                   "selectedTurtles": [
-                    0,
-                    1,
-                    2,
-                    3,
-                    4,
-                    5,
-                    6
+                    0
                   ],
-                  "parameter": "Mufield number",
-                  "time": "2016-04-22T12:16:50.976",
+                  "parameter": "Turtle",
+                  "time": "2016-04-22T12:44:02.847",
                   "chart": "Scatter-chart",
                   "parameterIndex": 0,
-                  "parameterValue": "mu-field"
+                  "parameterValue": "x"
                 }
               ],
               "pos": "BOTTOM",
@@ -37,11 +31,11 @@
                 5,
                 6
               ],
-              "parameter": "Refbox command",
-              "time": "2016-04-22T12:16:20.339",
-              "chart": "Categorical-chart",
+              "parameter": "Skill ID",
+              "time": "2016-04-22T12:44:02.831",
+              "chart": "Turtle-chart",
               "parameterIndex": 0,
-              "parameterValue": "all"
+              "parameterValue": "skill ID"
             }
           ],
           "pos": "LEFT",
@@ -56,13 +50,13 @@
             6
           ],
           "parameter": "CPB",
-          "time": "2016-04-22T12:16:20.308",
+          "time": "2016-04-22T12:44:02.797",
           "chart": "Categorical-chart",
           "parameterIndex": 0,
           "parameterValue": "CPB"
         }
       ],
-      "turtleHistory": true,
+      "turtleHistory": false,
       "pos": "RIGHT",
       "liveUpdate": true,
       "selectedTurtles": [
@@ -74,7 +68,7 @@
         5,
         6
       ],
-      "time": "2016-04-22T12:16:20.205",
+      "time": "2016-04-22T12:44:02.711",
       "chart": "Field"
     }
   ]

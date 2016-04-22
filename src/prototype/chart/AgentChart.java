@@ -67,6 +67,7 @@ public class AgentChart implements Chart {
   
   private Rectangle selectionRectangle;
   private Point2D selectionPoint;
+  private Rectangle selectionFrame;
   
   private double initSelectionX = 0;
   private double initSelectionWidth = 0;
@@ -169,6 +170,14 @@ public class AgentChart implements Chart {
         initSelectionWidth = end - start;
         initSelectionData = new Object[]{ startIndex, endIndex };
       }
+      
+      if(selectionFrame != null) {
+        if(forward)
+          selectionFrame.setX(xAxisShift + end);
+        else
+          selectionFrame.setX(xAxisShift + start);
+      }
+      selectionFrame.setUserData(forward);
       
       setDockTitle();
     }
@@ -505,6 +514,22 @@ public class AgentChart implements Chart {
           createRectangleSelectionEvents(child, xAxis, yAxis);
         }
       }
+
+      if(selectionFrame == null) {
+        selectionFrame = RectangleBuilder.create()
+                .x(0)
+                .y(0)
+                .height(yAxis.getHeight())
+                .width(2)
+                .fill(Color.web("0x222222"))
+                .opacity(0.6)
+                .id("selection")
+                .build();
+        selectionFrame.setUserData(true);
+      }
+
+      if(!rootPane.getChildren().contains(selectionFrame))
+        rootPane.getChildren().add(selectionFrame);
       
       createLegend();
     }
@@ -580,6 +605,15 @@ public class AgentChart implements Chart {
 
       selectionRectangle.setY(yAxisShift + 5);
       selectionRectangle.setHeight(yAxis.getHeight() - 10);
+      
+      boolean forward = (boolean)selectionFrame.getUserData();
+      if(forward)
+        selectionFrame.setX(xAxisShift + end);
+      else
+        selectionFrame.setX(xAxisShift + start);
+      
+      selectionFrame.setY(yAxisShift);
+      selectionFrame.setHeight(yAxis.getHeight());
     }
   }
   

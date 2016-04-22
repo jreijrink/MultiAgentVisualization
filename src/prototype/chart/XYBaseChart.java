@@ -75,6 +75,7 @@ public class XYBaseChart implements Chart {
   
   private Point2D selectionPoint;
   private Rectangle selectionRectangle;
+  private Rectangle selectionFrame;
   private Point2D basePoint;
   private List<Rectangle> filterRectangles;
   private int selectedFilterIndex;
@@ -191,6 +192,14 @@ public class XYBaseChart implements Chart {
         selectionRectangle.setWidth(end - start);
         selectionRectangle.setUserData(new Object[]{ startIndex, endIndex });
       }
+      
+      if(selectionFrame != null) {
+        if(forward)
+          selectionFrame.setX(xAxisShift + end);
+        else
+          selectionFrame.setX(xAxisShift + start);
+      }
+      selectionFrame.setUserData(forward);
       
       setDockTitle();
     }
@@ -417,6 +426,10 @@ public class XYBaseChart implements Chart {
       selectionRectangle.setY(yAxisShift);
       selectionRectangle.setWidth(0);
       selectionRectangle.setHeight(yAxis.getHeight());
+      
+      selectionFrame.setX(0);
+      selectionFrame.setY(yAxisShift);
+      selectionFrame.setHeight(yAxis.getHeight());      
     }
   }
   
@@ -579,9 +592,17 @@ public class XYBaseChart implements Chart {
       
       selectionRectangle.setX(xAxisShift + start);
       selectionRectangle.setWidth(end - start);
-
       selectionRectangle.setY(yAxisShift);
       selectionRectangle.setHeight(yAxis.getHeight());
+
+      boolean forward = (boolean)selectionFrame.getUserData();
+      if(forward)
+        selectionFrame.setX(xAxisShift + end);
+      else
+        selectionFrame.setX(xAxisShift + start);
+      
+      selectionFrame.setY(yAxisShift);
+      selectionFrame.setHeight(yAxis.getHeight());
     }    
 
     for(Rectangle filterRectangle : filterRectangles) {
@@ -648,6 +669,27 @@ public class XYBaseChart implements Chart {
       if(!rootPane.getChildren().contains(selectionRectangle))
         rootPane.getChildren().add(selectionRectangle);
         createRectangleSelectionEvents(selectionRectangle, rootPane, xAxis, yAxis);
+      }
+    });
+
+    if(selectionFrame == null) {
+      selectionFrame = RectangleBuilder.create()
+              .x(0)
+              .y(0)
+              .height(yAxis.getHeight())
+              .width(2)
+              .fill(Color.web("0x222222"))
+              .opacity(0.6)
+              .id("selection")
+              .build();
+      selectionFrame.setUserData(true);
+    }
+    
+    Platform.runLater(new Runnable() {
+      @Override
+      public void run() {
+      if(!rootPane.getChildren().contains(selectionFrame))
+        rootPane.getChildren().add(selectionFrame);
       }
     });
     
@@ -809,7 +851,7 @@ public class XYBaseChart implements Chart {
       int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth()).intValue();
       
       boolean forward = true;
-      if( selectionPoint.getX() == (selection.getX() + selection.getWidth())) {
+      if(selectionPoint.getX() == (selection.getX() + selection.getWidth() + xShift)) {
         //Backward selection
         forward = false;
       }
