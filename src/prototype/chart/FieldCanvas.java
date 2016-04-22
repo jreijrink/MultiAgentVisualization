@@ -49,6 +49,7 @@ import prototype.object.CombinedOpponent;
 public class FieldCanvas extends Pane implements Chart{
   private List<Turtle> data;
   private Range<Integer> selection;
+  private boolean forward;
   private Rectangle field;
   private List<SelectionEventListener> listenerList = new ArrayList();
   
@@ -127,6 +128,7 @@ public class FieldCanvas extends Pane implements Chart{
   public void updateData(List<Turtle> data) {
     this.data = data;
     this.selection = new Range(0, 0);
+    this.forward = true;
    
     this.configuration = new Configuration();
     this.parameterMap = new ParameterMap();
@@ -135,13 +137,15 @@ public class FieldCanvas extends Pane implements Chart{
   }
   
   @Override
-  public void selectFrames(int startIndex, int endIndex, boolean drag) {
+  public void selectFrames(int startIndex, int endIndex, boolean drag, boolean forward) {
     if((!drag || liveUpdate) && data.size() > 0) {
       this.selection = new Range(startIndex, endIndex);
+      this.forward = forward;
       drawMovingShapes();
       setDockTitle();
     } else {
       this.selection = new Range(0, 0);
+      this.forward = true;
     }
   }
   
@@ -271,50 +275,56 @@ public class FieldCanvas extends Pane implements Chart{
   }
   
   private void drawMovingShapes() {
-    if(field != null) {
+    if(field != null && selection != null) {
+      
+      int index = 0;
+      if(this.forward)
+        index = selection.GetMax();
+      else
+        index = selection.GetMin();
       
       drawTurtleLines();
 
-      drawOpponents(); 
+      drawOpponents(index); 
       
-      drawturtles();
+      drawturtles(index);
 
-      drawBall();
+      drawBall(index);
 
       resizePanel();
     }
   }
   
-  private void drawturtles() {
+  private void drawturtles(int index) {
     for(Pair<Polygon, Text> turtle_shape : shape_turtles) {
       this.getChildren().remove(turtle_shape.getKey());
       this.getChildren().remove(turtle_shape.getValue());
     }
     shape_turtles.clear();
     
-    if(selection != null && data != null && data.size() > 0) {
+    if(data != null && data.size() > 0) {
       try {
         for(int selectedTurtle : getTurtles()) {
           Turtle turtle  = data.get(selectedTurtle);
 
-          DataPoint inField = turtle.GetValue(this.configuration.RobotInField, 0, this.configuration.RobotInFieldIndex, selection.GetMax());
-          DataPoint poseX = turtle.GetValue(this.configuration.Pose, 0, this.configuration.PoseX, selection.GetMax());
-          DataPoint poseY = turtle.GetValue(this.configuration.Pose, 0, this.configuration.PoseY, selection.GetMax());
-          DataPoint orientationValue = turtle.GetValue(this.configuration.Pose, 0, this.configuration.PoseRot, selection.GetMax());
+          DataPoint inField = turtle.GetValue(this.configuration.RobotInField, 0, this.configuration.RobotInFieldIndex, index);
+          DataPoint poseX = turtle.GetValue(this.configuration.Pose, 0, this.configuration.PoseX, index);
+          DataPoint poseY = turtle.GetValue(this.configuration.Pose, 0, this.configuration.PoseY, index);
+          DataPoint orientationValue = turtle.GetValue(this.configuration.Pose, 0, this.configuration.PoseRot, index);
 
           if(inField != null && inField.getValue() > 0) {
             Point2D turtlePos = getPosition(poseX.getValue(), poseY.getValue());
             double orientation = orientationValue.getValue();
 
-            int index = turtle.getID();         
+            int turtleId = turtle.getID();         
 
-            Polygon turtlePolygon = createTurtleShape(index);
+            Polygon turtlePolygon = createTurtleShape(turtleId);
 
             turtlePolygon.setLayoutX(turtlePos.getX() - 15);
             turtlePolygon.setLayoutY(turtlePos.getY() - 12.5);
             turtlePolygon.setRotate(Math.toDegrees(orientation));
 
-            Text turtleText = new Text(turtlePos.getX() - 5, turtlePos.getY() + 5, String.valueOf(index + 1));
+            Text turtleText = new Text(turtlePos.getX() - 5, turtlePos.getY() + 5, String.valueOf(turtleId + 1));
 
             turtleText.setFill(Color.WHITE);
             turtleText.setRotate(Math.toDegrees(orientation));
@@ -342,7 +352,7 @@ public class FieldCanvas extends Pane implements Chart{
     }
   }
   
-  private Polygon createTurtleShape(int index) {
+  private Polygon createTurtleShape(int turtleId) {
     Polygon polygon = new Polygon();
     polygon.getPoints().addAll(new Double[]{
         0.0, 0.0,
@@ -352,13 +362,13 @@ public class FieldCanvas extends Pane implements Chart{
         15.0, 25.0,
         0.0, 15.0,
         0.0, 5.0 });
-    polygon.getStyleClass().add(String.format("default-color%d-agent", index));
+    polygon.getStyleClass().add(String.format("default-color%d-agent", turtleId));
     polygon.setStrokeWidth(1);
     
     return polygon;
   }
   
-  private void drawOpponents() {
+  private void drawOpponents(int index) {
     
     for(Rectangle opponent_shape : shape_opponents) {
       this.getChildren().remove(opponent_shape);
@@ -378,8 +388,8 @@ public class FieldCanvas extends Pane implements Chart{
 
           for(int i = 0; i < parameter.getCount(); i++) {
 
-            DataPoint opponentX = turtle.GetValue(this.configuration.Opponent, i, this.configuration.OpponentX, selection.GetMax());
-            DataPoint opponentY = turtle.GetValue(this.configuration.Opponent, i, this.configuration.OpponentY, selection.GetMax());
+            DataPoint opponentX = turtle.GetValue(this.configuration.Opponent, i, this.configuration.OpponentX, index);
+            DataPoint opponentY = turtle.GetValue(this.configuration.Opponent, i, this.configuration.OpponentY, index);
             
             if(opponentX != null && opponentX.getValue() != 0 && opponentY.getValue() != 0) {
               Point2D opponentPos = getPosition(opponentX.getValue(), opponentY.getValue());
@@ -470,7 +480,7 @@ public class FieldCanvas extends Pane implements Chart{
     return combinedPoints;
   }
   
-  private void drawBall() {
+  private void drawBall(int index) {
     for(Circle ball_shape : shape_ball) {
       this.getChildren().remove(ball_shape);
     }
@@ -482,9 +492,9 @@ public class FieldCanvas extends Pane implements Chart{
         for(int selectedTurtle : getTurtles()) {
           Turtle turtle  = data.get(selectedTurtle);
 
-          DataPoint ballFound = turtle.GetValue(this.configuration.BallFound, 0, this.configuration.BallFoundIndex, selection.GetMax());
-          DataPoint ballX = turtle.GetValue(this.configuration.Ball, 0, this.configuration.BallX, selection.GetMax());
-          DataPoint ballY = turtle.GetValue(this.configuration.Ball, 0, this.configuration.BallY, selection.GetMax());
+          DataPoint ballFound = turtle.GetValue(this.configuration.BallFound, 0, this.configuration.BallFoundIndex, index);
+          DataPoint ballX = turtle.GetValue(this.configuration.Ball, 0, this.configuration.BallX, index);
+          DataPoint ballY = turtle.GetValue(this.configuration.Ball, 0, this.configuration.BallY, index);
 
           if(ballFound != null&& ballFound.getValue() > 0 && ballX.getValue() != 0 && ballY.getValue() != 0) {
             Point2D ballPos = getPosition(ballX.getValue(), ballY.getValue());

@@ -84,6 +84,7 @@ public class Main extends Application {
   private int startIndex;
   private int endIndex;
   private boolean drag;
+  private boolean forward;
   private Menu loadMenu;  
   private File currentFile;
   
@@ -176,7 +177,7 @@ public class Main extends Application {
         FileChooser.ExtensionFilter extFilter = new FileChooser.ExtensionFilter("MAT files (*.mat)", "*.mat");
         fileChooser.getExtensionFilters().add(extFilter);
 
-        loadData(scene);
+        loadData(stage, scene);
       }
     });
     fileMenu.getItems().add(openMenu);
@@ -323,7 +324,7 @@ public class Main extends Application {
           dialogStage.showAndWait();
           
           if(controller.hasChanges())
-            loadData(scene);
+            loadData(stage, scene);
         } catch (IOException e) {
           e.printStackTrace();
         }
@@ -354,7 +355,7 @@ public class Main extends Application {
           dialogStage.showAndWait();
           
           if(controller.hasChanges())
-            loadData(scene);
+            loadData(stage, scene);
         } catch (IOException e) {
           e.printStackTrace();
         }
@@ -365,7 +366,7 @@ public class Main extends Application {
     return settingsMenu;
   }
   
-  private void loadData(Scene scene) {
+  private void loadData(Stage stage, Scene scene) {
     if (currentFile != null && configurationComplete()) {
       scene.setCursor(Cursor.WAIT);
 
@@ -374,6 +375,7 @@ public class Main extends Application {
           try {
             Parser parser = new Parser();
             List<Turtle> result = parser.parse(currentFile.getAbsolutePath());
+            Platform.runLater(()-> stage.setTitle("Prototype [" + currentFile.getName() + "]"));
             Platform.runLater(()-> updateLayout(result));
           } catch (Exception ex) {          
             ex.printStackTrace();            
@@ -780,17 +782,18 @@ public class Main extends Application {
     if(!enlarged) {
       this.charts.add(chart);
 
-      chart.selectFrames(this.startIndex, this.endIndex, this.drag);
+      chart.selectFrames(this.startIndex, this.endIndex, this.drag, this.forward);
 
       chart.addSelectionEventListener(new SelectionEventListener() {
 
       @Override
-      public void timeFrameSelected(int startIndex, int endIndex, boolean drag) {        
+      public void timeFrameSelected(int startIndex, int endIndex, boolean drag, boolean forward) {        
         for (Chart chart : charts) {
           Main.this.startIndex = startIndex;
           Main.this.endIndex = endIndex;
           Main.this.drag = drag;
-          chart.selectFrames(startIndex, endIndex, drag);
+          Main.this.forward = forward;
+          chart.selectFrames(startIndex, endIndex, drag, forward);
         }
       }
 

@@ -38,7 +38,9 @@ public class Turtle {
 
           for(Filter filter : filters.get(chart)) {          
             int valueIndex = this.parameterMap.GetValueIndex(filter.ParameterName(), filter.ParameterIndex(), filter.ValueName());
-            double[] dataset = this.data[valueIndex];
+            double[] dataset = this.data[valueIndex];            
+            dataset = applyDecimalMask(dataset, this.parameterMap.GetParameter(filter.ParameterName()).getValue(filter.ValueName()));
+          
             for(int i = 0; i < this.data[0].length; i++) {
               if(filter.SatisfiesFilter(dataset[i])) {
                 localFilterMap[i] = true;
@@ -65,7 +67,7 @@ public class Turtle {
   }
   
   public boolean removeFilters(Chart chart) {
-    if(filters.containsKey(chart)) {
+    if(filters.containsKey(chart) && filters.get(chart).size() > 0) {
       filters.remove(chart);
       applyFilters();
       return true;
@@ -77,7 +79,7 @@ public class Turtle {
     Chart chart = filter.GetChart();
     boolean success = false;
     
-    if(filters.containsKey(chart)) {
+    if(filters.containsKey(chart) && filters.get(chart).size() > 0) {
       success = filters.get(chart).remove(filter);
       if(success) 
         applyFilters();
@@ -168,7 +170,7 @@ public class Turtle {
   private double[] applyDecimalMask(double[] data, Value value) {
     
     String mask = value.getDecimalmask();
-    if(mask!= null && mask.length() > 0) {      
+    if(mask != null && mask.length() > 0) {      
       double[] editData = Arrays.copyOf(data, data.length);
       
       for(int i = 0; i < editData.length; i++) {

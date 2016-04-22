@@ -146,7 +146,7 @@ public class AgentChart implements Chart {
   }
   
   @Override
-  public void selectFrames(int startIndex, int endIndex, boolean drag) {
+  public void selectFrames(int startIndex, int endIndex, boolean drag, boolean forward) {
     if((!drag || liveUpdate) && data.size() > 0) {
       
       selectedStartIndex = startIndex;
@@ -196,9 +196,9 @@ public class AgentChart implements Chart {
     }
   }
   
-  private void notifyListeners(int startIndex, int endIndex, boolean drag) {
+  private void notifyListeners(int startIndex, int endIndex, boolean drag, boolean forward) {
     for(SelectionEventListener listener : listenerList) {
-      listener.timeFrameSelected(startIndex, endIndex, drag);
+      listener.timeFrameSelected(startIndex, endIndex, drag, forward);
     }
   }
   
@@ -276,7 +276,7 @@ public class AgentChart implements Chart {
               @Override
               public void run() {
                 plotData();
-                selectFrames(selectedStartIndex, selectedEndIndex, false);
+                selectFrames(selectedStartIndex, selectedEndIndex, false, true);
                 timer.cancel();
                 timer.purge();
               }
@@ -611,8 +611,8 @@ public class AgentChart implements Chart {
             
       int start = xAxis.getValueForDisplay(selection.getX() - xAxisShift).intValue();
       int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xAxisShift).intValue();
-      
-      notifyListeners(start, end, false);
+            
+      notifyListeners(start, end, true, true);
     });
 
     node.setOnMouseDragged((MouseEvent event) -> {
@@ -624,7 +624,13 @@ public class AgentChart implements Chart {
       int start = xAxis.getValueForDisplay(selection.getX() - xAxisShift).intValue();
       int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xAxisShift).intValue();
       
-      notifyListeners(start, end, true);
+      boolean forward = true;
+      if( selectionPoint.getX() == (selection.getX() + selection.getWidth())) {
+        //Backward selection
+        forward = false;
+      }
+      
+      notifyListeners(start, end, true, forward);
       
       selectionRectangle.setX(selection.getX());
       selectionRectangle.setWidth(selection.getWidth());
@@ -640,7 +646,13 @@ public class AgentChart implements Chart {
       int start = xAxis.getValueForDisplay(selection.getX() - xAxisShift).intValue();
       int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xAxisShift).intValue();
       
-      notifyListeners(start, end, false);
+      boolean forward = true;
+      if( selectionPoint.getX() == (selection.getX() + selection.getWidth())) {
+        //Backward selection
+        forward = false;
+      }
+      
+      notifyListeners(start, end, true, forward);
     });
   }
   

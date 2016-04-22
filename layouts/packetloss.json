@@ -1,0 +1,216 @@
+{
+  "charts": [
+    {
+      "charts": [],
+      "turtleHistory": true,
+      "pos": "RIGHT",
+      "liveUpdate": true,
+      "selectedTurtles": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "time": "2016-04-22T11:07:25.333",
+      "chart": "Field"
+    },
+    {
+      "charts": [
+        {
+          "charts": [
+            {
+              "charts": [],
+              "pos": "RIGHT",
+              "liveUpdate": true,
+              "selectedTurtles": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              "parameter": "Packetloss turtles",
+              "time": "2016-04-22T11:07:25.327",
+              "chart": "Scatter-chart",
+              "parameterIndex": 3,
+              "parameterValue": "packetloss-turtles"
+            }
+          ],
+          "pos": "BOTTOM",
+          "liveUpdate": true,
+          "selectedTurtles": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "parameter": "Packetloss turtles",
+          "time": "2016-04-22T11:07:25.324",
+          "chart": "Scatter-chart",
+          "parameterIndex": 2,
+          "parameterValue": "packetloss-turtles"
+        },
+        {
+          "charts": [],
+          "pos": "RIGHT",
+          "liveUpdate": true,
+          "selectedTurtles": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "parameter": "Packetloss turtles",
+          "time": "2016-04-22T11:07:25.330",
+          "chart": "Scatter-chart",
+          "parameterIndex": 1,
+          "parameterValue": "packetloss-turtles"
+        },
+        {
+          "charts": [
+            {
+              "charts": [
+                {
+                  "charts": [],
+                  "pos": "RIGHT",
+                  "liveUpdate": true,
+                  "selectedTurtles": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6
+                  ],
+                  "parameter": "Packetloss turtles",
+                  "time": "2016-04-22T11:07:25.321",
+                  "chart": "Scatter-chart",
+                  "parameterIndex": 5,
+                  "parameterValue": "packetloss-turtles"
+                }
+              ],
+              "pos": "TOP",
+              "liveUpdate": true,
+              "selectedTurtles": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              "parameter": "Packetloss turtles",
+              "time": "2016-04-22T11:07:25.318",
+              "chart": "Scatter-chart",
+              "parameterIndex": 4,
+              "parameterValue": "packetloss-turtles"
+            },
+            {
+              "charts": [],
+              "pos": "RIGHT",
+              "liveUpdate": true,
+              "selectedTurtles": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              "parameter": "Robot in field",
+              "time": "2016-04-22T11:10:07.293",
+              "chart": "Categorical-chart",
+              "parameterIndex": 0,
+              "parameterValue": "robot-in-field"
+            },
+            {
+              "charts": [
+                {
+                  "charts": [],
+                  "pos": "RIGHT",
+                  "liveUpdate": true,
+                  "selectedTurtles": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6
+                  ],
+                  "parameter": "Turtle",
+                  "time": "2016-04-22T11:09:38.478",
+                  "chart": "Scatter-chart",
+                  "parameterIndex": 0,
+                  "parameterValue": "y"
+                }
+              ],
+              "pos": "BOTTOM",
+              "liveUpdate": true,
+              "selectedTurtles": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              "parameter": "Turtle",
+              "time": "2016-04-22T11:07:35.054",
+              "chart": "Scatter-chart",
+              "parameterIndex": 0,
+              "parameterValue": "x"
+            }
+          ],
+          "pos": "BOTTOM",
+          "liveUpdate": true,
+          "selectedTurtles": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "parameter": "Packetloss coach",
+          "time": "2016-04-22T11:07:25.314",
+          "chart": "Scatter-chart",
+          "parameterIndex": 0,
+          "parameterValue": "packetloss-coach"
+        }
+      ],
+      "pos": "TOP",
+      "liveUpdate": true,
+      "selectedTurtles": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "parameter": "Packetloss turtles",
+      "time": "2016-04-22T11:07:25.311",
+      "chart": "Scatter-chart",
+      "parameterIndex": 0,
+      "parameterValue": "packetloss-turtles"
+    }
+  ]
+}

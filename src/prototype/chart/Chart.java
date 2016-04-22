@@ -35,7 +35,7 @@ public interface Chart extends EventListener {
   public void setDockNode(DockNode dockNode);
   
   public void addSelectionEventListener(SelectionEventListener listener);
-  public void selectFrames(int startIndex, int endIndex, boolean drag);
+  public void selectFrames(int startIndex, int endIndex, boolean drag, boolean forward);
     
   public void showParameterDialog();
 

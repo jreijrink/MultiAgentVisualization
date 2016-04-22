@@ -62,12 +62,12 @@
         {
           "unit": "meter",
           "min": 0,
-          "max": 0,
+          "max": 100,
           "name": "z",
           "index": 2,
           "decimalmask": "",
           "categories": [],
-          "rangeEnabled": false
+          "rangeEnabled": true
         }
       ],
       "name": "Ball",
@@ -1445,6 +1445,22 @@
             {
               "name": "Goal magenta",
               "value": 97
+            },
+            {
+              "name": "Subgoal magenta",
+              "value": 100
+            },
+            {
+              "name": "Subgoal cyan",
+              "value": 68
+            },
+            {
+              "name": "Goalkick magenta",
+              "value": 103
+            },
+            {
+              "name": "Goalkick cyan",
+              "value": 71
             }
           ],
           "rangeEnabled": false

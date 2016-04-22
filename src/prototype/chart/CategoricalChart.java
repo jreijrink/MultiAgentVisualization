@@ -156,22 +156,25 @@ public class CategoricalChart implements Chart {
   
   @Override
   public void clearFilter() {
+    boolean hadFilters = false;
     for(Turtle turtle : data) {
-      turtle.removeFilters(this);
+      hadFilters = turtle.removeFilters(this) || hadFilters;
     }
-
+    
     for(Rectangle filter : filterRectangles) {
       this.rootPane.getChildren().remove(filter);
     }
     filterRectangles.clear();
 
-    for(SelectionEventListener listener : listenerList) {
-      listener.update();
+    if(hadFilters) {
+      for(SelectionEventListener listener : listenerList) {
+        listener.update();
+      }
     }
   }
 
   @Override
-  public void selectFrames(int startIndex, int endIndex, boolean drag) {
+  public void selectFrames(int startIndex, int endIndex, boolean drag, boolean forward) {
     if((!drag || liveUpdate) && data.size() > 0) {
       
       selectedStartIndex = startIndex;
@@ -216,9 +219,9 @@ public class CategoricalChart implements Chart {
     }
   }
   
-  private void notifyListeners(int startIndex, int endIndex, boolean drag) {
+  private void notifyListeners(int startIndex, int endIndex, boolean drag, boolean forward) {
     for(SelectionEventListener listener : listenerList) {
-      listener.timeFrameSelected(startIndex, endIndex, drag);
+      listener.timeFrameSelected(startIndex, endIndex, drag, forward);
     }
   }
   
@@ -303,7 +306,7 @@ public class CategoricalChart implements Chart {
               @Override
               public void run() {
                 plotData();
-                selectFrames(selectedStartIndex, selectedEndIndex, false);
+                selectFrames(selectedStartIndex, selectedEndIndex, false, true);
                 timer.cancel();
                 timer.purge();
               }
@@ -414,6 +417,8 @@ public class CategoricalChart implements Chart {
         }
         
         if(parameterChoiceBox.getSelectionModel().getSelectedItem() != null) {
+          clearFilter();
+          
           parameter = parameterChoiceBox.getSelectionModel().getSelectedItem();
           parameterIndex = indexChoiceBox.getSelectionModel().getSelectedItem();
           parameterValue = valueChoiceBox.getSelectionModel().getSelectedItem();
@@ -652,16 +657,18 @@ public class CategoricalChart implements Chart {
         filterRectangles.add(filterRectangle);
           selectedFilterIndex = filterRectangles.indexOf(filterRectangle);
       } else {
-        Rectangle removeFilter = filterRectangles.get(selectedFilterIndex);
-        for(Turtle turtle : data) {
-          Filter filter = (Filter)((Object[])removeFilter.getUserData())[2];
-          turtle.removeFilter(filter);
-        }
-        rootPane.getChildren().remove(removeFilter);
-        filterRectangles.remove(removeFilter);
+        if(selectedFilterIndex >= 0 && filterRectangles.size() > selectedFilterIndex) {
+          Rectangle removeFilter = filterRectangles.get(selectedFilterIndex);
+          for(Turtle turtle : data) {
+            Filter filter = (Filter)((Object[])removeFilter.getUserData())[2];
+            turtle.removeFilter(filter);
+          }
+          rootPane.getChildren().remove(removeFilter);
+          filterRectangles.remove(removeFilter);
 
-        for(SelectionEventListener listener : listenerList) {
-          listener.update();
+          for(SelectionEventListener listener : listenerList) {
+            listener.update();
+          }
         }
       }
       
@@ -670,7 +677,7 @@ public class CategoricalChart implements Chart {
     yAxis.setOnMouseDragged((MouseEvent event) -> {
       setCursor(Cursor.V_RESIZE);
       
-      if(newFilter) {
+      if(newFilter && selectedFilterIndex >= 0 && filterRectangles.size() > selectedFilterIndex) {
       double yAxisShift = getSceneYShift(yAxis);    
       double xShift = getSceneXShift(xAxis);
       double yShift = getSceneYShift(yAxis);
@@ -686,7 +693,7 @@ public class CategoricalChart implements Chart {
     yAxis.setOnMouseReleased((MouseEvent event) -> {
       setCursor(Cursor.DEFAULT);
       
-      if(newFilter) {
+      if(newFilter && selectedFilterIndex >= 0 && filterRectangles.size() > selectedFilterIndex) {
         double yAxisShift = getSceneYShift(yAxis);    
         double xShift = getSceneXShift(xAxis);
         double yShift = getSceneYShift(yAxis);
@@ -873,7 +880,7 @@ public class CategoricalChart implements Chart {
       int start = xAxis.getValueForDisplay(selection.getX() - xAxisShift).intValue();
       int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xAxisShift).intValue();
       
-      notifyListeners(start, end, false);
+      notifyListeners(start, end, false, true);
     });
 
     node.setOnMouseDragged((MouseEvent event) -> {
@@ -885,7 +892,13 @@ public class CategoricalChart implements Chart {
       int start = xAxis.getValueForDisplay(selection.getX() - xAxisShift).intValue();
       int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xAxisShift).intValue();
       
-      notifyListeners(start, end, true);
+      boolean forward = true;
+      if( selectionPoint.getX() == (selection.getX() + selection.getWidth())) {
+        //Backward selection
+        forward = false;
+      }
+      
+      notifyListeners(start, end, true, forward);
       
       selectionRectangle.setX(selection.getX());
       selectionRectangle.setWidth(selection.getWidth());
@@ -901,7 +914,13 @@ public class CategoricalChart implements Chart {
       int start = xAxis.getValueForDisplay(selection.getX() - xAxisShift).intValue();
       int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xAxisShift).intValue();
       
-      notifyListeners(start, end, false);
+      boolean forward = true;
+      if( selectionPoint.getX() == (selection.getX() + selection.getWidth())) {
+        //Backward selection
+        forward = false;
+      }
+      
+      notifyListeners(start, end, true, forward);
     });
   }
   
