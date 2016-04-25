@@ -6,17 +6,15 @@ import javafx.geometry.Point2D;
 import javafx.scene.shape.Rectangle;
 import prototype.settings.Configuration;
 
-public class CombinedOpponent {
+public class CombinedBall {
   private final List<Point2D> positions;
   private final List<Integer> turtles;
   private final double id;
-  private final List<Rectangle> shapes;
   private final Configuration configuration;
   
-  public CombinedOpponent(double id, int turtle, Point2D position) {
+  public CombinedBall(double id, int turtle, Point2D position) {
     this.positions = new ArrayList();
     this.turtles = new ArrayList();
-    this.shapes = new ArrayList();
     this.configuration = new Configuration();
     
     this.id = id;
@@ -72,39 +70,5 @@ public class CombinedOpponent {
       turtlesArray[i] = this.turtles.get(i);
     }
     return turtlesArray;
-  }
-
-  public List<Rectangle> createShape(double opacity) {
-    this.shapes.clear();
-    Point2D position = getAveragePosition();
-    
-    double rectSize = 26.0;
-    double offsetX = 2;
-    double offsetY = 2;
-    
-    if(position != null) {
-      Rectangle opponent = new Rectangle(position.getX() - (rectSize / 2), position.getY() - (rectSize / 2), rectSize, rectSize);
-      opponent.getStyleClass().add("default-color-opponent-combined");
-      opponent.setOpacity(opacity);
-      this.shapes.add(opponent);
-      
-      double height = (rectSize - offsetY) / this.configuration.MaxTurtles;
-      
-      for(int index = 0; index < this.configuration.MaxTurtles; index++) {
-        if(containsTurtle(index)) {
-          Rectangle turtleRect = new Rectangle(position.getX() - ((rectSize - offsetX) / 2), (position.getY() - ((rectSize - offsetY) / 2)) + (height * index) , rectSize - offsetX, height);
-          turtleRect.getStyleClass().add(String.format("default-color%d-opponent-combined", index));
-          turtleRect.setOpacity(opacity - 0.1);
-          this.shapes.add(turtleRect);
-        }
-      }
-      
-    }
-  
-    return this.shapes; 
-  }
-  
-  public List<Rectangle> getShape() {
-    return this.shapes; 
   }
 }

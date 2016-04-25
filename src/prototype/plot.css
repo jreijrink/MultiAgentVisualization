@@ -73,13 +73,13 @@
 .default-color6-opponent { -fx-stroke: #e5c494 !important; -fx-fill: #2F4F4F !important; }
 
 .default-color-opponent-combined { -fx-stroke: #282828 !important; -fx-fill: #494949 !important; }
-.default-color0-opponent-combined { -fx-fill: #66c2a5 !important; -fx-opacity: 0.9;}
-.default-color1-opponent-combined { -fx-fill: #fc8d62 !important; -fx-opacity: 0.9;}
-.default-color2-opponent-combined { -fx-fill: #8da0cb !important; -fx-opacity: 0.9;}
-.default-color3-opponent-combined { -fx-fill: #e78ac3 !important; -fx-opacity: 0.9;}
-.default-color4-opponent-combined { -fx-fill: #a6d854 !important; -fx-opacity: 0.9;}
-.default-color5-opponent-combined { -fx-fill: #ffd92f !important; -fx-opacity: 0.9;}
-.default-color6-opponent-combined { -fx-fill: #e5c494 !important; -fx-opacity: 0.9;}
+.default-color0-opponent-combined { -fx-fill: #66c2a5 !important;}
+.default-color1-opponent-combined { -fx-fill: #fc8d62 !important;}
+.default-color2-opponent-combined { -fx-fill: #8da0cb !important;}
+.default-color3-opponent-combined { -fx-fill: #e78ac3 !important;}
+.default-color4-opponent-combined { -fx-fill: #a6d854 !important;}
+.default-color5-opponent-combined { -fx-fill: #ffd92f !important;}
+.default-color6-opponent-combined { -fx-fill: #e5c494 !important;}
 
 .default-color0-opponent-text { -fx-fill: #66c2a5 !important; }
 .default-color1-opponent-text { -fx-fill: #fc8d62 !important; }

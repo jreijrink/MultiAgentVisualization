@@ -1,119 +1,8 @@
 {
   "charts": [
     {
-      "charts": [
-        {
-          "charts": [],
-          "pos": "BOTTOM",
-          "liveUpdate": true,
-          "selectedTurtles": [
-            0,
-            1,
-            2,
-            3,
-            4,
-            5,
-            6
-          ],
-          "parameter": "CPB",
-          "time": "2016-04-22T16:50:01.526",
-          "chart": "Categorical-chart",
-          "parameterIndex": 0,
-          "parameterValue": "CPB"
-        },
-        {
-          "charts": [],
-          "pos": "LEFT",
-          "liveUpdate": true,
-          "selectedTurtles": [
-            0,
-            1,
-            2,
-            3,
-            4,
-            5,
-            6
-          ],
-          "parameter": "Skill ID",
-          "time": "2016-04-22T16:50:01.551",
-          "chart": "Scatter-chart",
-          "parameterIndex": 0,
-          "parameterValue": "shottype"
-        }
-      ],
-      "pos": "BOTTOM",
-      "liveUpdate": true,
-      "selectedTurtles": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6
-      ],
-      "parameter": "Skill ID",
-      "time": "2016-04-22T16:50:01.453",
-      "chart": "Categorical-chart",
-      "parameterIndex": 0,
-      "parameterValue": "shottype"
-    },
-    {
-      "charts": [
-        {
-          "charts": [
-            {
-              "charts": [],
-              "turtleHistory": false,
-              "pos": "RIGHT",
-              "liveUpdate": true,
-              "selectedTurtles": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6
-              ],
-              "time": "2016-04-22T16:50:32.076",
-              "chart": "Field"
-            }
-          ],
-          "turtleHistory": false,
-          "pos": "BOTTOM",
-          "liveUpdate": true,
-          "selectedTurtles": [
-            0,
-            1,
-            2,
-            3,
-            4,
-            5,
-            6
-          ],
-          "time": "2016-04-22T16:50:25.438",
-          "chart": "Field"
-        },
-        {
-          "charts": [],
-          "turtleHistory": false,
-          "pos": "RIGHT",
-          "liveUpdate": true,
-          "selectedTurtles": [
-            0,
-            1,
-            2,
-            3,
-            4,
-            5,
-            6
-          ],
-          "time": "2016-04-22T16:50:39.716",
-          "chart": "Field"
-        }
-      ],
-      "turtleHistory": false,
+      "charts": [],
+      "turtleHistory": true,
       "pos": "RIGHT",
       "liveUpdate": true,
       "selectedTurtles": [
@@ -125,13 +14,12 @@
         5,
         6
       ],
-      "time": "2016-04-22T16:50:01.569",
+      "time": "2016-04-25T13:00:41.148",
       "chart": "Field"
     },
     {
       "charts": [],
-      "turtleHistory": false,
-      "pos": "FLOAT",
+      "pos": "TOP",
       "liveUpdate": true,
       "selectedTurtles": [
         0,
@@ -142,7 +30,30 @@
         5,
         6
       ],
-      "chart": "Field"
+      "parameter": "Ball",
+      "time": "2016-04-25T13:00:41.117",
+      "chart": "Scatter-chart",
+      "parameterIndex": 0,
+      "parameterValue": "y"
+    },
+    {
+      "charts": [],
+      "pos": "BOTTOM",
+      "liveUpdate": true,
+      "selectedTurtles": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "parameter": "Role ID",
+      "time": "2016-04-25T13:00:41.014",
+      "chart": "Categorical-chart",
+      "parameterIndex": 0,
+      "parameterValue": "current"
     }
   ]
 }

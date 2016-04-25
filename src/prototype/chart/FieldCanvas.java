@@ -33,7 +33,6 @@ import javafx.scene.text.Text;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Translate;
 import javafx.util.Pair;
-import org.apache.pivot.util.Console;
 import prototype.object.ParameterMap;
 import prototype.listener.SelectionEventListener;
 import prototype.object.StringValuePair;
@@ -44,9 +43,11 @@ import prototype.object.Parameter;
 import prototype.object.Range;
 import prototype.settings.Configuration;
 import org.dockfx.DockNode;
+import prototype.object.CombinedBall;
 import prototype.object.CombinedOpponent;
 
 public class FieldCanvas extends Pane implements Chart{
+  private static double TRANSPARENCY = 0.35;
   private List<Turtle> data;
   private Range<Integer> selection;
   private boolean forward;
@@ -83,9 +84,13 @@ public class FieldCanvas extends Pane implements Chart{
   
   private boolean showTurtlePerspective;
   private boolean showOpponentPerspective;
+  private boolean showBallPerspective;
   private int[] viewTurtleIds;
   private double viewOpponentId;
-
+  private Point2D source;
+  private Map<Integer, List<Point2D>> targets;
+  private List<Path> hoverPaths = new ArrayList();
+  
   public FieldCanvas(List<Turtle> data, boolean liveUpdate, int[] selectedTurtles, boolean turtleHistory) {
     this.data = data;
     
@@ -102,8 +107,11 @@ public class FieldCanvas extends Pane implements Chart{
     this.shape_ball = new ArrayList();
     this.shape_opponents = new ArrayList();
     this.shape_turtles = new ArrayList();
+    this.hoverPaths = new ArrayList();
   
     this.showTurtlePerspective = false;
+    this.showOpponentPerspective = false;
+    this.showBallPerspective = false;
     this.viewTurtleIds = new int[0];
     
     this.getStylesheets().add("prototype/plot.css");
@@ -147,6 +155,13 @@ public class FieldCanvas extends Pane implements Chart{
     if((!drag || liveUpdate) && data.size() > 0) {
       this.selection = new Range(startIndex, endIndex);
       this.forward = forward;
+      
+      this.showTurtlePerspective = false;
+      this.showOpponentPerspective = false;
+      this.showBallPerspective = false;
+      this.source = null;
+      this.targets = new HashMap();
+            
       drawMovingShapes();
       setDockTitle();
     } else {
@@ -289,6 +304,8 @@ public class FieldCanvas extends Pane implements Chart{
       else
         index = selection.GetMin();
       
+      targets = new HashMap();
+      
       drawTurtleLines();
 
       drawOpponents(index); 
@@ -297,6 +314,8 @@ public class FieldCanvas extends Pane implements Chart{
 
       drawBall(index);
 
+      drawHoverPaths();
+      
       resizePanel();
     }
   }
@@ -310,7 +329,9 @@ public class FieldCanvas extends Pane implements Chart{
     
     if(data != null && data.size() > 0) {
       try {
-        for(int selectedTurtle : getTurtles()) {
+        List<Integer> visible = getVisibleTurtles();
+        
+        for(int selectedTurtle : selectedTurtles) {
           Turtle turtle  = data.get(selectedTurtle);
 
           DataPoint inField = turtle.GetValue(this.configuration.RobotInField, 0, this.configuration.RobotInFieldIndex, index);
@@ -335,6 +356,15 @@ public class FieldCanvas extends Pane implements Chart{
             turtleText.setFill(Color.WHITE);
             turtleText.setRotate(Math.toDegrees(orientation));
 
+            if(!visible.contains(selectedTurtle)) {
+              turtlePolygon.setOpacity(TRANSPARENCY);
+              turtleText.setOpacity(TRANSPARENCY);
+            } else {
+              if(!targets.containsKey(selectedTurtle))
+                targets.put(selectedTurtle, new ArrayList());
+              targets.get(selectedTurtle).add(turtlePos);
+            }
+            
             shape_turtles.add(new Pair(turtlePolygon, turtleText));
             this.getChildren().add(turtlePolygon);
             this.getChildren().add(turtleText);
@@ -342,9 +372,15 @@ public class FieldCanvas extends Pane implements Chart{
             turtlePolygon.setOnMouseMoved(new EventHandler() {
               @Override
               public void handle(Event event) {
-                if(!showTurtlePerspective) {
+                if(source != turtlePos) {
                   viewTurtleIds = new int[] { turtleId };
-                  showTurtlePerspective = true;
+                showTurtlePerspective = true;
+                showOpponentPerspective = false;
+                showBallPerspective = false;
+                  
+                  source = turtlePos;
+                  targets = new HashMap();
+                
                   drawMovingShapes();
                 }
               }
@@ -384,8 +420,8 @@ public class FieldCanvas extends Pane implements Chart{
     if(selection != null && data != null && data.size() > 0) {
       try {
         Map<Integer, List<Point2D>> turltePoints = new HashMap();
-                
-        for(int turtleIndex : getTurtles()) {
+        
+        for(int turtleIndex : selectedTurtles) {
           turltePoints.put(turtleIndex, new ArrayList());
           
           Turtle turtle  = data.get(turtleIndex);
@@ -404,27 +440,145 @@ public class FieldCanvas extends Pane implements Chart{
           }
         }
         
-        List<CombinedOpponent> filtered = filter(turltePoints, 20);
+        List<CombinedOpponent> filtered = filterOpponents(turltePoints, 20);      
+        List<Integer> visible = getVisibleTurtles();
 
         for(CombinedOpponent newPoint : filtered) {
-
+          int[] pointTurtles = newPoint.getTurtles();
+          double opacity = 1;
+          Point2D opponentPos = newPoint.getAveragePosition();
+          
           EventHandler mouseMove = new EventHandler() {
             @Override
             public void handle(Event event) {
-              if(!showOpponentPerspective) {
+              if(source != opponentPos) {
+                showTurtlePerspective = false;
                 showOpponentPerspective = true;
+                showBallPerspective = false;
+                
                 viewTurtleIds = newPoint.getTurtles();
                 viewOpponentId = newPoint.getId();
+
+                source = newPoint.getAveragePosition();
+                targets = new HashMap();
+
                 drawMovingShapes();
               }
             }
           };
+          
+          if((showOpponentPerspective && viewOpponentId != newPoint.getId()) || showBallPerspective) {
+            opacity = TRANSPARENCY;
+          } else {
+            boolean contains = false;
+            for(int i = 0; i < pointTurtles.length; i++) {
+              if(visible.contains(pointTurtles[i])) {
+                contains = true;
+              }
+            }
 
-          for(Rectangle shape : newPoint.createShape()) {
+            if(!contains) {
+              opacity = TRANSPARENCY;
+            }
+          }
+          
+          if(opacity == 1) {
+            for(int i = 0; i < viewTurtleIds.length; i++) {
+              if(!targets.containsKey(viewTurtleIds[i]))
+                targets.put(viewTurtleIds[i], new ArrayList());
+              targets.get(viewTurtleIds[i]).add(opponentPos);
+            }
+          }
+          
+          for(Rectangle shape : newPoint.createShape(opacity)) {            
             this.getChildren().add(shape);
             shape.setOnMouseMoved(mouseMove);            
             shape_opponents.add(shape);
           }
+        }      
+      } catch(Exception ex) {
+        ex.printStackTrace();        
+      }
+    }
+  }
+    
+  private void drawBall(int index) {
+    for(Circle ball_shape : shape_ball) {
+      this.getChildren().remove(ball_shape);
+    }
+    shape_ball.clear();
+    
+    if(selection != null && data != null && data.size() > 0) {      
+      try {
+        Map<Integer, Point2D> turltePoints = new HashMap();
+
+        for(int turtleIndex : selectedTurtles) {
+          Turtle turtle  = data.get(turtleIndex);
+
+          DataPoint ballFound = turtle.GetValue(this.configuration.BallFound, 0, this.configuration.BallFoundIndex, index);
+          DataPoint ballX = turtle.GetValue(this.configuration.Ball, 0, this.configuration.BallX, index);
+          DataPoint ballY = turtle.GetValue(this.configuration.Ball, 0, this.configuration.BallY, index);
+
+          if(ballFound != null&& ballFound.getValue() > 0 && ballX.getValue() != 0 && ballY.getValue() != 0) {
+            Point2D ballPos = getPosition(ballX.getValue(), ballY.getValue());
+            turltePoints.put(turtleIndex, ballPos);
+          }
+        }
+
+        List<CombinedBall> filtered = filterBall(turltePoints, 8);
+        List<Integer> visible = getVisibleTurtles();
+
+        for(CombinedBall newPoint : filtered) {
+          Point2D averagePos = newPoint.getAveragePosition();
+          int[] pointTurtles = newPoint.getTurtles();
+          Circle ball = new Circle(averagePos.getX(), averagePos.getY(), 7.0f, Color.ORANGE);
+
+          double opacity = 1;
+          
+          if(showOpponentPerspective) {
+            opacity = TRANSPARENCY;
+          } else {
+            boolean contains = false;
+            for(int i = 0; i < pointTurtles.length; i++) {
+              if(visible.contains(pointTurtles[i])) {
+                contains = true;
+              }
+            }
+
+            if(!contains) {
+              opacity = TRANSPARENCY;
+            }
+          }
+          
+          if(opacity == 1) {
+            for(int i = 0; i < viewTurtleIds.length; i++) {
+              if(!targets.containsKey(viewTurtleIds[i]))
+                targets.put(viewTurtleIds[i], new ArrayList());
+              targets.get(viewTurtleIds[i]).add(averagePos);
+            }
+          }
+          
+          ball.setStroke(Color.DARKORANGE);
+          ball.setOpacity(opacity);
+          shape_ball.add(ball);
+          this.getChildren().add(ball);
+
+          ball.setOnMouseMoved(new EventHandler() {
+              @Override
+              public void handle(Event event) {
+                if(source != averagePos) {
+                  viewTurtleIds = pointTurtles;
+                showTurtlePerspective = false;
+                showOpponentPerspective = false;
+                showBallPerspective = true;
+                  
+                  source = averagePos;
+                  targets = new HashMap();
+                  
+                  drawMovingShapes();
+                }
+              }
+            });            
         }        
       } catch(Exception ex) {
         ex.printStackTrace();        
@@ -432,10 +586,10 @@ public class FieldCanvas extends Pane implements Chart{
     }
   }
   
-  private List<CombinedOpponent> filter(Map<Integer, List<Point2D>> turltePoints, double distance) {
+  private List<CombinedOpponent> filterOpponents(Map<Integer, List<Point2D>> opponentPoints, double distance) {
     List<CombinedOpponent> combinedPoints = new ArrayList();
     
-    for(Entry<Integer, List<Point2D>> points : turltePoints.entrySet()) {
+    for(Entry<Integer, List<Point2D>> points : opponentPoints.entrySet()) {
       int turtle = points.getKey();
       
       for(CombinedOpponent combination : combinedPoints) {
@@ -473,59 +627,39 @@ public class FieldCanvas extends Pane implements Chart{
       }
     }
     
-    if(showOpponentPerspective) {
-      for(CombinedOpponent combination : combinedPoints) {
-        if(viewOpponentId == combination.getId()) {
-          List<CombinedOpponent> singlePoint = new ArrayList();
-          singlePoint.add(combination);
-          return singlePoint;
+    return combinedPoints;
+  }
+  
+  private List<CombinedBall> filterBall(Map<Integer, Point2D> ballPoints, double distance) {
+    List<CombinedBall> combinedPoints = new ArrayList();
+    
+    for(Entry<Integer, Point2D> points : ballPoints.entrySet()) {
+      int turtle = points.getKey();    
+      Point2D point = points.getValue();
+      
+      boolean added = false;
+      for(CombinedBall combination : combinedPoints) {
+        if(!combination.containsTurtle(turtle)) {      
+          
+          if(combination.distance(point) <= distance) {
+           try {
+              combination.addTurtle(turtle, point);
+              added = true;
+            } catch (Exception ex) {
+              Logger.getLogger(FieldCanvas.class.getName()).log(Level.SEVERE, null, ex);
+            }
+          }
         }
+      }
+
+      if(!added) {
+        double id = point.getX();
+        CombinedBall newCombined = new CombinedBall(id, turtle, point);
+        combinedPoints.add(newCombined);
       }
     }
     
     return combinedPoints;
-  }
-  
-  private void drawBall(int index) {
-    for(Circle ball_shape : shape_ball) {
-      this.getChildren().remove(ball_shape);
-    }
-    shape_ball.clear();
-    
-    if(selection != null && data != null && data.size() > 0) {
-      
-      try {
-        for(int selectedTurtle : getTurtles()) {
-          Turtle turtle  = data.get(selectedTurtle);
-
-          DataPoint ballFound = turtle.GetValue(this.configuration.BallFound, 0, this.configuration.BallFoundIndex, index);
-          DataPoint ballX = turtle.GetValue(this.configuration.Ball, 0, this.configuration.BallX, index);
-          DataPoint ballY = turtle.GetValue(this.configuration.Ball, 0, this.configuration.BallY, index);
-
-          if(ballFound != null&& ballFound.getValue() > 0 && ballX.getValue() != 0 && ballY.getValue() != 0) {
-            Point2D ballPos = getPosition(ballX.getValue(), ballY.getValue());
-
-            Circle ball = new Circle(ballPos.getX(), ballPos.getY(), 7.0f, Color.ORANGE);
-            ball.setStroke(Color.DARKORANGE);
-            shape_ball.add(ball);
-            this.getChildren().add(ball);
-            
-            ball.setOnMouseMoved(new EventHandler() {
-              @Override
-              public void handle(Event event) {
-                if(!showTurtlePerspective) {
-                  viewTurtleIds = new int[] { selectedTurtle };
-                  showTurtlePerspective = true;
-                  drawMovingShapes();
-                }
-              }
-            });
-          }
-        }
-      } catch(Exception ex) {
-        ex.printStackTrace();        
-      }
-    }
   }
   
   private void drawField() {
@@ -602,9 +736,12 @@ public class FieldCanvas extends Pane implements Chart{
       EventHandler mouseMove = new EventHandler() {
         @Override
         public void handle(Event event) {
-          if(showTurtlePerspective || showOpponentPerspective) {
+          if(showTurtlePerspective || showOpponentPerspective || showBallPerspective) {
             showTurtlePerspective = false;
             showOpponentPerspective = false;
+            showBallPerspective = false;
+            source = null;
+            targets = new HashMap();
             drawMovingShapes();
           }
         }
@@ -630,7 +767,7 @@ public class FieldCanvas extends Pane implements Chart{
     if(turtleHistory && selection != null && data != null && data.size() > 0) {
       List<Pair<Integer, List<Point2D>>> turtle_paths = new ArrayList();
 
-      for(int selectedTurtle : getTurtles()) {
+      for(int selectedTurtle : getVisibleTurtles()) {
         Turtle turtle  = data.get(selectedTurtle);
 
         Parameter parameter = this.parameterMap.GetParameter(this.configuration.Pose);
@@ -692,11 +829,47 @@ public class FieldCanvas extends Pane implements Chart{
     }
   }
   
-  private int[] getTurtles() {
-    if(showTurtlePerspective || showOpponentPerspective)
-      return viewTurtleIds;
-    else
-      return selectedTurtles;
+  private void drawHoverPaths() {
+    for(Path path : hoverPaths) {
+      this.getChildren().remove(path);
+    }
+    hoverPaths.clear();
+    
+    if((showTurtlePerspective || showOpponentPerspective || showBallPerspective) && source != null) {
+      for(int turtle : targets.keySet()) {
+        for(Point2D point : targets.get(turtle)) {
+          
+          Path path = new Path();
+          path.getStyleClass().add(String.format("default-color%d-agent-line", turtle));
+          path.setStrokeWidth(2);
+          path.setOpacity(0.6);
+          
+          MoveTo moveTo = new MoveTo(source.getX(), source.getY());
+          path.getElements().add(moveTo); 
+
+          LineTo lineTo = new LineTo(point.getX(), point.getY());
+          path.getElements().add(lineTo);
+
+          
+          this.hoverPaths.add(path);
+          this.getChildren().add(11, path);        
+        }
+      }
+    }
+  }
+  
+  private List<Integer> getVisibleTurtles() {
+    List<Integer> results = new ArrayList();
+    if(showTurtlePerspective || showOpponentPerspective || showBallPerspective) {
+      for (int index = 0; index < viewTurtleIds.length; index++) {
+        results.add(viewTurtleIds[index]);
+      }
+    } else {
+      for (int index = 0; index < selectedTurtles.length; index++) {
+        results.add(selectedTurtles[index]);
+      }
+    }
+    return results;
   }
   
   private void resizePanel() {      
