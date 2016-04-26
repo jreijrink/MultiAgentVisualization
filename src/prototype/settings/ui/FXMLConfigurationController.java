@@ -77,7 +77,7 @@ public class FXMLConfigurationController implements Initializable {
     goalWidthTextField.setText(String.valueOf(configuration.GoalWidth));
     goalDepthTextField.setText(String.valueOf(configuration.GoalDepth));
     
-    turtlePoseChoiceBox.getItems().setAll(this.parameterMap.GetParameters());
+    turtlePoseChoiceBox.getItems().setAll(this.parameterMap.GetAllParameters());
     if(this.parameterMap.ContainsParameter(configuration.Pose)) {
       Parameter parameter = this.parameterMap.GetParameter(configuration.Pose);
       turtlePoseChoiceBox.setValue(parameter);
@@ -95,7 +95,7 @@ public class FXMLConfigurationController implements Initializable {
       }
     });
     
-    turtleInFieldChoiceBox.getItems().setAll(this.parameterMap.GetParameters());
+    turtleInFieldChoiceBox.getItems().setAll(this.parameterMap.GetAllParameters());
     if(this.parameterMap.ContainsParameter(configuration.RobotInField)) {
       Parameter parameter = this.parameterMap.GetParameter(configuration.RobotInField);
       turtleInFieldChoiceBox.setValue(parameter);      
@@ -109,7 +109,7 @@ public class FXMLConfigurationController implements Initializable {
       }
     });
     
-    OponnentPosesChoiceBox.getItems().setAll(this.parameterMap.GetParameters());
+    OponnentPosesChoiceBox.getItems().setAll(this.parameterMap.GetAllParameters());
     if(this.parameterMap.ContainsParameter(configuration.Opponent)) {
       Parameter parameter = this.parameterMap.GetParameter(configuration.Opponent);
       OponnentPosesChoiceBox.setValue(parameter);      
@@ -125,7 +125,7 @@ public class FXMLConfigurationController implements Initializable {
       }
     });
     
-    OpponentLabelsChoiceBox.getItems().setAll(this.parameterMap.GetParameters());
+    OpponentLabelsChoiceBox.getItems().setAll(this.parameterMap.GetAllParameters());
     if(this.parameterMap.ContainsParameter(configuration.Opponentlabelnumber)) {
       Parameter parameter = this.parameterMap.GetParameter(configuration.Opponentlabelnumber);
       OpponentLabelsChoiceBox.setValue(parameter);      
@@ -139,7 +139,7 @@ public class FXMLConfigurationController implements Initializable {
       }
     });
     
-    ballPoseChoiceBox.getItems().setAll(this.parameterMap.GetParameters());
+    ballPoseChoiceBox.getItems().setAll(this.parameterMap.GetAllParameters());
     if(this.parameterMap.ContainsParameter(configuration.Ball)) {
       Parameter parameter = this.parameterMap.GetParameter(configuration.Ball);
       ballPoseChoiceBox.setValue(parameter);      
@@ -155,7 +155,7 @@ public class FXMLConfigurationController implements Initializable {
       }
     });
     
-    ballFoundChoiceBox.getItems().setAll(this.parameterMap.GetParameters());
+    ballFoundChoiceBox.getItems().setAll(this.parameterMap.GetAllParameters());
     if(this.parameterMap.ContainsParameter(configuration.BallFound)) {
       Parameter parameter = this.parameterMap.GetParameter(configuration.BallFound);
       ballFoundChoiceBox.setValue(parameter);

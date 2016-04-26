@@ -5,12 +5,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javafx.util.Pair;
 import prototype.chart.Chart;
 import prototype.chart.DataPoint;
 
 public class Turtle {
   public final int turtleID;
-  public final double[][] data;
+  public double[][] data;
   private final ParameterMap parameterMap;
   private boolean[] filterMap;
   private final Map<Chart, List<Filter>> filters;
@@ -20,6 +21,153 @@ public class Turtle {
     this.data = data;
     this.parameterMap = new ParameterMap();
     this.filters = new HashMap();
+    
+    createGeneratedParameters();
+  }
+  
+  private void createGeneratedParameters() {
+    List<GeneratedParameter> parameters = this.parameterMap.GetGeneratedParameters();
+    
+    for(GeneratedParameter parameter : parameters) {
+
+      Map<Condition, List<DataPoint>> preConditions = new HashMap();
+      for(Condition preCondition : parameter.getPreConditions()) {
+        List<Double> values = preCondition.getValues(this.parameterMap);
+        List<DataPoint> datapoints = GetAllValues(preCondition.getParameterName(), preCondition.getParameterIndex(), preCondition.GetValueName());
+        preConditions.put(preCondition, datapoints);
+      }
+      
+      Map<Condition, List<DataPoint>> postConditionsSuccess = new HashMap();
+      for(Condition postCondition : parameter.getPostConditionsSuccess()) {
+        List<Double> values = postCondition.getValues(this.parameterMap);
+        List<DataPoint> datapoints = GetAllValues(postCondition.getParameterName(), postCondition.getParameterIndex(), postCondition.GetValueName());
+        postConditionsSuccess.put(postCondition, datapoints);
+      }
+      
+      Map<Condition, List<DataPoint>> postConditionsFailed = new HashMap();
+      for(Condition postCondition : parameter.getPostConditionsFailed()) {
+        List<Double> values = postCondition.getValues(this.parameterMap);
+        List<DataPoint> datapoints = GetAllValues(postCondition.getParameterName(), postCondition.getParameterIndex(), postCondition.GetValueName());
+        postConditionsFailed.put(postCondition, datapoints);
+      }
+
+      for(Value value : parameter.getValues()) {
+        try {
+          int valueIndex = this.parameterMap.GetValueIndex(parameter.getName(), 0, value.getName());
+          double[] data = new double[this.data[0].length];
+          boolean active = false;
+          int activationIndex = 0;
+          int endIndex = 0;
+          int result = 0;
+          boolean finished = false;
+          
+          for(int i = 0; i < data.length - 1; i++) {
+            
+            if(!active) {
+              boolean satisfied = (preConditions.size() > 0);
+              
+              for(Condition condition : preConditions.keySet()) {
+                List<DataPoint> points = preConditions.get(condition);
+                List<Double> conditionValues = condition.getValues(this.parameterMap);
+                
+                switch(condition.GetEquationType()) {
+                  case IS:
+                    if(!conditionValues.contains(points.get(i).getValue())) {
+                      satisfied = false;
+                    }
+                    break;
+                  case IS_NOT:
+                    if(conditionValues.contains(points.get(i).getValue())) {
+                      satisfied = false;
+                    }
+                    break;
+                }
+              }
+
+              if(satisfied) {
+                active = true;
+                finished = false;
+                activationIndex = i;
+                data[i] = 1;
+              }
+              
+              
+            } else {
+              boolean success = false;
+              boolean failed = false;
+              
+              for(Condition condition : postConditionsSuccess.keySet()) {
+                List<DataPoint> points = postConditionsSuccess.get(condition);
+                List<Double> conditionValues = condition.getValues(this.parameterMap);
+                
+                switch(condition.GetEquationType()) {
+                  case IS:
+                    if(conditionValues.contains(points.get(i).getValue())) {
+                      success = true;
+                    }
+                    break;
+                  case IS_NOT:
+                    if(!conditionValues.contains(points.get(i).getValue())) {
+                      success = true;
+                    }
+                    break;
+                }
+              }
+              
+              if(!success) {
+                for(Condition condition : postConditionsFailed.keySet()) {
+                  List<DataPoint> points = postConditionsFailed.get(condition);
+                  List<Double> conditionValues = condition.getValues(this.parameterMap);
+
+                  switch(condition.GetEquationType()) {
+                    case IS:
+                      if(conditionValues.contains(points.get(i).getValue())) {
+                        failed = true;
+                      }
+                      break;
+                    case IS_NOT:
+                      if(!conditionValues.contains(points.get(i).getValue())) {
+                        failed = true;
+                      }
+                      break;
+                  }
+                }
+              }
+              
+              if(success || failed) {
+                endIndex = i;
+                if(success) {
+                  //Succes
+                  result = 1;
+                }  else {
+                  //Failed
+                  result = 2;
+                }
+                finished = true;
+              }
+            }
+
+            
+            if(finished) {
+              for(int x = activationIndex; x <= endIndex; x++) {
+                data[x] = result;
+              }              
+              active = false;
+            }
+          }
+
+          this.data = addElement(this.data, valueIndex, data);
+        } catch(Exception ex) {
+          ex.printStackTrace();
+        }
+      }
+    }
+  }
+
+  static double[][] addElement(double[][] a, int index, double[] e) {
+    a  = Arrays.copyOf(a, Math.max(a.length, a.length + (index - a.length) + 1));
+    a[index] = e;
+    return a;
   }
   
   private void applyFilters() {
@@ -90,45 +238,46 @@ public class Turtle {
   
   public DataPoint GetValue(String parameterName, int parameterIndex, String valueName, int index) {
     try {
-      Value value = this.parameterMap.GetParameter(parameterName).getValue(valueName);
-            
-      int valueIndex = this.parameterMap.GetValueIndex(parameterName, parameterIndex, valueName);
-      double[] dataset = this.data[valueIndex];
+      int startIndex = index;
+      int endIndex = index + 1;
       
-      index = Math.max(index, 0);
-      index = Math.min(index, dataset.length - 1);
+      if(endIndex > this.data[0].length - 1) {
+        startIndex = this.data[0].length - 2;
+        endIndex = this.data[0].length - 1;
+      }
       
-      return processData(valueIndex, new double[] { dataset[index] }, value).get(0);
+      List<DataPoint> values = GetValues(parameterName, parameterIndex, valueName, startIndex, endIndex);
+      if(values.size() > 0) {
+        return values.get(0);
+      }
     } catch(Exception ex) {
       ex.printStackTrace();
-      return null;
     }
+      return null;
   }
   
-  public List<DataPoint> GetValues(String parameterName, int parameterIndex, String valueName, int startIndex, int endIndex) {    
+  public List<DataPoint> GetAllValues(String parameterName, int parameterIndex, String valueName) {
     try {
-      Value value = this.parameterMap.GetParameter(parameterName).getValue(valueName);
-      
-      int valueIndex = this.parameterMap.GetValueIndex(parameterName, parameterIndex, valueName);
-      
-      startIndex = Math.max(startIndex, 0);
-      endIndex = Math.min(endIndex, this.data[valueIndex].length - 1);
-      
-      double[] dataset = Arrays.copyOfRange(this.data[valueIndex], startIndex, endIndex);
-      return processData(startIndex, dataset, value);
+      return GetValues(parameterName, parameterIndex, valueName, 0, this.data[0].length - 1);
     } catch(Exception ex) {
       ex.printStackTrace();
       return new ArrayList();
     }
   }
   
-  public List<DataPoint> GetAllValues(String parameterName, int parameterIndex, String valueName) {
+  public List<DataPoint> GetValues(String parameterName, int parameterIndex, String valueName, int startIndex, int endIndex) {    
     try {
       Value value = this.parameterMap.GetParameter(parameterName).getValue(valueName);
-      
       int valueIndex = this.parameterMap.GetValueIndex(parameterName, parameterIndex, valueName);
-      double[] dataset = this.data[valueIndex];
-      return processData(0, dataset, value);
+
+      startIndex = Math.max(startIndex, 0);
+      startIndex = Math.min(startIndex, this.data[valueIndex].length - 1);
+
+      endIndex = Math.max(endIndex, 0);
+      endIndex = Math.min(endIndex, this.data[valueIndex].length - 1);
+
+      double[] dataset = Arrays.copyOfRange(this.data[valueIndex], startIndex, endIndex);
+      return processData(startIndex, dataset, value);
     } catch(Exception ex) {
       ex.printStackTrace();
       return new ArrayList();
@@ -147,7 +296,7 @@ public class Turtle {
   public String toString() {
     return String.format("Turtle: %d", turtleID);
   }
-  
+    
   private List<DataPoint> processData(int offest, double[] data, Value value) {
     List<DataPoint> values = new ArrayList();
     
@@ -155,8 +304,13 @@ public class Turtle {
 
     for(int i = 0; i < result.length; i++) {
       double dataValue = result[i];
-                  
-      DataPoint point = new DataPoint(i + offest, dataValue, i + offest, value.aboveMin(dataValue), value.belowMax(dataValue), satisfiesFilter(i + offest));
+      DataPoint point = null;
+      
+      if(value != null)
+        point = new DataPoint(i + offest, dataValue, i + offest, value.aboveMin(dataValue), value.belowMax(dataValue), satisfiesFilter(i + offest));
+      else
+        point = new DataPoint(i + offest, dataValue, i + offest, true, true, satisfiesFilter(i + offest));
+      
       values.add(point);
     }
     
@@ -168,33 +322,33 @@ public class Turtle {
   }
   
   private double[] applyDecimalMask(double[] data, Value value) {
-    
-    String mask = value.getDecimalmask();
-    if(mask != null && mask.length() > 0) {      
-      double[] editData = Arrays.copyOf(data, data.length);
-      
-      for(int i = 0; i < editData.length; i++) {
-        int calcValue = (int)editData[i];
-        
-        String stringRep = String.valueOf(calcValue);
-        String newValueRep = "";
-        
-        for(int s = 0; s < stringRep.length(); s++) {
-          if(s < mask.length() && mask.charAt(mask.length() - 1 - s) == '1') {
-            newValueRep = stringRep.charAt(stringRep.length() - 1 - s) + newValueRep;
+    if(value != null) {
+      String mask = value.getDecimalmask();
+      if(mask != null && mask.length() > 0) {      
+        double[] editData = Arrays.copyOf(data, data.length);
+
+        for(int i = 0; i < editData.length; i++) {
+          int calcValue = (int)editData[i];
+
+          String stringRep = String.valueOf(calcValue);
+          String newValueRep = "";
+
+          for(int s = 0; s < stringRep.length(); s++) {
+            if(s < mask.length() && mask.charAt(mask.length() - 1 - s) == '1') {
+              newValueRep = stringRep.charAt(stringRep.length() - 1 - s) + newValueRep;
+            }
           }
+
+          double newValue = 0;
+          if(newValueRep.length() > 0)
+            newValue = Double.parseDouble(newValueRep);
+
+          editData[i] = newValue;
         }
-        
-        double newValue = 0;
-        if(newValueRep.length() > 0)
-          newValue = Double.parseDouble(newValueRep);
-        
-        editData[i] = newValue;
+
+        return editData;      
       }
-      
-      return editData;      
     }
-    
     return data;
   }
 }

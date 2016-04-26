@@ -1,7 +1,47 @@
 {
   "charts": [
     {
-      "charts": [],
+      "charts": [
+        {
+          "charts": [
+            {
+              "charts": [],
+              "pos": "BOTTOM",
+              "liveUpdate": true,
+              "selectedTurtles": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              "parameter": "Intercept",
+              "time": "2016-04-26T18:13:55.411",
+              "chart": "Categorical-chart",
+              "parameterIndex": 0,
+              "parameterValue": "result"
+            }
+          ],
+          "pos": "LEFT",
+          "liveUpdate": true,
+          "selectedTurtles": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "parameter": "Skill ID",
+          "time": "2016-04-26T18:11:52.496",
+          "chart": "Categorical-chart",
+          "parameterIndex": 0,
+          "parameterValue": "skill ID"
+        }
+      ],
       "turtleHistory": true,
       "pos": "RIGHT",
       "liveUpdate": true,
@@ -14,46 +54,8 @@
         5,
         6
       ],
-      "time": "2016-04-25T13:00:41.148",
+      "time": "2016-04-26T18:11:52.413",
       "chart": "Field"
-    },
-    {
-      "charts": [],
-      "pos": "TOP",
-      "liveUpdate": true,
-      "selectedTurtles": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6
-      ],
-      "parameter": "Ball",
-      "time": "2016-04-25T13:00:41.117",
-      "chart": "Scatter-chart",
-      "parameterIndex": 0,
-      "parameterValue": "y"
-    },
-    {
-      "charts": [],
-      "pos": "BOTTOM",
-      "liveUpdate": true,
-      "selectedTurtles": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6
-      ],
-      "parameter": "Role ID",
-      "time": "2016-04-25T13:00:41.014",
-      "chart": "Categorical-chart",
-      "parameterIndex": 0,
-      "parameterValue": "current"
     }
   ]
 }

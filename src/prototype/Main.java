@@ -38,7 +38,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.chart.XYChart;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.ButtonType;
@@ -55,7 +54,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import org.apache.pivot.util.Console;
 import prototype.chart.XYBaseChart.ChartType;
 import prototype.object.Turtle;
 import prototype.settings.Configuration;
@@ -389,7 +387,7 @@ public class Main extends Application {
           }
         }
       }).start();
-    }    
+    }
   }
   
   private boolean configurationComplete() {

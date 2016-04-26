@@ -131,6 +131,15 @@ public class Value {
     else
       return "";
   }
+    
+  public int getCategoryValue(String categoryName) {
+    for (Category categorie : this.categories) {
+      if (categorie.getName().equals(categoryName)) {
+        return categorie.getValue();
+      }
+    }
+    return -1;
+  }
   
   public Value copy() {
     ArrayList<Category> categoriesCopy = new ArrayList();

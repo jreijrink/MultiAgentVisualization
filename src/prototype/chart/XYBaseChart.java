@@ -38,7 +38,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.RectangleBuilder;
-import org.apache.pivot.util.Console;
 import prototype.object.ParameterMap;
 import prototype.listener.SelectionEventListener;
 import prototype.object.StringValuePair;
@@ -123,8 +122,8 @@ public class XYBaseChart implements Chart {
     this.selectedEndIndex = selectionEnd;
     this.forward = forward;
     
-    if(this.parameterMap.GetParameters().size() > 0) {
-    Parameter firstParameter = this.parameterMap.GetParameters().get(0);
+    if(this.parameterMap.GetAllParameters().size() > 0) {
+    Parameter firstParameter = this.parameterMap.GetAllParameters().get(0);
       this.parameter = firstParameter.getName();
       if(firstParameter.getValues().size() > 0) {
         this.parameterValue = firstParameter.getValues().get(0).getName();
@@ -269,7 +268,7 @@ public class XYBaseChart implements Chart {
     ChoiceBox<Integer> indexChoiceBox = new ChoiceBox();
     ChoiceBox<String> valueChoiceBox = new ChoiceBox();
 
-    List<Parameter> choices = parameterMap.GetParameters();
+    List<Parameter> choices = parameterMap.GetAllParameters();
     ObservableList<String> options = FXCollections.observableArrayList();
     for(Parameter choise : choices) {
       options.add(choise.getName());

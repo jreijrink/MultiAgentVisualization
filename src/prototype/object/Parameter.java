@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Parameter {
-  private String name;
-  private Type type;
-  private int count;
-  private List<Value> values;
+  protected String name;
+  protected Type type;
+  protected int count;
+  protected List<Value> values;
     
   public Parameter() {
     this("", Type.Numerical, 0, new ArrayList());

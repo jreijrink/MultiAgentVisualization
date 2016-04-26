@@ -47,7 +47,7 @@ import prototype.object.CombinedBall;
 import prototype.object.CombinedOpponent;
 
 public class FieldCanvas extends Pane implements Chart{
-  private static double TRANSPARENCY = 0.35;
+  private static double TRANSPARENCY = 0.5;
   private List<Turtle> data;
   private Range<Integer> selection;
   private boolean forward;

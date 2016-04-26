@@ -670,7 +670,7 @@
     {
       "values": [
         {
-          "unit": "boolean",
+          "unit": "turtle",
           "min": 0,
           "max": 0,
           "name": "CPB-team",
@@ -678,12 +678,36 @@
           "decimalmask": "",
           "categories": [
             {
-              "name": "False",
+              "name": "None",
               "value": 0
             },
             {
-              "name": "True",
+              "name": "Turtle 1",
               "value": 1
+            },
+            {
+              "name": "Tutle 2",
+              "value": 2
+            },
+            {
+              "name": "Turtle 3",
+              "value": 3
+            },
+            {
+              "name": "Turtle 4",
+              "value": 4
+            },
+            {
+              "name": "Turtle 5",
+              "value": 5
+            },
+            {
+              "name": "Turtle 6",
+              "value": 6
+            },
+            {
+              "name": "Turtle 7",
+              "value": 7
             }
           ],
           "rangeEnabled": false
@@ -1619,43 +1643,47 @@
           "decimalmask": "",
           "categories": [
             {
-              "name": "opponent1",
+              "name": "None",
+              "value": 0
+            },
+            {
+              "name": "Opponent 1",
               "value": 1
             },
             {
-              "name": "opponent2",
+              "name": "Opponent 2",
               "value": 2
             },
             {
-              "name": "opponent3",
+              "name": "Opponent 3",
               "value": 3
             },
             {
-              "name": "opponent4",
+              "name": "Opponent 4",
               "value": 4
             },
             {
-              "name": "opponent5",
+              "name": "Opponent 5",
               "value": 5
             },
             {
-              "name": "opponent6",
+              "name": "Opponent 6",
               "value": 6
             },
             {
-              "name": "opponent7",
+              "name": "Opponent 7",
               "value": 7
             },
             {
-              "name": "opponent8",
+              "name": "Opponent 8",
               "value": 8
             },
             {
-              "name": "opponent9",
+              "name": "Opponent 9",
               "value": 9
             },
             {
-              "name": "opponent10",
+              "name": "Opponent 10",
               "value": 10
             }
           ],
