@@ -3,27 +3,7 @@
     {
       "charts": [
         {
-          "charts": [
-            {
-              "charts": [],
-              "pos": "BOTTOM",
-              "liveUpdate": true,
-              "selectedTurtles": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6
-              ],
-              "parameter": "Intercept",
-              "time": "2016-04-26T18:13:55.411",
-              "chart": "Categorical-chart",
-              "parameterIndex": 0,
-              "parameterValue": "result"
-            }
-          ],
+          "charts": [],
           "pos": "LEFT",
           "liveUpdate": true,
           "selectedTurtles": [
@@ -35,13 +15,71 @@
             5,
             6
           ],
-          "parameter": "Skill ID",
-          "time": "2016-04-26T18:11:52.496",
+          "parameter": "CPB",
+          "time": "2016-04-27T13:17:32.090",
           "chart": "Categorical-chart",
           "parameterIndex": 0,
-          "parameterValue": "skill ID"
+          "parameterValue": "CPB"
+        },
+        {
+          "charts": [
+            {
+              "charts": [],
+              "pos": "LEFT",
+              "liveUpdate": true,
+              "selectedTurtles": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              "parameter": "*Illegal SkillID Ball",
+              "time": "2016-04-27T13:17:32.079",
+              "chart": "Categorical-chart",
+              "parameterIndex": 0,
+              "parameterValue": "result"
+            }
+          ],
+          "pos": "TOP",
+          "liveUpdate": true,
+          "selectedTurtles": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "parameter": "Opponent with ball",
+          "time": "2016-04-27T13:17:32.057",
+          "chart": "Categorical-chart",
+          "parameterIndex": 0,
+          "parameterValue": "opponent-with-ball"
         }
       ],
+      "pos": "RIGHT",
+      "liveUpdate": true,
+      "selectedTurtles": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "parameter": "Refbox command",
+      "time": "2016-04-27T13:17:31.986",
+      "chart": "Categorical-chart",
+      "parameterIndex": 0,
+      "parameterValue": "all"
+    },
+    {
+      "charts": [],
       "turtleHistory": true,
       "pos": "RIGHT",
       "liveUpdate": true,
@@ -54,7 +92,7 @@
         5,
         6
       ],
-      "time": "2016-04-26T18:11:52.413",
+      "time": "2016-04-27T13:17:32.103",
       "chart": "Field"
     }
   ]

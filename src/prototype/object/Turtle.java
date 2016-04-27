@@ -30,141 +30,101 @@ public class Turtle {
     
     for(GeneratedParameter parameter : parameters) {
 
-      Map<Condition, List<DataPoint>> preConditions = new HashMap();
-      for(Condition preCondition : parameter.getPreConditions()) {
-        List<Double> values = preCondition.getValues(this.parameterMap);
-        List<DataPoint> datapoints = GetAllValues(preCondition.getParameterName(), preCondition.getParameterIndex(), preCondition.GetValueName());
-        preConditions.put(preCondition, datapoints);
-      }
+      Map<Condition, List<DataPoint>> preConditions = getConditionMap(parameter.getPreConditions());
+      Map<Condition, List<DataPoint>> postConditionsSuccess = getConditionMap(parameter.getPostConditionsSuccess());
+      Map<Condition, List<DataPoint>> postConditionsFailed = getConditionMap(parameter.getPostConditionsFailed());
       
-      Map<Condition, List<DataPoint>> postConditionsSuccess = new HashMap();
-      for(Condition postCondition : parameter.getPostConditionsSuccess()) {
-        List<Double> values = postCondition.getValues(this.parameterMap);
-        List<DataPoint> datapoints = GetAllValues(postCondition.getParameterName(), postCondition.getParameterIndex(), postCondition.GetValueName());
-        postConditionsSuccess.put(postCondition, datapoints);
-      }
-      
-      Map<Condition, List<DataPoint>> postConditionsFailed = new HashMap();
-      for(Condition postCondition : parameter.getPostConditionsFailed()) {
-        List<Double> values = postCondition.getValues(this.parameterMap);
-        List<DataPoint> datapoints = GetAllValues(postCondition.getParameterName(), postCondition.getParameterIndex(), postCondition.GetValueName());
-        postConditionsFailed.put(postCondition, datapoints);
-      }
-
       for(Value value : parameter.getValues()) {
         try {
           int valueIndex = this.parameterMap.GetValueIndex(parameter.getName(), 0, value.getName());
-          double[] data = new double[this.data[0].length];
+          double[] newDataRow = new double[this.data[0].length];
+          
           boolean active = false;
           int activationIndex = 0;
           int endIndex = 0;
           int result = 0;
           boolean finished = false;
           
-          for(int i = 0; i < data.length - 1; i++) {
+          for(int i = 0; i < newDataRow.length - 1; i++) {
             
             if(!active) {
               boolean satisfied = (preConditions.size() > 0);
               
+              //AND type
               for(Condition condition : preConditions.keySet()) {
-                List<DataPoint> points = preConditions.get(condition);
-                List<Double> conditionValues = condition.getValues(this.parameterMap);
-                
-                switch(condition.GetEquationType()) {
-                  case IS:
-                    if(!conditionValues.contains(points.get(i).getValue())) {
-                      satisfied = false;
-                    }
-                    break;
-                  case IS_NOT:
-                    if(conditionValues.contains(points.get(i).getValue())) {
-                      satisfied = false;
-                    }
-                    break;
-                }
+                satisfied = condition.IsSatisfied(parameterMap, preConditions.get(condition).get(i)) && satisfied;
               }
-
+              
               if(satisfied) {
                 active = true;
                 finished = false;
                 activationIndex = i;
-                data[i] = 1;
-              }
-              
+                newDataRow[i] = 1;
+              }              
               
             } else {
-              boolean success = false;
-              boolean failed = false;
+              boolean preConditionsFinished = false;
               
-              for(Condition condition : postConditionsSuccess.keySet()) {
-                List<DataPoint> points = postConditionsSuccess.get(condition);
-                List<Double> conditionValues = condition.getValues(this.parameterMap);
-                
-                switch(condition.GetEquationType()) {
-                  case IS:
-                    if(conditionValues.contains(points.get(i).getValue())) {
-                      success = true;
-                    }
-                    break;
-                  case IS_NOT:
-                    if(!conditionValues.contains(points.get(i).getValue())) {
-                      success = true;
-                    }
-                    break;
-                }
+              //Wait until one of the preconditions is unsatisfied.
+              for(Condition condition : preConditions.keySet()) {
+                preConditionsFinished = !condition.IsSatisfied(parameterMap, preConditions.get(condition).get(i)) || preConditionsFinished;
               }
               
-              if(!success) {
-                for(Condition condition : postConditionsFailed.keySet()) {
-                  List<DataPoint> points = postConditionsFailed.get(condition);
-                  List<Double> conditionValues = condition.getValues(this.parameterMap);
+              if(preConditionsFinished) {
+                boolean success = true;
+                boolean failed = false;
 
-                  switch(condition.GetEquationType()) {
-                    case IS:
-                      if(conditionValues.contains(points.get(i).getValue())) {
-                        failed = true;
-                      }
-                      break;
-                    case IS_NOT:
-                      if(!conditionValues.contains(points.get(i).getValue())) {
-                        failed = true;
-                      }
-                      break;
+                //AND type
+                for(Condition condition : postConditionsSuccess.keySet()) {
+                  success = condition.IsSatisfied(parameterMap, postConditionsSuccess.get(condition).get(i)) && success;
+                }
+
+                //OR type
+                for(Condition condition : postConditionsFailed.keySet()) {
+                  failed = condition.IsSatisfied(parameterMap, postConditionsFailed.get(condition).get(i)) || failed;
+                }
+
+                //Don't end if the post conditions success and failed are both satisfied
+                if((success || failed) && !(success && failed)) {
+                  endIndex = i;
+                  if(success) {
+                    result = 1; //Succes
+                  } else {
+                    result = 2; //Failed
                   }
+                  finished = true;
                 }
-              }
-              
-              if(success || failed) {
-                endIndex = i;
-                if(success) {
-                  //Succes
-                  result = 1;
-                }  else {
-                  //Failed
-                  result = 2;
-                }
-                finished = true;
               }
             }
-
             
             if(finished) {
-              for(int x = activationIndex; x <= endIndex; x++) {
-                data[x] = result;
+              for(int index = activationIndex; index <= endIndex; index++) {
+                newDataRow[index] = result;
               }              
               active = false;
             }
           }
 
-          this.data = addElement(this.data, valueIndex, data);
+          this.data = addElement(this.data, valueIndex, newDataRow);
         } catch(Exception ex) {
           ex.printStackTrace();
         }
       }
     }
   }
-
-  static double[][] addElement(double[][] a, int index, double[] e) {
+  
+  private Map<Condition, List<DataPoint>> getConditionMap(List<Condition> conditions) {
+    Map<Condition, List<DataPoint>> conditionsMap = new HashMap();
+    
+    for(Condition condition : conditions) {
+      List<DataPoint> datapoints = GetAllValues(condition.GetParameterName(), condition.GetParameterIndex(), condition.GetValueName());
+      conditionsMap.put(condition, datapoints);
+    }
+    
+    return conditionsMap;
+  }
+  
+  private double[][] addElement(double[][] a, int index, double[] e) {
     a  = Arrays.copyOf(a, Math.max(a.length, a.length + (index - a.length) + 1));
     a[index] = e;
     return a;

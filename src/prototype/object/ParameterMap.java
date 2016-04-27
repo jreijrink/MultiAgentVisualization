@@ -1,8 +1,8 @@
 package prototype.object;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import prototype.settings.DataGeneration;
 import prototype.settings.DataMapping;
 
 public class ParameterMap {
@@ -11,38 +11,7 @@ public class ParameterMap {
   
   public ParameterMap() {
     this.parameters = DataMapping.loadParameters();
-    this.generated = createGeneratedParameters();
-  }
-  
-  private List<GeneratedParameter> createGeneratedParameters() {
-    List<GeneratedParameter> result = new ArrayList();
-    
-    List<Category> categories = new ArrayList();
-    //categories.add(new Category(0, "None"));
-    categories.add(new Category(1, "Success"));
-    categories.add(new Category(2, "Failed"));
-    
-    List<Value> values = new ArrayList();
-    values.add(new Value("result", 0, "", "", false, 0, 0, categories));
-    
-    GeneratedParameter generatedParameter = new GeneratedParameter("Intercept", Type.Categorical, 1, values);
-    
-    Condition preCondition1 = new Condition("Opponent with ball", 0, "opponent-with-ball", Equation.IS_NOT, Arrays.asList("None"));
-    Condition preCondition2 = new Condition("Skill ID", 0, "skill ID", Equation.IS, Arrays.asList("Intercept"));
-    generatedParameter.addPreCondition(preCondition1);
-    generatedParameter.addPreCondition(preCondition2);
-    
-    Condition postConditionSucces = new Condition("CPB", 0, "CPB", Equation.IS, Arrays.asList("True"));
-    generatedParameter.addPostConditionSuccess(postConditionSucces);
-    
-    Condition postConditionFailed1 = new Condition("Opponent with ball", 0, "opponent-with-ball", Equation.IS_NOT, Arrays.asList("None"));
-    Condition postConditionFailed2 = new Condition("Refbox command", 0, "all", Equation.IS, Arrays.asList("Stop"));
-    generatedParameter.addPostConditionFailed(postConditionFailed1);
-    generatedParameter.addPostConditionFailed(postConditionFailed2);
-
-    result.add(generatedParameter);
-    
-    return result;
+    this.generated = DataGeneration.loadGenerated();
   }
   
   public boolean ContainsParameter(String parameterName) {

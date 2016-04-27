@@ -2,6 +2,7 @@ package prototype.object;
 
 import java.util.ArrayList;
 import java.util.List;
+import prototype.chart.DataPoint;
 
 public class Condition {
   private final String parameterName;
@@ -18,7 +19,7 @@ public class Condition {
     this.values = values;
   }
   
-  public List<Double> getValues(ParameterMap parameterMap) {
+  public List<Double> GetValues(ParameterMap parameterMap) {
     List<Double> results = new ArrayList();
     
     try {
@@ -34,11 +35,11 @@ public class Condition {
     return results;
   }
   
-  public String getParameterName() {
+  public String GetParameterName() {
     return this.parameterName;
   }
   
-  public int getParameterIndex() {
+  public int GetParameterIndex() {
     return this.parameterIndex;
   }
   
@@ -48,5 +49,23 @@ public class Condition {
   
   public Equation GetEquationType() {
     return this.equation;
+  }
+  
+  public boolean IsSatisfied(ParameterMap parameterMap, DataPoint point) {
+    List<Double> conditionValues = GetValues(parameterMap);
+
+    switch(GetEquationType()) {
+      case IS:
+        if(conditionValues.contains(point.getValue())) {
+          return true;
+        }
+        break;
+      case IS_NOT:
+        if(!conditionValues.contains(point.getValue())) {
+          return true;
+        }
+        break;
+    }
+    return false;
   }
 }

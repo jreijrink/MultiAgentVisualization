@@ -19,7 +19,7 @@ public class GeneratedParameter extends Parameter {
     this.postConditionsFailed = new ArrayList();
   }
   
-  public void addPreCondition(Condition condition) {
+  public void addANDPreCondition(Condition condition) {
     preConditions.add(condition);
   }
   
@@ -27,7 +27,7 @@ public class GeneratedParameter extends Parameter {
     return preConditions;
   }
   
-  public void addPostConditionSuccess(Condition condition) {
+  public void addANDPostConditionSuccess(Condition condition) {
     postConditionsSuccess.add(condition);
   }
   
@@ -35,7 +35,7 @@ public class GeneratedParameter extends Parameter {
     return postConditionsSuccess;
   }
   
-  public void addPostConditionFailed(Condition condition) {
+  public void addORPostConditionFailed(Condition condition) {
     postConditionsFailed.add(condition);
   }
   
