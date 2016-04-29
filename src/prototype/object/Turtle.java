@@ -70,7 +70,7 @@ public class Turtle {
                 preConditionsFinished = !condition.IsSatisfied(parameterMap, preConditions.get(condition).get(i)) || preConditionsFinished;
               }
               
-              if(preConditionsFinished) {
+              if(preConditionsFinished || i == newDataRow.length - 1) {
                 boolean success = true;
                 boolean failed = false;
 

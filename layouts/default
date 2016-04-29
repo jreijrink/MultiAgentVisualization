@@ -3,25 +3,58 @@
     {
       "charts": [
         {
-          "charts": [],
-          "pos": "TOP",
+          "charts": [
+            {
+              "charts": [],
+              "pos": "BOTTOM",
+              "liveUpdate": true,
+              "selectedTurtles": [
+                3
+              ],
+              "parameter": "Battery voltage",
+              "time": "2016-04-29T14:40:37.540",
+              "chart": "Scatter-chart",
+              "parameterIndex": 0,
+              "parameterValue": "battery-voltage"
+            }
+          ],
+          "pos": "RIGHT",
           "liveUpdate": true,
           "selectedTurtles": [
             0,
             1,
             2,
-            3,
             4,
             5,
             6
           ],
-          "parameter": "*Ball loss",
-          "time": "2016-04-29T11:46:30.103",
-          "chart": "Categorical-chart",
+          "parameter": "Battery voltage",
+          "time": "2016-04-29T14:40:37.537",
+          "chart": "Scatter-chart",
           "parameterIndex": 0,
-          "parameterValue": "result"
+          "parameterValue": "battery-voltage"
         }
       ],
+      "pos": "TOP",
+      "liveUpdate": true,
+      "selectedTurtles": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "parameter": "Packetloss coach",
+      "time": "2016-04-29T14:40:37.534",
+      "chart": "Scatter-chart",
+      "parameterIndex": 0,
+      "parameterValue": "packetloss-coach"
+    },
+    {
+      "charts": [],
+      "turtleHistory": false,
       "pos": "RIGHT",
       "liveUpdate": true,
       "selectedTurtles": [
@@ -33,17 +66,14 @@
         5,
         6
       ],
-      "parameter": "Skill ID",
-      "time": "2016-04-29T11:46:30.028",
-      "chart": "Categorical-chart",
-      "parameterIndex": 0,
-      "parameterValue": "skill ID"
+      "time": "2016-04-29T14:40:37.542",
+      "chart": "Field"
     },
     {
       "charts": [
         {
           "charts": [],
-          "pos": "TOP",
+          "pos": "LEFT",
           "liveUpdate": true,
           "selectedTurtles": [
             0,
@@ -54,14 +84,14 @@
             5,
             6
           ],
-          "parameter": "CPB",
-          "time": "2016-04-29T11:46:30.138",
+          "parameter": "Role ID",
+          "time": "2016-04-29T14:40:37.529",
           "chart": "Categorical-chart",
           "parameterIndex": 0,
-          "parameterValue": "CPB"
+          "parameterValue": "current"
         }
       ],
-      "pos": "RIGHT",
+      "pos": "BOTTOM",
       "liveUpdate": true,
       "selectedTurtles": [
         0,
@@ -72,11 +102,11 @@
         5,
         6
       ],
-      "parameter": "Skill ID",
-      "time": "2016-04-29T11:46:30.127",
+      "parameter": "*Ball loss",
+      "time": "2016-04-29T14:40:37.526",
       "chart": "Turtle-chart",
       "parameterIndex": 0,
-      "parameterValue": "shottype"
+      "parameterValue": "result"
     }
   ]
 }

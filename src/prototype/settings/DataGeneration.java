@@ -9,6 +9,7 @@ import prototype.object.Value;
 import prototype.object.Condition;
 import prototype.object.Equation;
 import prototype.object.GeneratedParameter;
+import prototype.object.Range;
 
 public abstract class DataGeneration {
   
@@ -115,6 +116,7 @@ public abstract class DataGeneration {
     illegalBallParameter.addANDPreCondition(skillIDBallCondition);
     
     result.add(illegalBallParameter);
+    
     
     //Illegal SkillID Ball
     GeneratedParameter illegalSkillParameter = new GeneratedParameter("*Illegal Move (has ball)", Type.Categorical, 1, values);
