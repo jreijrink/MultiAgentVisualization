@@ -50,6 +50,7 @@ import static prototype.chart.Chart.getAllTurtles;
 import prototype.object.Filter;
 
 public class AgentChart implements Chart {
+  private static final int MIN_WIDTH = 1;
   
   private Scene scene;
   private List<Turtle> data;
@@ -533,7 +534,7 @@ public class AgentChart implements Chart {
                       .x(currentPosition + xAxisShift)
                       .y(yPosition + yAxisShift - (height / 2))
                       .height(height)
-                      .width(xPosition - currentPosition)
+                      .width(Math.max(xPosition - currentPosition, MIN_WIDTH))
                       .userData(new Object[]{ categoryName, currentFrame, timeFrame })
                         .styleClass(String.format("default-color%d-status-symbol", categoryIndex))
                       .build();
@@ -809,7 +810,7 @@ public class AgentChart implements Chart {
         double yPosition = yAxis.getDisplayPosition(turtle);
 
         rectChild.setX(startPosition + xAxisShift);
-        rectChild.setWidth(endPosition - startPosition);
+        rectChild.setWidth(Math.max(endPosition - startPosition, MIN_WIDTH));
         rectChild.setY(yPosition + yAxisShift - (height / 2) + offset);
         rectChild.setHeight(turtleHeight);
       } else {

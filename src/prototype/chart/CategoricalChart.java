@@ -50,6 +50,7 @@ import static prototype.chart.Chart.getAllTurtles;
 import prototype.object.Filter;
 
 public class CategoricalChart implements Chart {
+  private static final int MIN_WIDTH = 1;
   
   private Scene scene;
   private List<Turtle> data;
@@ -551,7 +552,7 @@ public class CategoricalChart implements Chart {
                     .x(currentPosition + xAxisShift)
                     .y(yPosition + yAxisShift - (height / 2) + (turtleHeight * index) + offset)
                     .height(turtleHeight)
-                    .width(Math.max(xPosition - currentPosition, 1))
+                    .width(Math.max(xPosition - currentPosition, MIN_WIDTH))
                     .userData(new Object[]{ value.getCategoryName((int)currentCategory), index, currentFrame, timeFrame })
                     .styleClass(String.format("default-color%d-agent-category", turtleIndex))
                     .build();
@@ -832,7 +833,7 @@ public class CategoricalChart implements Chart {
         double yPosition = yAxis.getDisplayPosition(category);
 
         rectChild.setX(startPosition + xAxisShift);
-        rectChild.setWidth(Math.max(endPosition - startPosition, 1));
+        rectChild.setWidth(Math.max(endPosition - startPosition, MIN_WIDTH));
         rectChild.setY(yPosition + yAxisShift - (height / 2) + (turtleHeight * index) + offset);
         rectChild.setHeight(turtleHeight);
       } else {

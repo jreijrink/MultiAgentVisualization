@@ -3,28 +3,8 @@
     {
       "charts": [
         {
-          "charts": [
-            {
-              "charts": [],
-              "pos": "RIGHT",
-              "liveUpdate": true,
-              "selectedTurtles": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6
-              ],
-              "parameter": "Battery voltage",
-              "time": "2016-04-29T11:06:53.363",
-              "chart": "Scatter-chart",
-              "parameterIndex": 0,
-              "parameterValue": "battery-voltage"
-            }
-          ],
-          "pos": "RIGHT",
+          "charts": [],
+          "pos": "TOP",
           "liveUpdate": true,
           "selectedTurtles": [
             0,
@@ -35,14 +15,14 @@
             5,
             6
           ],
-          "parameter": "Cpu1 load",
-          "time": "2016-04-29T11:06:53.356",
-          "chart": "Scatter-chart",
+          "parameter": "*Ball loss",
+          "time": "2016-04-29T11:46:30.103",
+          "chart": "Categorical-chart",
           "parameterIndex": 0,
-          "parameterValue": "cpu1-load"
+          "parameterValue": "result"
         }
       ],
-      "pos": "BOTTOM",
+      "pos": "RIGHT",
       "liveUpdate": true,
       "selectedTurtles": [
         0,
@@ -53,11 +33,50 @@
         5,
         6
       ],
-      "parameter": "Cpu0 load",
-      "time": "2016-04-29T11:06:53.346",
-      "chart": "Scatter-chart",
+      "parameter": "Skill ID",
+      "time": "2016-04-29T11:46:30.028",
+      "chart": "Categorical-chart",
       "parameterIndex": 0,
-      "parameterValue": "cpu0-load"
+      "parameterValue": "skill ID"
+    },
+    {
+      "charts": [
+        {
+          "charts": [],
+          "pos": "TOP",
+          "liveUpdate": true,
+          "selectedTurtles": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "parameter": "CPB",
+          "time": "2016-04-29T11:46:30.138",
+          "chart": "Categorical-chart",
+          "parameterIndex": 0,
+          "parameterValue": "CPB"
+        }
+      ],
+      "pos": "RIGHT",
+      "liveUpdate": true,
+      "selectedTurtles": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "parameter": "Skill ID",
+      "time": "2016-04-29T11:46:30.127",
+      "chart": "Turtle-chart",
+      "parameterIndex": 0,
+      "parameterValue": "shottype"
     }
   ]
 }
