@@ -109,7 +109,7 @@ public abstract class DataGeneration {
     
     
     //Illegal SkillID
-    GeneratedParameter illegalBallParameter = new GeneratedParameter("*Illegal SkillID", Type.Categorical, 1, values);
+    GeneratedParameter illegalBallParameter = new GeneratedParameter("*Illegal SkillID (no ball)", Type.Categorical, 1, values);
     
     illegalBallParameter.addANDPreCondition(NotBallCondition);
     illegalBallParameter.addANDPreCondition(skillIDBallCondition);
@@ -117,7 +117,7 @@ public abstract class DataGeneration {
     result.add(illegalBallParameter);
     
     //Illegal SkillID Ball
-    GeneratedParameter illegalSkillParameter = new GeneratedParameter("*Illegal SkillID Ball", Type.Categorical, 1, values);
+    GeneratedParameter illegalSkillParameter = new GeneratedParameter("*Illegal Move (has ball)", Type.Categorical, 1, values);
     
     illegalSkillParameter.addANDPreCondition(HasBallCondition);
     illegalSkillParameter.addANDPreCondition(skillIDSMoveCondition);

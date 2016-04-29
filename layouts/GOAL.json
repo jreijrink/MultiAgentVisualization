@@ -1,0 +1,76 @@
+{
+  "charts": [
+    {
+      "charts": [
+        {
+          "charts": [],
+          "pos": "TOP",
+          "liveUpdate": true,
+          "selectedTurtles": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "parameter": "*Goal",
+          "time": "2016-04-29T10:09:45.122",
+          "chart": "Categorical-chart",
+          "parameterIndex": 0,
+          "parameterValue": "result"
+        }
+      ],
+      "pos": "RIGHT",
+      "liveUpdate": true,
+      "selectedTurtles": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "parameter": "Skill ID",
+      "time": "2016-04-29T10:09:45.051",
+      "chart": "Categorical-chart",
+      "parameterIndex": 0,
+      "parameterValue": "skill ID"
+    },
+    {
+      "charts": [
+        {
+          "charts": [],
+          "pos": "BOTTOM",
+          "liveUpdate": true,
+          "selectedTurtles": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "parameter": "*Goal",
+          "time": "2016-04-29T10:10:09.536",
+          "chart": "Turtle-chart",
+          "parameterIndex": 0,
+          "parameterValue": "result"
+        }
+      ],
+      "pos": "RIGHT",
+      "liveUpdate": true,
+      "selectedTurtles": [
+        0
+      ],
+      "parameter": "*Goal",
+      "time": "2016-04-29T10:10:00.817",
+      "chart": "Scatter-chart",
+      "parameterIndex": 0,
+      "parameterValue": "result"
+    }
+  ]
+}

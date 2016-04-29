@@ -33,7 +33,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.RectangleBuilder;
-import org.apache.pivot.util.Console;
 import static prototype.chart.Chart.getCheckbox;
 import static prototype.chart.Chart.getScale;
 import static prototype.chart.Chart.getTurtleListView;
@@ -47,8 +46,8 @@ import prototype.object.Type;
 import prototype.object.Value;
 import prototype.settings.Configuration;
 import org.dockfx.DockNode;
+import static prototype.chart.Chart.getAllTurtles;
 import prototype.object.Filter;
-import prototype.object.Range;
 
 public class CategoricalChart implements Chart {
   
@@ -158,6 +157,7 @@ public class CategoricalChart implements Chart {
   
   @Override
   public void updateData(List<Turtle> data) {
+    clearFilter();
     this.data = data;
     initialize();
   }
@@ -254,22 +254,28 @@ public class CategoricalChart implements Chart {
   
   private void createChart() {
     ObservableList<String> categories = FXCollections.observableArrayList();
-    Parameter parameter = this.parameterMap.GetParameter(this.parameter);
-    Value value = parameter.getValue(parameterValue);
-    for(Category category : value.getCategories()) {
-      categories.add(category.getName());
-    }
-    CategoryAxis yAxis = new CategoryAxis(categories);
     
+    try {
+      Parameter parameter = this.parameterMap.GetParameter(this.parameter);
+      Value value = parameter.getValue(parameterValue);
+      for(Category category : value.getCategories()) {
+        categories.add(category.getName());
+      }
+    } catch(Exception ex) {
+      ex.printStackTrace();
+    }
+    
+    CategoryAxis yAxis = new CategoryAxis(categories);
+
     NumberAxis xAxis = new NumberAxis();
     try {
         int timeframes = this.data.get(0).getTimeFrameCount();
         double scale = getScale(timeframes);
         xAxis = new NumberAxis(0, timeframes, scale);
     } catch(Exception ex) { }
-    
+
     this.scattterChart = new ScatterChart<>(xAxis, yAxis);
-    
+
     xAxis.widthProperty().addListener((ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) -> {
       Timer timer = new java.util.Timer();
       timer.schedule( 
@@ -287,7 +293,7 @@ public class CategoricalChart implements Chart {
             }
           }, 0);
     });
-    
+
     yAxis.heightProperty().addListener((ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) -> {      
       Timer timer = new java.util.Timer();
       timer.schedule( 
@@ -305,31 +311,31 @@ public class CategoricalChart implements Chart {
             }
           }, 0);
     });
-    
+
     if(data.size() > 0) {
       xAxis.setLabel("Time");
       this.scattterChart.getData().addAll(getData());
     }
-    
+
     rootPane.getChildren().clear();
     rootPane.setCenter(this.scattterChart);
 
     Timer timer = new java.util.Timer();
     timer.schedule( 
       new java.util.TimerTask() {
-        @Override
-        public void run() {
-          Platform.runLater(new Runnable() {
-              @Override
-              public void run() {
-                plotData();
-                selectFrames(selectedStartIndex, selectedEndIndex, false, forward);
-                timer.cancel();
-                timer.purge();
-              }
-            });
-          }
-        }, 100);
+      @Override
+      public void run() {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+              plotData();
+              selectFrames(selectedStartIndex, selectedEndIndex, false, forward);
+              timer.cancel();
+              timer.purge();
+            }
+          });
+        }
+      }, 100);
   }
   
   @Override
@@ -486,21 +492,21 @@ public class CategoricalChart implements Chart {
       Value value = parameter.getValue(parameterValue);
       
       for(Category category : value.getCategories()) {        
-          double yPosition = yAxis.getDisplayPosition(category.getName());
-          int timeframes = this.data.get(0).getTimeFrameCount();
+        double yPosition = yAxis.getDisplayPosition(category.getName());
+        int timeframes = this.data.get(0).getTimeFrameCount();
 
-          Rectangle categoryBlock = RectangleBuilder.create()
-                  .x(xAxisShift)
-                  .y(yPosition + yAxisShift - (height / 2))
-                  .height(height)
-                  .width(xAxis.getWidth())
-                  .userData(new Object[]{ category.getName(), 0, 0, timeframes })
-                  .styleClass("default-color-agent-category-background")
-                  .id("background")
-                  .build();
+        Rectangle categoryBlock = RectangleBuilder.create()
+                .x(xAxisShift)
+                .y(yPosition + yAxisShift - (height / 2))
+                .height(height)
+                .width(xAxis.getWidth())
+                .userData(new Object[]{ category.getName(), 0, 0, timeframes })
+                .styleClass("default-color-agent-category-background")
+                .id("background")
+                .build();
 
-          this.rootPane.getChildren().add(categoryBlock);
-      }     
+        this.rootPane.getChildren().add(categoryBlock);
+      }
             
       int selectionSize = selectedTurtles.length;
       double offset = height * 0.05;
@@ -769,8 +775,7 @@ public class CategoricalChart implements Chart {
           filterRectangles.remove(filterRectangle);
         }
       }      
-    });    
-    
+    });
   }
     
   private Filter filter(List<String> filterCategories) {
@@ -787,7 +792,7 @@ public class CategoricalChart implements Chart {
       }
     }
     
-    Filter filter = new Filter(this, this.parameter, this.parameterIndex, this.parameterValue, filterValues);
+    Filter filter = new Filter(this, this.parameter, this.parameterIndex, this.parameterValue, getAllTurtles(), filterValues);
 
     for(Turtle turtle : data) {
       turtle.setFilter(filter);
@@ -928,43 +933,46 @@ public class CategoricalChart implements Chart {
     });
 
     node.setOnMouseDragged((MouseEvent event) -> {
-      double xAxisShift = getSceneXShift(xAxis);
-      double yAxisShift = getSceneYShift(yAxis);
-      
-      Rectangle selection = getSelectionRectangle(selectionPoint, event.getX(), event.getY(), xAxisShift, yAxisShift, xAxis.getWidth(), yAxis.getHeight());
-            
-      int start = xAxis.getValueForDisplay(selection.getX() - xAxisShift).intValue();
-      int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xAxisShift).intValue();
-      
-      boolean forward = true;
-      if( selectionPoint.getX() == (selection.getX() + selection.getWidth())) {
-        //Backward selection
-        forward = false;
+      if(selectionPoint != null) {
+        double xAxisShift = getSceneXShift(xAxis);
+        double yAxisShift = getSceneYShift(yAxis);
+
+        Rectangle selection = getSelectionRectangle(selectionPoint, event.getX(), event.getY(), xAxisShift, yAxisShift, xAxis.getWidth(), yAxis.getHeight());
+
+        int start = xAxis.getValueForDisplay(selection.getX() - xAxisShift).intValue();
+        int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xAxisShift).intValue();
+
+        boolean forward = true;
+        if( selectionPoint.getX() == (selection.getX() + selection.getWidth())) {
+          //Backward selection
+          forward = false;
+        }
+
+        notifyListeners(start, end, true, forward);
+
+        selectionRectangle.setX(selection.getX());
+        selectionRectangle.setWidth(selection.getWidth());
       }
-            
-      notifyListeners(start, end, true, forward);
-      
-      selectionRectangle.setX(selection.getX());
-      selectionRectangle.setWidth(selection.getWidth());
     });
     
     node.setOnMouseReleased((MouseEvent event) -> {
+      if(selectionPoint != null) {
+        double xAxisShift = getSceneXShift(xAxis);
+        double yAxisShift = getSceneYShift(yAxis);
 
-      double xAxisShift = getSceneXShift(xAxis);
-      double yAxisShift = getSceneYShift(yAxis);
+        Rectangle selection = getSelectionRectangle(selectionPoint, event.getX(), event.getY(), xAxisShift, yAxisShift, xAxis.getWidth(), yAxis.getHeight());
 
-      Rectangle selection = getSelectionRectangle(selectionPoint, event.getX(), event.getY(), xAxisShift, yAxisShift, xAxis.getWidth(), yAxis.getHeight());
-      
-      int start = xAxis.getValueForDisplay(selection.getX() - xAxisShift).intValue();
-      int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xAxisShift).intValue();
-      
-      boolean forward = true;
-      if( selectionPoint.getX() == (selection.getX() + selection.getWidth())) {
-        //Backward selection
-        forward = false;
+        int start = xAxis.getValueForDisplay(selection.getX() - xAxisShift).intValue();
+        int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xAxisShift).intValue();
+
+        boolean forward = true;
+        if( selectionPoint.getX() == (selection.getX() + selection.getWidth())) {
+          //Backward selection
+          forward = false;
+        }
+
+        notifyListeners(start, end, true, forward);
       }
-      
-      notifyListeners(start, end, true, forward);
     });
   }
   

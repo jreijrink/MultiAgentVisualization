@@ -105,7 +105,17 @@ public class Value {
   }
 
   public List<Category> getCategories() {
-      return this.categories;
+    return this.categories;
+  }
+  
+  public List<Double> getCategoryValues() {
+    List<Double> values = new ArrayList();
+    
+    for(Category category : this.categories) {
+      values.add((double)category.getValue());
+    }
+    
+    return values;
   }
   
   public int getCategoryIndex(int categoryValue) {
@@ -133,9 +143,9 @@ public class Value {
   }
     
   public int getCategoryValue(String categoryName) {
-    for (Category categorie : this.categories) {
-      if (categorie.getName().equals(categoryName)) {
-        return categorie.getValue();
+    for (Category category : this.categories) {
+      if (category.getName().equals(categoryName)) {
+        return category.getValue();
       }
     }
     return -1;

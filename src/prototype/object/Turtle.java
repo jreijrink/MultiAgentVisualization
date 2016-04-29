@@ -144,13 +144,13 @@ public class Turtle {
             localFilterMap[i] = false;
           }
 
-          for(Filter filter : filters.get(chart)) {          
+          for(Filter filter : filters.get(chart)) {
             int valueIndex = this.parameterMap.GetValueIndex(filter.ParameterName(), filter.ParameterIndex(), filter.ValueName());
             double[] dataset = this.data[valueIndex];            
             dataset = applyDecimalMask(dataset, this.parameterMap.GetParameter(filter.ParameterName()).getValue(filter.ValueName()));
           
             for(int i = 0; i < this.data[0].length; i++) {
-              if(filter.SatisfiesFilter(dataset[i])) {
+              if(filter.SatisfiesFilter(turtleID, dataset[i])) {
                 localFilterMap[i] = true;
               }
             }

@@ -52,12 +52,11 @@ public interface Chart extends EventListener {
   }
     
   static ListView getTurtleListView(int[] selected) {
-    Configuration configuration = new Configuration();
     ListView<StringValuePair<String, Integer>> turtleListView = new ListView();              
     ObservableList<StringValuePair<String, Integer>> turtleList = FXCollections.observableArrayList();
     turtleListView.setItems(turtleList);
-    for(int i = 0; i < configuration.MaxTurtles; i++) {
-      turtleList.add(new StringValuePair(String.format("Turtle %d", i+1), i));
+    for(int turtle : getAllTurtles()) {
+      turtleList.add(new StringValuePair(String.format("Turtle %d", turtle+1), turtle));
     }
 
     turtleListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
@@ -66,6 +65,16 @@ public interface Chart extends EventListener {
     }        
     turtleListView.setPrefHeight(200);
     return turtleListView;
+  }
+  
+  static List<Integer> getAllTurtles() {
+    List<Integer> turtles = new ArrayList();
+    Configuration configuration = new Configuration();
+    
+    for(int i = 0; i < configuration.MaxTurtles; i++) {
+      turtles.add(i);
+    }
+    return turtles;
   }
   
   static CheckBox getCheckbox(String name, boolean checked) {

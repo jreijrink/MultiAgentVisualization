@@ -11,20 +11,23 @@ public class Filter {
   private final String valueName;
   private Range range;
   private List<Double> values;
+  private List<Integer> turtles;
 
-  public Filter(Chart chart, String parameterName, int parameterIndex, String valueName, Range range) {
+  public Filter(Chart chart, String parameterName, int parameterIndex, String valueName, List<Integer> turtles, Range range) {
     this.chart = chart;
     this.parameterName = parameterName;
     this.parameterIndex = parameterIndex;
     this.valueName = valueName;
+    this.turtles = turtles;
     this.range = range;
   }
   
-  public Filter(Chart chart, String parameterName, int parameterIndex, String valueName, List<Double> values) {
+  public Filter(Chart chart, String parameterName, int parameterIndex, String valueName, List<Integer> turtles, List<Double> values) {
     this.chart = chart;
     this.parameterName = parameterName;
     this.parameterIndex = parameterIndex;
     this.valueName = valueName;
+    this.turtles = turtles;
     this.values = values;
   }
   
@@ -39,8 +42,11 @@ public class Filter {
   public String ValueName() {
     return this.valueName;
   }
+  
+  public boolean SatisfiesFilter(int turtle, double value) {
+    if(!turtles.contains(turtle))
+      return false;
     
-  public boolean SatisfiesFilter(double value) {
     if(range != null) {
       return range.contains(value);
     }

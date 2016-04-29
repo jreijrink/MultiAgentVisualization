@@ -48,6 +48,7 @@ import prototype.object.Parameter;
 import prototype.object.Turtle;
 import prototype.object.Value;
 import org.dockfx.DockNode;
+import static prototype.chart.Chart.getAllTurtles;
 import prototype.object.Filter;
 import prototype.object.Range;
 
@@ -169,9 +170,9 @@ public class XYBaseChart implements Chart {
   
   @Override
   public void updateData(List<Turtle> data) {
+    clearFilter();
     this.data = data;
     initialize(false);
-    clearFilter();
   }
   
   @Override
@@ -203,6 +204,7 @@ public class XYBaseChart implements Chart {
           selectionFrame.setX(xAxisShift + end);
         else
           selectionFrame.setX(xAxisShift + start);
+        selectionFrame.setWidth(2);
         selectionFrame.setUserData(forward);
       }
       
@@ -436,6 +438,7 @@ public class XYBaseChart implements Chart {
       
       if(selectionFrame != null) {
         selectionFrame.setX(0);
+        selectionFrame.setWidth(0);
         selectionFrame.setY(yAxisShift);
         selectionFrame.setHeight(yAxis.getHeight());      
       }
@@ -600,7 +603,6 @@ public class XYBaseChart implements Chart {
         end +=1;
       
       selectionRectangle.setX(xAxisShift + start);
-      selectionRectangle.setWidth(end - start);
       selectionRectangle.setY(yAxisShift);
       selectionRectangle.setHeight(yAxis.getHeight());
 
@@ -686,7 +688,7 @@ public class XYBaseChart implements Chart {
               .x(0)
               .y(0)
               .height(yAxis.getHeight())
-              .width(2)
+              .width(0)
               .fill(Color.web("0x222222"))
               .opacity(0.6)
               .id("selection")
@@ -1032,7 +1034,7 @@ public class XYBaseChart implements Chart {
   
   private Filter filter(double minValue, double maxValue) {    
     if(minValue != maxValue) {
-      Filter filter = new Filter(this, parameter, parameterIndex, parameterValue, new Range(minValue, maxValue));
+      Filter filter = new Filter(this, parameter, parameterIndex, parameterValue, getAllTurtles(), new Range(minValue, maxValue));
 
       for(Turtle turtle : data) {
         turtle.setFilter(filter);

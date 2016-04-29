@@ -14,6 +14,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
+import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.chart.CategoryAxis;
@@ -45,6 +46,8 @@ import prototype.object.Type;
 import prototype.object.Value;
 import prototype.settings.Configuration;
 import org.dockfx.DockNode;
+import static prototype.chart.Chart.getAllTurtles;
+import prototype.object.Filter;
 
 public class AgentChart implements Chart {
   
@@ -69,6 +72,11 @@ public class AgentChart implements Chart {
   private Point2D selectionPoint;
   private Rectangle selectionFrame;
   
+  private Point2D basePoint;
+  private List<Rectangle> filterRectangles;
+  private int selectedFilterIndex;
+  private boolean newFilter;
+  
   private double initSelectionX = 0;
   private double initSelectionWidth = 0;
   private Object[] initSelectionData = new Object[]{ 0, 0 };
@@ -87,6 +95,7 @@ public class AgentChart implements Chart {
     this.liveUpdate = liveUpdate;
     this.rootPane = new BorderPane();
     this.rootPane.getStylesheets().add("prototype/plot.css");
+    this.filterRectangles = new ArrayList();
     this.parameterMap = new ParameterMap();
     
     initialize();
@@ -121,6 +130,7 @@ public class AgentChart implements Chart {
     
     this.rootPane = new BorderPane();
     this.rootPane.getStylesheets().add("prototype/plot.css");
+    this.filterRectangles = new ArrayList();
     
     initialize();
   }
@@ -196,7 +206,21 @@ public class AgentChart implements Chart {
   
   @Override
   public void clearFilter() {
-  
+    boolean hadFilters = false;
+    for(Turtle turtle : data) {
+      hadFilters = turtle.removeFilters(this) || hadFilters;
+    }
+    
+    for(Rectangle filter : filterRectangles) {
+      this.rootPane.getChildren().remove(filter);
+    }
+    filterRectangles.clear();
+
+    if(hadFilters) {
+      for(SelectionEventListener listener : listenerList) {
+        listener.update();
+      }
+    }  
   }
 
   @Override
@@ -220,6 +244,11 @@ public class AgentChart implements Chart {
   private void initialize() {
     this.parameterMap = new ParameterMap();
     createChart();
+  }
+  
+  private void setCursor(Cursor cursor) {
+    scene.setCursor(cursor);
+    rootPane.setCursor(cursor);    
   }
   
   private void createChart() {
@@ -447,11 +476,25 @@ public class AgentChart implements Chart {
       double yAxisShift = getSceneYShift(yAxis);
 
       double height = getRowHeigt();
-            
+      
       Parameter parameter = this.parameterMap.GetParameter(this.parameter);
       Value value = parameter.getValue(parameterValue);
       
       for(int turtleIndex : selectedTurtles) {
+        String categoryName = String.format("Turtle %d", turtleIndex + 1);
+        double yPosition = yAxis.getDisplayPosition(categoryName);
+        int timeframes = this.data.get(0).getTimeFrameCount();
+
+        Rectangle categoryBlock = RectangleBuilder.create()
+                .x(xAxisShift)
+                .y(yPosition + yAxisShift - (height / 2))
+                .height(height)
+                .width(xAxis.getWidth())
+                .userData(new Object[]{ categoryName, 0, 0, timeframes })
+                .styleClass("default-color-agent-category-background")
+                .id("background")
+                .build();
+        this.rootPane.getChildren().add(categoryBlock);
         
         double currentCategory = -1;
         boolean currentVisibility = true;
@@ -483,18 +526,19 @@ public class AgentChart implements Chart {
           
           if(newBlock) {
             double xPosition = xAxis.getDisplayPosition(timeFrame);
-            double yPosition = yAxis.getDisplayPosition(String.format("Turtle %d", turtleIndex + 1));
 
-            Rectangle categoryBlock = RectangleBuilder.create()
-                    .x(currentPosition + xAxisShift)
-                    .y(yPosition + yAxisShift - (height / 2))
-                    .height(height)
-                    .width(xPosition - currentPosition)
-                    .userData(new Object[]{ String.format("Turtle %d", turtleIndex + 1), currentFrame, timeFrame })
-                      .styleClass(String.format("default-color%d-status-symbol", value.getCategoryIndex((int)currentCategory)))
-                    .build();
-
-            this.rootPane.getChildren().add(categoryBlock);
+            int categoryIndex = value.getCategoryIndex((int)currentCategory);
+            if(categoryIndex != -1) {
+              Rectangle valueBlock = RectangleBuilder.create()
+                      .x(currentPosition + xAxisShift)
+                      .y(yPosition + yAxisShift - (height / 2))
+                      .height(height)
+                      .width(xPosition - currentPosition)
+                      .userData(new Object[]{ categoryName, currentFrame, timeFrame })
+                        .styleClass(String.format("default-color%d-status-symbol", categoryIndex))
+                      .build();
+              this.rootPane.getChildren().add(valueBlock);
+            }
 
             currentPosition = xPosition;
             currentFrame = timeFrame;
@@ -539,6 +583,8 @@ public class AgentChart implements Chart {
         }
       }
       
+      createAxisFilter();
+      
       createLegend();
     }
   }
@@ -568,6 +614,176 @@ public class AgentChart implements Chart {
       legend.getItems().setAll(items);
   }
   
+  private void createAxisFilter() {
+    
+    Platform.runLater(new Runnable() {
+      @Override
+      public void run() {
+      for(Rectangle filter : filterRectangles) {
+        if(!rootPane.getChildren().contains(filter))
+          rootPane.getChildren().add(filter);
+        }
+      }
+    });
+    
+    NumberAxis xAxis = (NumberAxis) this.scattterChart.getXAxis();
+    CategoryAxis yAxis = (CategoryAxis) this.scattterChart.getYAxis();
+    
+    yAxis.setOnMouseMoved((MouseEvent event) -> {
+      double yAxisShift = getSceneYShift(yAxis);
+      newFilter = true;
+      selectedFilterIndex = -1;
+
+      for(Rectangle filter : filterRectangles) {
+        if(event.getY() > filter.getY() - yAxisShift && event.getY() < filter.getY() - yAxisShift + filter.getHeight()) {
+          selectedFilterIndex = filterRectangles.indexOf(filter);
+          newFilter = false;
+        }
+      }
+
+      if(scene.getCursor() != Cursor.WAIT) {
+        if(newFilter) {
+          setCursor(Cursor.CROSSHAIR);
+        } else {
+          setCursor(Cursor.CLOSED_HAND);
+        }
+      }
+    });
+    
+    yAxis.setOnMouseExited((MouseEvent event) -> {
+      if(scene.getCursor() != Cursor.WAIT)
+        setCursor(Cursor.DEFAULT);
+    });
+    
+    yAxis.setOnMousePressed((MouseEvent event) -> {
+      if(scene.getCursor() != Cursor.WAIT)
+        setCursor(Cursor.V_RESIZE);
+
+      if(newFilter) {        
+        double yAxisShift = getSceneYShift(yAxis);    
+        double xShift = getSceneXShift(xAxis);
+        double yShift = getSceneYShift(yAxis);
+
+        basePoint = new Point2D(event.getX(), event.getY());
+
+        Rectangle selection = getSelectionRectangle(basePoint, event.getX(), event.getY(), xShift, yShift, xAxis.getWidth(), yAxis.getHeight());
+
+        Rectangle filterRectangle = RectangleBuilder.create()
+                .x(getSceneXShift(xAxis))
+                .y(selection.getY() + yAxisShift)
+                .height(selection.getHeight())
+                .width(xAxis.getWidth())
+                .fill(Color.web("0x222222"))
+                .opacity(0.3)
+                .id("filter")
+                .build();
+        filterRectangle.setUserData(new Object[]{ 0.0, 0.0 });
+        rootPane.getChildren().add(filterRectangle);
+        filterRectangles.add(filterRectangle);
+          selectedFilterIndex = filterRectangles.indexOf(filterRectangle);
+      } else {
+        if(selectedFilterIndex >= 0 && filterRectangles.size() > selectedFilterIndex) {
+          Rectangle removeFilter = filterRectangles.get(selectedFilterIndex);
+          for(Turtle turtle : data) {
+            Filter filter = (Filter)((Object[])removeFilter.getUserData())[2];
+            turtle.removeFilter(filter);
+          }
+          rootPane.getChildren().remove(removeFilter);
+          filterRectangles.remove(removeFilter);
+
+          for(SelectionEventListener listener : listenerList) {
+            listener.update();
+          }
+        }
+      }
+      
+    });
+
+    yAxis.setOnMouseDragged((MouseEvent event) -> {
+      setCursor(Cursor.V_RESIZE);
+      
+      if(newFilter && selectedFilterIndex >= 0 && filterRectangles.size() > selectedFilterIndex) {
+      double yAxisShift = getSceneYShift(yAxis);    
+      double xShift = getSceneXShift(xAxis);
+      double yShift = getSceneYShift(yAxis);
+
+      Rectangle selection = getSelectionRectangle(basePoint, event.getX(), event.getY(), xShift, yShift, xAxis.getWidth(), yAxis.getHeight());
+      
+        Rectangle filterRectangle = filterRectangles.get(selectedFilterIndex);
+        filterRectangle.setY(selection.getY() + yAxisShift);
+        filterRectangle.setHeight(selection.getHeight());
+      }
+    });
+    
+    yAxis.setOnMouseReleased((MouseEvent event) -> {
+      setCursor(Cursor.DEFAULT);
+      
+      if(newFilter && selectedFilterIndex >= 0 && filterRectangles.size() > selectedFilterIndex) {
+        double yAxisShift = getSceneYShift(yAxis);    
+        double xShift = getSceneXShift(xAxis);
+        double yShift = getSceneYShift(yAxis);
+
+        Rectangle selection = getSelectionRectangle(basePoint, event.getX(), event.getY(), xShift, yShift, xAxis.getWidth(), yAxis.getHeight());
+
+        Rectangle filterRectangle = filterRectangles.get(selectedFilterIndex);
+        
+        if(selection.getHeight() != 0) {
+          filterRectangle.setY(selection.getY() + yAxisShift);
+          filterRectangle.setHeight(selection.getHeight());
+
+          String minValue = yAxis.getValueForDisplay(selection.getY() + selection.getHeight());
+          String maxValue = yAxis.getValueForDisplay(selection.getY());
+
+          filterRectangle.setUserData(new Object[]{ minValue, maxValue });
+
+          List<String> filterTurtles = new ArrayList();
+          boolean started = false;
+          for(String category : yAxis.getCategories()) {
+            if(category.equals(minValue))
+              started = true;
+            if(started)
+              filterTurtles.add(category);
+            if(category.equals(maxValue))
+              started = false;
+          }
+
+          Filter filter = filter(filterTurtles);
+          if(filter != null) {
+            filterRectangle.setUserData(new Object[]{ minValue, maxValue, filter });
+          } else {
+            rootPane.getChildren().remove(filterRectangle);
+            filterRectangles.remove(filterRectangle);
+          }
+        } else {
+          rootPane.getChildren().remove(filterRectangle);
+          filterRectangles.remove(filterRectangle);
+        }
+      }      
+    });
+  }
+    
+  private Filter filter(List<String> filterTurtles) {
+    Parameter selectedParameter = this.parameterMap.GetParameter(this.parameter);
+    Value value = selectedParameter.getValue(parameterValue);
+    
+    List<Integer> turtles = new ArrayList();
+    for(String filterTurtle : filterTurtles) {
+      turtles.add(Integer.parseInt(filterTurtle.replaceAll("[\\D]", "")) - 1);
+    }
+    
+    Filter filter = new Filter(this, this.parameter, this.parameterIndex, this.parameterValue, turtles, value.getCategoryValues());
+
+    for(Turtle turtle : data) {
+      turtle.setFilter(filter);
+    }
+
+    for(SelectionEventListener listener : listenerList) {
+      listener.update();
+    }
+
+    return filter;
+  }
+  
   private void resizeChart() {    
     CategoryAxis yAxis = (CategoryAxis) scattterChart.getYAxis();
     NumberAxis xAxis = (NumberAxis) scattterChart.getXAxis();
@@ -576,6 +792,8 @@ public class AgentChart implements Chart {
     double yAxisShift = getSceneYShift(yAxis);
     
     double height = getRowHeigt();
+    double offset = height * 0.05;
+    double turtleHeight = (height - (offset * 2));
 
     for(Node child : this.rootPane.getChildren()) {
       if(child.getClass() == Rectangle.class && child.getId() == null) {
@@ -592,8 +810,27 @@ public class AgentChart implements Chart {
 
         rectChild.setX(startPosition + xAxisShift);
         rectChild.setWidth(endPosition - startPosition);
-        rectChild.setY(yPosition + yAxisShift - (height / 2));
-        rectChild.setHeight(height);
+        rectChild.setY(yPosition + yAxisShift - (height / 2) + offset);
+        rectChild.setHeight(turtleHeight);
+      } else {
+        if(child.getClass() == Rectangle.class && "background".equals(child.getId())) {
+          Rectangle rectChild = (Rectangle)child;
+
+          Object[] userData = (Object[])rectChild.getUserData();
+          String category = (String)userData[0];
+          int index = (int)userData[1];
+          int startFrame = (int)userData[2];
+          int endFrame = (int)userData[3];
+
+          double startPosition = xAxis.getDisplayPosition(startFrame);
+          double endPosition = xAxis.getDisplayPosition(endFrame);
+          double yPosition = yAxis.getDisplayPosition(category);
+
+          rectChild.setX(startPosition + xAxisShift);
+          rectChild.setWidth(endPosition - startPosition);
+          rectChild.setY(yPosition + yAxisShift - (height / 2));
+          rectChild.setHeight(height);
+        }
       }
     }
 
@@ -623,6 +860,21 @@ public class AgentChart implements Chart {
       selectionFrame.setY(yAxisShift);
       selectionFrame.setHeight(yAxis.getHeight());
     }
+    
+    for(Rectangle filterRectangle : filterRectangles) {
+      Object[] userData = (Object[])filterRectangle.getUserData();
+      String minValue = (String)userData[0];
+      String maxValue = (String)userData[1];
+
+      double start = yAxis.getDisplayPosition(maxValue);
+      double end = yAxis.getDisplayPosition(minValue);
+
+      filterRectangle.setY(yAxisShift + start - (height / 2));
+      filterRectangle.setHeight(end - start + height);
+
+      filterRectangle.setX(xAxisShift);
+      filterRectangle.setWidth(xAxis.getWidth());
+    }
   }
   
   private double getRowHeigt() {  
@@ -649,7 +901,7 @@ public class AgentChart implements Chart {
       
       selectionPoint = new Point2D(event.getX(), event.getY());
       
-      Rectangle selection = getSelectionRectangle(event.getX(), event.getY(), xAxisShift, yAxisShift, xAxis.getWidth(), yAxis.getHeight());
+      Rectangle selection = getSelectionRectangle(selectionPoint, event.getX(), event.getY(), xAxisShift, yAxisShift, xAxis.getWidth(), yAxis.getHeight());
             
       int start = xAxis.getValueForDisplay(selection.getX() - xAxisShift).intValue();
       int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xAxisShift).intValue();
@@ -661,7 +913,7 @@ public class AgentChart implements Chart {
       double xAxisShift = getSceneXShift(xAxis);
       double yAxisShift = getSceneYShift(yAxis);
       
-      Rectangle selection = getSelectionRectangle(event.getX(), event.getY(), xAxisShift, yAxisShift, xAxis.getWidth(), yAxis.getHeight());
+      Rectangle selection = getSelectionRectangle(selectionPoint, event.getX(), event.getY(), xAxisShift, yAxisShift, xAxis.getWidth(), yAxis.getHeight());
             
       int start = xAxis.getValueForDisplay(selection.getX() - xAxisShift).intValue();
       int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xAxisShift).intValue();
@@ -683,7 +935,7 @@ public class AgentChart implements Chart {
       double xAxisShift = getSceneXShift(xAxis);
       double yAxisShift = getSceneYShift(yAxis);
 
-      Rectangle selection = getSelectionRectangle(event.getX(), event.getY(), xAxisShift, yAxisShift, xAxis.getWidth(), yAxis.getHeight());
+      Rectangle selection = getSelectionRectangle(selectionPoint, event.getX(), event.getY(), xAxisShift, yAxisShift, xAxis.getWidth(), yAxis.getHeight());
       
       int start = xAxis.getValueForDisplay(selection.getX() - xAxisShift).intValue();
       int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xAxisShift).intValue();
@@ -698,7 +950,7 @@ public class AgentChart implements Chart {
     });
   }
   
-  private Rectangle getSelectionRectangle(double mouseX, double mouseY, double xShift, double yShift, double chartWidth, double chartHeight) {
+  private Rectangle getSelectionRectangle(Point2D start, double mouseX, double mouseY, double xShift, double yShift, double chartWidth, double chartHeight) {
     
     //Bound the rectangle to be only within the chart
     mouseX = Math.max(mouseX, xShift);
@@ -706,10 +958,10 @@ public class AgentChart implements Chart {
     mouseY = Math.max(mouseY, yShift);
     mouseY = Math.min(mouseY, chartHeight + yShift);
     
-    double width = mouseX - selectionPoint.getX();
-    double height = mouseY - selectionPoint.getY();
-    double x = Math.max(0, selectionPoint.getX() + Math.min(width, 0));
-    double y = selectionPoint.getY() + Math.min(height, 0);
+    double width = mouseX - start.getX();
+    double height = mouseY - start.getY();
+    double x = Math.max(0, start.getX() + Math.min(width, 0));
+    double y = start.getY() + Math.min(height, 0);
       
     return new Rectangle(x, y, Math.abs(width), Math.abs(height));
   }
