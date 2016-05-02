@@ -696,7 +696,9 @@ public class CategoricalChart implements Chart {
         filterRectangle.setUserData(new Object[]{ 0.0, 0.0 });
         rootPane.getChildren().add(filterRectangle);
         filterRectangles.add(filterRectangle);
-          selectedFilterIndex = filterRectangles.indexOf(filterRectangle);
+        selectedFilterIndex = filterRectangles.indexOf(filterRectangle);
+        
+        createRectangleSelectionEvents(filterRectangle, xAxis, yAxis);
       } else {
         if(selectedFilterIndex >= 0 && filterRectangles.size() > selectedFilterIndex) {
           Rectangle removeFilter = filterRectangles.get(selectedFilterIndex);
