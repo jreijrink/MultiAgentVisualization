@@ -502,7 +502,7 @@ public class CategoricalChart implements Chart {
                 .height(height)
                 .width(xAxis.getWidth())
                 .userData(new Object[]{ category.getName(), 0, 0, timeframes })
-                .styleClass("default-color-agent-category-background")
+                .styleClass("default-category-background")
                 .id("background")
                 .build();
 
@@ -554,7 +554,7 @@ public class CategoricalChart implements Chart {
                     .height(turtleHeight)
                     .width(Math.max(xPosition - currentPosition, MIN_WIDTH))
                     .userData(new Object[]{ value.getCategoryName((int)currentCategory), index, currentFrame, timeFrame })
-                    .styleClass(String.format("default-color%d-agent-category", turtleIndex))
+                    .styleClass(String.format("default-color%d-fill", turtleIndex))
                     .build();
 
             this.rootPane.getChildren().add(categoryBlock);
@@ -621,7 +621,7 @@ public class CategoricalChart implements Chart {
                   .build();
         
         LegendItem item = new Legend.LegendItem(String.format("Turtle %d", turtle + 1), legendPoint);
-        item.getSymbol().getStyleClass().add(String.format("default-color%d-agent-category", turtle));
+        item.getSymbol().getStyleClass().add(String.format("default-color%d-fill", turtle));
         
         items.add(item);
       }

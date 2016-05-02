@@ -9,7 +9,6 @@ import prototype.object.Value;
 import prototype.object.Condition;
 import prototype.object.Equation;
 import prototype.object.GeneratedParameter;
-import prototype.object.Range;
 
 public abstract class DataGeneration {
   

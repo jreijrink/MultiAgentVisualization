@@ -84,7 +84,7 @@ public class CombinedOpponent {
     
     if(position != null) {
       Rectangle opponent = new Rectangle(position.getX() - (rectSize / 2), position.getY() - (rectSize / 2), rectSize, rectSize);
-      opponent.getStyleClass().add("default-color-opponent-combined");
+      opponent.getStyleClass().add("default-background-combined-shape");
       opponent.setOpacity(opacity);
       this.shapes.add(opponent);
       
@@ -93,7 +93,7 @@ public class CombinedOpponent {
       for(int index = 0; index < this.configuration.MaxTurtles; index++) {
         if(containsTurtle(index)) {
           Rectangle turtleRect = new Rectangle(position.getX() - ((rectSize - offsetX) / 2), (position.getY() - ((rectSize - offsetY) / 2)) + (height * index) , rectSize - offsetX, height);
-          turtleRect.getStyleClass().add(String.format("default-color%d-opponent-combined", index));
+          turtleRect.getStyleClass().add(String.format("default-color%d-fill", index));
           turtleRect.setOpacity(opacity - 0.1);
           this.shapes.add(turtleRect);
         }

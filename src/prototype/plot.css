@@ -1,10 +1,60 @@
-.chart-symbol{ 
-  -fx-background-radius: 2px;
-  -fx-padding: 2px;
-  -fx-shape: "M0 0 L0 4 L4 4 L4 0 L0 0 Z";
+* {
+   -fx-chart-background-color: #FFFFFF;
+   -fx-stroke-color: #BBBBBB;
+   
+   -fx-primary-color0: #66c2a5;
+   -fx-primary-color1: #fc8d62;
+   -fx-primary-color2: #8da0cb;
+   -fx-primary-color3: #e78ac3;
+   -fx-primary-color4: #a6d854;
+   -fx-primary-color5: #ffd92f;
+   -fx-primary-color6: #e5c494;
+   
+   -fx-secondary-color0: #36876d;
+   -fx-secondary-color1: #fa5d1e;
+   -fx-secondary-color2: #657eb8;
+   -fx-secondary-color3: #d945a0;
+   -fx-secondary-color4: #8cc82d;
+   -fx-secondary-color5: #e0b700;
+   -fx-secondary-color6: #d9aa63;
+   
+   -fx-category-color0: #a6cee3;
+   -fx-category-color1: #b2df8a;
+   -fx-category-color2: #fb9a99;
+   -fx-category-color3: #fdbf6f;
+   -fx-category-color4: #cab2d6;
+   -fx-category-color5: #ffff99;
+   -fx-category-color6: #b15928;
+   -fx-category-color7: #1f78b4;
+   -fx-category-color8: #33a02c;
+   -fx-category-color9: #e31a1c;
+   -fx-category-color10: #ff7f00;
+   -fx-category-color11: #6a3d9a;
+   -fx-category-color12: #1D616A;
+   -fx-category-color13: #BB027D;
+   -fx-category-color14: #5E3A0A;
+   -fx-category-color15: #DB195A;
+   -fx-category-color16: #BE610C;
+   -fx-category-color17: #5D6B13;
+   -fx-category-color18: #8F329D;
+   -fx-category-color19: #6EAAF7;
+   -fx-category-color20: #3B1719;
+   -fx-category-color21: #A6F5C2;
+   -fx-category-color22: #7BD3EE;
+   -fx-category-color23: #F6A14E;
+   -fx-category-color24: #17557B;
+   -fx-category-color25: #F2558B;
+   -fx-category-color26: #5B3689;
+   -fx-category-color27: #246012;
+   -fx-category-color28: #CBB813;
+   -fx-category-color29: #7CFE80;
 }
 
-.chart-line-symbol { 
+.chart, .chart-content, .chart-plot-background {
+  -fx-background-color: -fx-chart-background-color;
+}
+
+.chart-symbol, .chart-line-symbol { 
   -fx-background-radius: 2px;
   -fx-padding: 2px;
   -fx-shape: "M0 0 L0 4 L4 4 L4 0 L0 0 Z";
@@ -15,141 +65,186 @@
   -fx-padding: 5px;
 }
 
-.default-color0.chart-symbol { -fx-background-color: #66c2a5; }
-.default-color1.chart-symbol { -fx-background-color: #fc8d62; }
-.default-color2.chart-symbol { -fx-background-color: #8da0cb; }
-.default-color3.chart-symbol { -fx-background-color: #e78ac3; }
-.default-color4.chart-symbol { -fx-background-color: #a6d854; }
-.default-color5.chart-symbol { -fx-background-color: #ffd92f; }
-.default-color6.chart-symbol { -fx-background-color: #e5c494; }
-
-.default-color0.chart-line-symbol  { -fx-background-color: #66c2a5; }
-.default-color1.chart-line-symbol  { -fx-background-color: #fc8d62; }
-.default-color2.chart-line-symbol  { -fx-background-color: #8da0cb; }
-.default-color3.chart-line-symbol  { -fx-background-color: #e78ac3; }
-.default-color4.chart-line-symbol  { -fx-background-color: #a6d854; }
-.default-color5.chart-line-symbol  { -fx-background-color: #ffd92f; }
-.default-color6.chart-line-symbol  { -fx-background-color: #e5c494; }
-
-.default-color0.chart-series-line  { -fx-stroke: #66c2a5; }
-.default-color1.chart-series-line  { -fx-stroke: #fc8d62; }
-.default-color2.chart-series-line  { -fx-stroke: #8da0cb; }
-.default-color3.chart-series-line  { -fx-stroke: #e78ac3; }
-.default-color4.chart-series-line  { -fx-stroke: #a6d854; }
-.default-color5.chart-series-line  { -fx-stroke: #ffd92f; }
-.default-color6.chart-series-line  { -fx-stroke: #e5c494; }
-
-.default-color0-agent { -fx-fill: #66c2a5 !important; -fx-stroke: #36876d !important; }
-.default-color1-agent { -fx-fill: #fc8d62 !important; -fx-stroke: #fa5d1e !important; }
-.default-color2-agent { -fx-fill: #8da0cb !important; -fx-stroke: #657eb8 !important; }
-.default-color3-agent { -fx-fill: #e78ac3 !important; -fx-stroke: #d945a0 !important; }
-.default-color4-agent { -fx-fill: #a6d854 !important; -fx-stroke: #8cc82d !important; }
-.default-color5-agent { -fx-fill: #ffd92f !important; -fx-stroke: #e0b700 !important; }
-.default-color6-agent { -fx-fill: #e5c494 !important; -fx-stroke: #d9aa63 !important; }
-
-.default-color0-agent-category  { -fx-fill: #66c2a5 !important; }
-.default-color1-agent-category  { -fx-fill: #fc8d62 !important; }
-.default-color2-agent-category  { -fx-fill: #8da0cb !important; }
-.default-color3-agent-category  { -fx-fill: #e78ac3 !important; }
-.default-color4-agent-category  { -fx-fill: #a6d854 !important; }
-.default-color5-agent-category  { -fx-fill: #ffd92f !important; }
-.default-color6-agent-category  { -fx-fill: #e5c494 !important; }
-
-.default-color-agent-category-background  { 
-  -fx-fill: #F4F4F4;
-  -fx-stroke: #BBBBBB;
-    -fx-stroke-width: 1;
-    -fx-stroke-dash-array: 5 5;
-    -fx-stroke-dash-offset: 6;
-    -fx-stroke-line-cap: butt;
+.default-category-background  { 
+  -fx-fill: -fx-chart-background-color;
+  -fx-stroke: -fx-stroke-color;
+  -fx-stroke-width: 1;
+  -fx-stroke-dash-array: 5 5;
+  -fx-stroke-dash-offset: 6;
+  -fx-stroke-line-cap: butt;
 }
 
-.default-color0-opponent { -fx-stroke: #66c2a5 !important; -fx-fill: #2F4F4F !important; }
-.default-color1-opponent { -fx-stroke: #fc8d62 !important; -fx-fill: #2F4F4F !important; }
-.default-color2-opponent { -fx-stroke: #8da0cb !important; -fx-fill: #2F4F4F !important; }
-.default-color3-opponent { -fx-stroke: #e78ac3 !important; -fx-fill: #2F4F4F !important; }
-.default-color4-opponent { -fx-stroke: #a6d854 !important; -fx-fill: #2F4F4F !important; }
-.default-color5-opponent { -fx-stroke: #ffd92f !important; -fx-fill: #2F4F4F !important; }
-.default-color6-opponent { -fx-stroke: #e5c494 !important; -fx-fill: #2F4F4F !important; }
+.default-color0.chart-symbol, .default-color0.chart-line-symbol { 
+  -fx-background-color: -fx-primary-color0;
+}
 
-.default-color-opponent-combined { -fx-stroke: #282828 !important; -fx-fill: #494949 !important; }
-.default-color0-opponent-combined { -fx-fill: #66c2a5 !important;}
-.default-color1-opponent-combined { -fx-fill: #fc8d62 !important;}
-.default-color2-opponent-combined { -fx-fill: #8da0cb !important;}
-.default-color3-opponent-combined { -fx-fill: #e78ac3 !important;}
-.default-color4-opponent-combined { -fx-fill: #a6d854 !important;}
-.default-color5-opponent-combined { -fx-fill: #ffd92f !important;}
-.default-color6-opponent-combined { -fx-fill: #e5c494 !important;}
+.default-color1.chart-symbol, .default-color1.chart-line-symbol { 
+  -fx-background-color: -fx-primary-color1;
+}
 
-.default-color0-opponent-text { -fx-fill: #66c2a5 !important; }
-.default-color1-opponent-text { -fx-fill: #fc8d62 !important; }
-.default-color2-opponent-text { -fx-fill: #8da0cb !important; }
-.default-color3-opponent-text { -fx-fill: #e78ac3 !important; }
-.default-color4-opponent-text { -fx-fill: #a6d854 !important; }
-.default-color5-opponent-text { -fx-fill: #ffd92f !important; }
-.default-color6-opponent-text { -fx-fill: #e5c494 !important; }
+.default-color2.chart-symbol, .default-color2.chart-line-symbol { 
+  -fx-background-color: -fx-primary-color2;
+}
 
-.default-color0-agent-line  { -fx-stroke: #66c2a5; }
-.default-color1-agent-line  { -fx-stroke: #fc8d62; }
-.default-color2-agent-line  { -fx-stroke: #8da0cb; }
-.default-color3-agent-line  { -fx-stroke: #e78ac3; }
-.default-color4-agent-line  { -fx-stroke: #a6d854; }
-.default-color5-agent-line  { -fx-stroke: #ffd92f; }
-.default-color6-agent-line  { -fx-stroke: #e5c494; }
+.default-color3.chart-symbol, .default-color3.chart-line-symbol { 
+  -fx-background-color: -fx-primary-color3;
+}
 
-.default-color0-ball-line  { -fx-stroke: #66c2a5; }
-.default-color1-ball-line  { -fx-stroke: #fc8d62; }
-.default-color2-ball-line  { -fx-stroke: #8da0cb; }
-.default-color3-ball-line  { -fx-stroke: #e78ac3; }
-.default-color4-ball-line  { -fx-stroke: #a6d854; }
-.default-color5-ball-line  { -fx-stroke: #ffd92f; }
-.default-color6-ball-line  { -fx-stroke: #e5c494; }
+.default-color4.chart-symbol, .default-color4.chart-line-symbol { 
+  -fx-background-color: -fx-primary-color4;
+}
 
-.default-color0-opponent-line { -fx-stroke: #66c2a5; }
-.default-color1-opponent-line  { -fx-stroke: #fc8d62; }
-.default-color2-opponent-line  { -fx-stroke: #8da0cb; }
-.default-color3-opponent-line  { -fx-stroke: #e78ac3; }
-.default-color4-opponent-line  { -fx-stroke: #a6d854; }
-.default-color5-opponent-line  { -fx-stroke: #ffd92f; }
-.default-color6-opponent-line  { -fx-stroke: #e5c494; }
+.default-color5.chart-symbol, .default-color5.chart-line-symbol { 
+  -fx-background-color: -fx-primary-color5;
+}
 
-.default-color0-selected-chart-symbol { -fx-background-color: #307962 !important; }
-.default-color1-selected-chart-symbol { -fx-background-color: #db3f04 !important; }
-.default-color2-selected-chart-symbol { -fx-background-color: #445c94 !important; }
-.default-color3-selected-chart-symbol { -fx-background-color: #c9298a !important; }
-.default-color4-selected-chart-symbol { -fx-background-color: #648d20 !important; }
-.default-color5-selected-chart-symbol { -fx-background-color: #af8e00 !important; }
-.default-color6-selected-chart-symbol { -fx-background-color: #c88b31 !important; }
+.default-color6.chart-symbol, .default-color6.chart-line-symbol { 
+  -fx-background-color: -fx-primary-color6;
+}
 
-.default-color0-status-symbol { -fx-fill: #a6cee3 !important; }
-.default-color1-status-symbol { -fx-fill: #b2df8a !important; }
-.default-color2-status-symbol { -fx-fill: #fb9a99 !important; }
-.default-color3-status-symbol { -fx-fill: #fdbf6f !important; }
-.default-color4-status-symbol { -fx-fill: #cab2d6 !important; }
-.default-color5-status-symbol { -fx-fill: #ffff99 !important; }
-.default-color6-status-symbol { -fx-fill: #b15928 !important; }
-.default-color7-status-symbol { -fx-fill: #1f78b4 !important;  }
-.default-color8-status-symbol { -fx-fill: #33a02c !important; }
-.default-color9-status-symbol { -fx-fill: #e31a1c !important; }
-.default-color10-status-symbol { -fx-fill: #ff7f00 !important; }
-.default-color11-status-symbol { -fx-fill: #6a3d9a !important; }
-.default-color12-status-symbol { -fx-fill: #1D616A !important; }
-.default-color13-status-symbol { -fx-fill: #BB027D !important; }
-.default-color14-status-symbol { -fx-fill: #5E3A0A !important; }
-.default-color15-status-symbol { -fx-fill: #DB195A !important; }
-.default-color16-status-symbol { -fx-fill: #BE610C !important; }
-.default-color17-status-symbol { -fx-fill: #5D6B13 !important; }
-.default-color18-status-symbol { -fx-fill: #8F329D !important; }
-.default-color19-status-symbol { -fx-fill: #6EAAF7 !important; }
-.default-color20-status-symbol { -fx-fill: #3B1719 !important; }
-.default-color21-status-symbol { -fx-fill: #A6F5C2 !important; }
-.default-color22-status-symbol { -fx-fill: #7BD3EE !important; }
-.default-color23-status-symbol { -fx-fill: #F6A14E !important; }
-.default-color24-status-symbol { -fx-fill: #17557B !important; }
-.default-color25-status-symbol { -fx-fill: #F2558B !important; }
-.default-color26-status-symbol { -fx-fill: #5B3689 !important; }
-.default-color27-status-symbol { -fx-fill: #246012 !important; }
-.default-color28-status-symbol { -fx-fill: #CBB813 !important; }
-.default-color29-status-symbol { -fx-fill: #7CFE80 !important; }
+.default-color0-fill  {
+  -fx-fill: -fx-primary-color0;
+}
+
+.default-color1-fill  {
+  -fx-fill: -fx-primary-color1;
+}
+
+.default-color2-fill  {
+  -fx-fill: -fx-primary-color2;
+}
+
+.default-color3-fill  {
+  -fx-fill: -fx-primary-color3;
+}
+
+.default-color4-fill  {
+  -fx-fill: -fx-primary-color4;
+}
+
+.default-color5-fill  {
+  -fx-fill: -fx-primary-color5;
+}
+
+.default-color6-fill  {
+  -fx-fill: -fx-primary-color6;
+}
+
+.default-primary-color0-stroke {
+  -fx-stroke: -fx-primary-color0 !important;
+}
+
+.default-primary-color1-stroke {
+  -fx-stroke: -fx-primary-color1 !important;
+}
+
+.default-primary-color2-stroke {
+  -fx-stroke: -fx-primary-color2 !important;
+}
+
+.default-primary-color3-stroke {
+  -fx-stroke: -fx-primary-color3 !important;
+}
+
+.default-primary-color4-stroke {
+  -fx-stroke: -fx-primary-color4 !important;
+}
+
+.default-secondarycolor5-stroke {
+  -fx-stroke: -fx-primary-color5 !important;
+}
+
+.default-primary-color6-stroke {
+  -fx-stroke: -fx-primary-color6 !important;
+}
+
+.default-color0.chart-series-line, .default-color0-stroke {
+  -fx-stroke: -fx-primary-color0;
+}
+
+.default-color1.chart-series-line, .default-color1-stroke {
+  -fx-stroke: -fx-primary-color1;
+}
+
+.default-color2.chart-series-line, .default-color2-stroke {
+  -fx-stroke: -fx-primary-color2;
+}
+
+.default-color3.chart-series-line, .default-color3-stroke {
+  -fx-stroke: -fx-primary-color3;
+}
+
+.default-color4.chart-series-line, .default-color4-stroke {
+  -fx-stroke: -fx-primary-color4;
+}
+
+.default-color5.chart-series-line, .default-color5-stroke {
+  -fx-stroke: -fx-primary-color5;
+}
+
+.default-color6.chart-series-line, .default-color6-stroke {
+  -fx-stroke: -fx-primary-color6;
+}
+
+.default-secondary-color0-stroke {
+  -fx-stroke: -fx-secondary-color0 !important;
+}
+
+.default-secondary-color1-stroke {
+  -fx-stroke: -fx-secondary-color1 !important;
+}
+
+.default-secondary-color2-stroke {
+  -fx-stroke: -fx-secondary-color2 !important;
+}
+
+.default-secondary-color3-stroke {
+  -fx-stroke: -fx-secondary-color3 !important;
+}
+
+.default-secondary-color4-stroke {
+  -fx-stroke: -fx-secondary-color4 !important;
+}
+
+.default-secondarycolor5-stroke {
+  -fx-stroke: -fx-secondary-color5 !important;
+}
+
+.default-secondary-color6-stroke {
+  -fx-stroke: -fx-secondary-color6 !important;
+}
+
+.default-background-combined-shape { -fx-stroke: #282828 !important; -fx-fill: #494949 !important; }
 
 .default-invalid-color { -fx-fill: #FF0000 !important; }
+
+.default-category-color0 { -fx-fill: -fx-category-color0 !important; }
+.default-category-color1 { -fx-fill: -fx-category-color1 !important; }
+.default-category-color2 { -fx-fill: -fx-category-color2 !important; }
+.default-category-color3 { -fx-fill: -fx-category-color3 !important; }
+.default-category-color4 { -fx-fill: -fx-category-color4 !important; }
+.default-category-color5 { -fx-fill: -fx-category-color5 !important; }
+.default-category-color6 { -fx-fill: -fx-category-color6 !important; }
+.default-category-color7 { -fx-fill: -fx-category-color7 !important;  }
+.default-category-color8 { -fx-fill: -fx-category-color8 !important; }
+.default-category-color9 { -fx-fill: -fx-category-color9 !important; }
+.default-category-color10 { -fx-fill: -fx-category-color10 !important; }
+.default-category-color11 { -fx-fill: -fx-category-color11 !important; }
+.default-category-color12 { -fx-fill: -fx-category-color12 !important; }
+.default-category-color13 { -fx-fill: -fx-category-color13 !important; }
+.default-category-color14 { -fx-fill: -fx-category-color14 !important; }
+.default-category-color15 { -fx-fill: -fx-category-color15 !important; }
+.default-category-color16 { -fx-fill: -fx-category-color16 !important; }
+.default-category-color17 { -fx-fill: -fx-category-color17 !important; }
+.default-category-color18 { -fx-fill: -fx-category-color18 !important; }
+.default-category-color19 { -fx-fill: -fx-category-color19 !important; }
+.default-category-color20 { -fx-fill: -fx-category-color20 !important; }
+.default-category-color21 { -fx-fill: -fx-category-color21 !important; }
+.default-category-color22 { -fx-fill: -fx-category-color22 !important; }
+.default-category-color23 { -fx-fill: -fx-category-color23 !important; }
+.default-category-color24 { -fx-fill: -fx-category-color24 !important; }
+.default-category-color25 { -fx-fill: -fx-category-color25 !important; }
+.default-category-color26 { -fx-fill: -fx-category-color26 !important; }
+.default-category-color27 { -fx-fill: -fx-category-color27 !important; }
+.default-category-color28 { -fx-fill: -fx-category-color28 !important; }
+.default-category-color29 { -fx-fill: -fx-category-color29 !important; }

@@ -404,7 +404,8 @@ public class FieldCanvas extends Pane implements Chart{
         15.0, 25.0,
         0.0, 15.0,
         0.0, 5.0 });
-    polygon.getStyleClass().add(String.format("default-color%d-agent", turtleId));
+    polygon.getStyleClass().add(String.format("default-color%d-fill", turtleId));
+    polygon.getStyleClass().add(String.format("default-secondary-color%d-stroke", turtleId));
     polygon.setStrokeWidth(1);
     
     return polygon;
@@ -703,13 +704,11 @@ public class FieldCanvas extends Pane implements Chart{
 
       position = translateToField(width_center, this.configuration.PenaltySpot, 0.15, 0.15);
       shape_penaltyspot1 = new Circle(position.getX(), position.getY(), position.getWidth());
-      shape_penaltyspot1.setStroke(Color.rgb(154, 205, 50));
-      shape_penaltyspot1.setFill(Color.rgb(154, 205, 50));
+      shape_penaltyspot1.setFill(Color.rgb(154, 205, 50, 0.3));
       
       position = translateToField(width_center, this.configuration.FieldLength - this.configuration.PenaltySpot, 0.15, 0.15);    
       shape_penaltyspot2 = new Circle(position.getX(), position.getY(), position.getWidth());
-      shape_penaltyspot2.setStroke(Color.rgb(154, 205, 50));
-      shape_penaltyspot2.setFill(Color.rgb(154, 205, 50));
+      shape_penaltyspot2.setFill(Color.rgb(154, 205, 50, 0.3));
 
       position = translateToField(0, height_center - 0.02, this.configuration.FieldWidth, 0.04);
       shape_fieldcenter = new Rectangle(position.getX(), position.getY(), position.getWidth(), position.getHeight());
@@ -801,7 +800,7 @@ public class FieldCanvas extends Pane implements Chart{
         }
       }
 
-      drawPaths(turtle_paths, "default-color%d-agent-line");
+      drawPaths(turtle_paths, "default-color%d-stroke");
     }
   }
   
@@ -840,7 +839,7 @@ public class FieldCanvas extends Pane implements Chart{
         for(Point2D point : targets.get(turtle)) {
           
           Path path = new Path();
-          path.getStyleClass().add(String.format("default-color%d-agent-line", turtle));
+          path.getStyleClass().add(String.format("default-color%d-stroke", turtle));
           path.setStrokeWidth(2);
           path.setOpacity(0.6);
           

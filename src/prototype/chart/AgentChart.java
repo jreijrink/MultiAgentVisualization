@@ -492,7 +492,7 @@ public class AgentChart implements Chart {
                 .height(height)
                 .width(xAxis.getWidth())
                 .userData(new Object[]{ categoryName, 0, 0, timeframes })
-                .styleClass("default-color-agent-category-background")
+                .styleClass("default-category-background")
                 .id("background")
                 .build();
         this.rootPane.getChildren().add(categoryBlock);
@@ -536,7 +536,7 @@ public class AgentChart implements Chart {
                       .height(height)
                       .width(Math.max(xPosition - currentPosition, MIN_WIDTH))
                       .userData(new Object[]{ categoryName, currentFrame, timeFrame })
-                        .styleClass(String.format("default-color%d-status-symbol", categoryIndex))
+                        .styleClass(String.format("default-category-color%d", categoryIndex))
                       .build();
               this.rootPane.getChildren().add(valueBlock);
             }
@@ -607,7 +607,7 @@ public class AgentChart implements Chart {
                   .build();
         
         LegendItem item = new Legend.LegendItem(categories.get(index).getName(), legendPoint);
-        item.getSymbol().getStyleClass().add(String.format("default-color%d-status-symbol", index));
+        item.getSymbol().getStyleClass().add(String.format("default-category-color%d", index));
         
         items.add(item);
       }
