@@ -678,7 +678,7 @@ public class CategoricalChart implements Chart {
       if(newFilter) {        
         double yAxisShift = getSceneYShift(yAxis);    
         double xShift = getSceneXShift(xAxis);
-        double yShift = getSceneYShift(yAxis);
+        double yShift = 0;//getSceneYShift(yAxis);
 
         basePoint = new Point2D(event.getX(), event.getY());
 
@@ -723,7 +723,7 @@ public class CategoricalChart implements Chart {
       if(newFilter && selectedFilterIndex >= 0 && filterRectangles.size() > selectedFilterIndex) {
       double yAxisShift = getSceneYShift(yAxis);    
       double xShift = getSceneXShift(xAxis);
-      double yShift = getSceneYShift(yAxis);
+        double yShift = 0;//getSceneYShift(yAxis);
 
       Rectangle selection = getSelectionRectangle(basePoint, event.getX(), event.getY(), xShift, yShift, xAxis.getWidth(), yAxis.getHeight());
       
@@ -739,7 +739,7 @@ public class CategoricalChart implements Chart {
       if(newFilter && selectedFilterIndex >= 0 && filterRectangles.size() > selectedFilterIndex) {
         double yAxisShift = getSceneYShift(yAxis);    
         double xShift = getSceneXShift(xAxis);
-        double yShift = getSceneYShift(yAxis);
+        double yShift = 0;//getSceneYShift(yAxis);
 
         Rectangle selection = getSelectionRectangle(basePoint, event.getX(), event.getY(), xShift, yShift, xAxis.getWidth(), yAxis.getHeight());
 
@@ -750,61 +750,71 @@ public class CategoricalChart implements Chart {
           filterRectangle.setHeight(selection.getHeight());
 
           String minValue = yAxis.getValueForDisplay(selection.getY() + selection.getHeight());
+          if(minValue == null)
+            minValue = yAxis.getValueForDisplay(selection.getY() + selection.getHeight() - (getRowHeigt() / 2));
           String maxValue = yAxis.getValueForDisplay(selection.getY());
+          if(maxValue == null)
+            maxValue = yAxis.getValueForDisplay(selection.getY() + (getRowHeigt() / 2));
+          
+          if(minValue != null && maxValue != null) {
+            filterRectangle.setUserData(new Object[]{ minValue, maxValue });
 
-          filterRectangle.setUserData(new Object[]{ minValue, maxValue });
+            List<String> filterCategories = new ArrayList();
+            boolean started = false;
+            for(String category : yAxis.getCategories()) {
+              if(category.equals(minValue))
+                started = true;
+              if(started)
+                filterCategories.add(category);
+              if(category.equals(maxValue))
+                started = false;
+            }
 
-          List<String> filterCategories = new ArrayList();
-          boolean started = false;
-          for(String category : yAxis.getCategories()) {
-            if(category.equals(minValue))
-              started = true;
-            if(started)
-              filterCategories.add(category);
-            if(category.equals(maxValue))
-              started = false;
-          }
-
-          Filter filter = filter(filterCategories);
-          if(filter != null) {
-            filterRectangle.setUserData(new Object[]{ minValue, maxValue, filter });
+            Filter filter = filter(filterCategories);
+            if(filter != null) {
+              filterRectangle.setUserData(new Object[]{ minValue, maxValue, filter });
+            } else {
+              rootPane.getChildren().remove(filterRectangle);
+              filterRectangles.remove(filterRectangle);
+            }
           } else {
             rootPane.getChildren().remove(filterRectangle);
             filterRectangles.remove(filterRectangle);
           }
-        } else {
-          rootPane.getChildren().remove(filterRectangle);
-          filterRectangles.remove(filterRectangle);
         }
       }      
     });
   }
     
   private Filter filter(List<String> filterCategories) {
-    Parameter selectedParameter = this.parameterMap.GetParameter(this.parameter);
-    Value value = selectedParameter.getValue(parameterValue);
-    
-    List<Double> filterValues = new ArrayList();
-    for(String filterCategory : filterCategories) {
-      for(Category category : value.getCategories()) {
-        if(category.getName().equals(filterCategory)) {
-          filterValues.add((double)category.getValue());
-          break; 
+    if(filterCategories.size() > 0) {
+      Parameter selectedParameter = this.parameterMap.GetParameter(this.parameter);
+      Value value = selectedParameter.getValue(parameterValue);
+
+      List<Double> filterValues = new ArrayList();
+      for(String filterCategory : filterCategories) {
+        for(Category category : value.getCategories()) {
+          if(category.getName().equals(filterCategory)) {
+            filterValues.add((double)category.getValue());
+            break; 
+          }
         }
       }
+
+      Filter filter = new Filter(this, this.parameter, this.parameterIndex, this.parameterValue, getAllTurtles(), filterValues);
+
+      for(Turtle turtle : data) {
+        turtle.setFilter(filter);
+      }
+
+      for(SelectionEventListener listener : listenerList) {
+        listener.update();
+      }
+
+      return filter;
     }
     
-    Filter filter = new Filter(this, this.parameter, this.parameterIndex, this.parameterValue, getAllTurtles(), filterValues);
-
-    for(Turtle turtle : data) {
-      turtle.setFilter(filter);
-    }
-
-    for(SelectionEventListener listener : listenerList) {
-      listener.update();
-    }
-
-    return filter;
+    return null;
   }
     
   private void resizeChart() {    

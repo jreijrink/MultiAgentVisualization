@@ -4,59 +4,6 @@
       "charts": [
         {
           "charts": [],
-          "pos": "LEFT",
-          "liveUpdate": true,
-          "selectedTurtles": [
-            0,
-            1,
-            2,
-            3,
-            4,
-            5,
-            6
-          ],
-          "parameter": "Role ID",
-          "time": "2016-05-02T17:42:56.515",
-          "chart": "Categorical-chart",
-          "parameterIndex": 0,
-          "parameterValue": "current"
-        }
-      ],
-      "pos": "BOTTOM",
-      "liveUpdate": true,
-      "selectedTurtles": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6
-      ],
-      "parameter": "Refbox command",
-      "time": "2016-05-02T17:42:56.443",
-      "chart": "Turtle-chart",
-      "parameterIndex": 0,
-      "parameterValue": "goals"
-    },
-    {
-      "charts": [
-        {
-          "charts": [
-            {
-              "charts": [],
-              "pos": "BOTTOM",
-              "liveUpdate": true,
-              "selectedTurtles": [
-                3
-              ],
-              "parameter": "Battery voltage",
-              "time": "2016-05-02T17:42:56.569",
-              "chart": "Scatter-chart",
-              "parameterIndex": 0,
-              "parameterValue": "battery-voltage"
-            }
-          ],
           "pos": "RIGHT",
           "liveUpdate": true,
           "selectedTurtles": [
@@ -68,7 +15,7 @@
             6
           ],
           "parameter": "Battery voltage",
-          "time": "2016-05-02T17:42:56.555",
+          "time": "2016-05-02T17:57:14.926",
           "chart": "Scatter-chart",
           "parameterIndex": 0,
           "parameterValue": "battery-voltage"
@@ -86,10 +33,49 @@
         6
       ],
       "parameter": "Packetloss coach",
-      "time": "2016-05-02T17:42:56.543",
+      "time": "2016-05-02T17:57:14.916",
       "chart": "Scatter-chart",
       "parameterIndex": 0,
       "parameterValue": "packetloss-coach"
+    },
+    {
+      "charts": [
+        {
+          "charts": [],
+          "pos": "LEFT",
+          "liveUpdate": true,
+          "selectedTurtles": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "parameter": "Role ID",
+          "time": "2016-05-02T17:57:14.892",
+          "chart": "Categorical-chart",
+          "parameterIndex": 0,
+          "parameterValue": "current"
+        }
+      ],
+      "pos": "BOTTOM",
+      "liveUpdate": true,
+      "selectedTurtles": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "parameter": "Refbox command",
+      "time": "2016-05-02T17:57:14.817",
+      "chart": "Turtle-chart",
+      "parameterIndex": 0,
+      "parameterValue": "goals"
     },
     {
       "charts": [],
@@ -100,7 +86,7 @@
         4,
         5
       ],
-      "time": "2016-05-02T17:42:56.584",
+      "time": "2016-05-02T17:57:14.938",
       "chart": "Field"
     }
   ]
