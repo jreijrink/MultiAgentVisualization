@@ -82,4 +82,17 @@ public interface Chart extends EventListener {
     newbox.setSelected(checked);
     return newbox;
   }
+  
+  static String selectionToString(int[] selection) {
+    StringBuilder sb = new StringBuilder();
+    for(int i = 0; i < selection.length; i++){
+      int turtle = selection[i] + 1;
+      sb.append(turtle);
+      if(i < selection.length - 2)
+        sb.append(", ");
+      if(i == selection.length - 2)
+        sb.append(" and ");
+    }
+    return sb.toString();
+  }
 }

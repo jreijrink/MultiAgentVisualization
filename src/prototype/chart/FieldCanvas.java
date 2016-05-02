@@ -1,6 +1,7 @@
 package prototype.chart;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +44,8 @@ import prototype.object.Parameter;
 import prototype.object.Range;
 import prototype.settings.Configuration;
 import org.dockfx.DockNode;
+import static prototype.chart.Chart.selectionToString;
+import static prototype.chart.Chart.getAllTurtles;
 import prototype.object.CombinedBall;
 import prototype.object.CombinedOpponent;
 
@@ -208,8 +211,15 @@ public class FieldCanvas extends Pane implements Chart{
   
   private void setDockTitle() {
     if(this.dockNode != null) {
-      this.dockNode.setTitle(String.format("%s [%d - %d]", getName(), this.selection.GetMin(), this.selection.GetMax()));
+      this.dockNode.setTitle(String.format("%s [%d - %d] %s", getName(), this.selection.GetMin(), this.selection.GetMax(), getHistoryString()));
     }
+  }
+  
+  private String getHistoryString() {
+    if(turtleHistory)
+      return String.format("History shown of turtle %s", selectionToString(selectedTurtles));
+    else
+      return "";
   }
   
   @Override
@@ -282,6 +292,7 @@ public class FieldCanvas extends Pane implements Chart{
           selectedTurtles[i] = turtleSelection.get(i).getValue();
         }
         turtleHistory = turtleCheckbox.isSelected();
+        setDockTitle();
         
         return true;
       }
@@ -331,7 +342,7 @@ public class FieldCanvas extends Pane implements Chart{
       try {
         List<Integer> visible = getVisibleTurtles();
         
-        for(int selectedTurtle : selectedTurtles) {
+        for(int selectedTurtle : getAllTurtles()) {
           Turtle turtle  = data.get(selectedTurtle);
 
           DataPoint inField = turtle.GetValue(this.configuration.RobotInField, 0, this.configuration.RobotInFieldIndex, index);
@@ -422,7 +433,7 @@ public class FieldCanvas extends Pane implements Chart{
       try {
         Map<Integer, List<Point2D>> turltePoints = new HashMap();
         
-        for(int turtleIndex : selectedTurtles) {
+        for(int turtleIndex : getAllTurtles()) {
           turltePoints.put(turtleIndex, new ArrayList());
           
           Turtle turtle  = data.get(turtleIndex);
@@ -496,7 +507,7 @@ public class FieldCanvas extends Pane implements Chart{
             shape.setOnMouseMoved(mouseMove);            
             shape_opponents.add(shape);
           }
-        }      
+        }
       } catch(Exception ex) {
         ex.printStackTrace();        
       }
@@ -513,7 +524,7 @@ public class FieldCanvas extends Pane implements Chart{
       try {
         Map<Integer, Point2D> turltePoints = new HashMap();
 
-        for(int turtleIndex : selectedTurtles) {
+        for(int turtleIndex : getAllTurtles()) {
           Turtle turtle  = data.get(turtleIndex);
 
           DataPoint ballFound = turtle.GetValue(this.configuration.BallFound, 0, this.configuration.BallFoundIndex, index);
@@ -766,7 +777,7 @@ public class FieldCanvas extends Pane implements Chart{
     if(turtleHistory && selection != null && data != null && data.size() > 0) {
       List<Pair<Integer, List<Point2D>>> turtle_paths = new ArrayList();
 
-      for(int selectedTurtle : getVisibleTurtles()) {
+      for(int selectedTurtle : getHistoryTurtles()) {
         Turtle turtle  = data.get(selectedTurtle);
 
         Parameter parameter = this.parameterMap.GetParameter(this.configuration.Pose);
@@ -858,19 +869,43 @@ public class FieldCanvas extends Pane implements Chart{
   }
   
   private List<Integer> getVisibleTurtles() {
-    List<Integer> results = new ArrayList();
     if(showTurtlePerspective || showOpponentPerspective || showBallPerspective) {
-      for (int index = 0; index < viewTurtleIds.length; index++) {
-        results.add(viewTurtleIds[index]);
-      }
+      return getPerspectiveTurtles();
     } else {
+      return getAllTurtles();
+    }
+  }
+  
+  private List<Integer> getHistoryTurtles() {
+    List<Integer> perspective =  getPerspectiveTurtles();
+    if(perspective != null) {
+      List<Integer> results = new ArrayList();
+      for (int index = 0; index < selectedTurtles.length; index++) {
+        if(perspective.contains(selectedTurtles[index])) {
+          results.add(selectedTurtles[index]);
+        }
+      }
+      return results;
+    } else {
+      List<Integer> results = new ArrayList();
       for (int index = 0; index < selectedTurtles.length; index++) {
         results.add(selectedTurtles[index]);
       }
+      return results;
     }
-    return results;
   }
   
+  private List<Integer> getPerspectiveTurtles() {
+    if(showTurtlePerspective || showOpponentPerspective || showBallPerspective) {
+      List<Integer> results = new ArrayList();
+      for (int index = 0; index < viewTurtleIds.length; index++) {
+        results.add(viewTurtleIds[index]);
+      }
+      return results;
+    }
+    return null;
+  }
+    
   private void resizePanel() {      
       if(field != null) {
         double cx = this.getBoundsInParent().getMinX();
