@@ -17,37 +17,38 @@
    -fx-secondary-color4: #8cc82d;
    -fx-secondary-color5: #e0b700;
    -fx-secondary-color6: #d9aa63;
+      
+   -fx-category-color0: #6EAAF7;
+   -fx-category-color1: #F2558B;
+   -fx-category-color2: #F6A14E;   
+   -fx-category-color3: #33a02c;
+   -fx-category-color4: #6a3d9a;
+   -fx-category-color5: #e31a1c;
+   -fx-category-color6: #1D616A;   
+   -fx-category-color7: #b15928;
+   -fx-category-color8: #BB027D;
+   -fx-category-color9: #5E3A0A;
+   -fx-category-color10: #DB195A;
+   -fx-category-color11: #BE610C;
+   -fx-category-color12: #5D6B13;
+   -fx-category-color13: #8F329D;
+   -fx-category-color14: #1f78b4;
+   -fx-category-color15: #ff7f00;
+   -fx-category-color16: #3B1719;
+   -fx-category-color17: #A6F5C2;
+   -fx-category-color18: #7BD3EE;
+   -fx-category-color19: #17557B;
+   -fx-category-color20: #5B3689;
+   -fx-category-color21: #246012;
+   -fx-category-color22: #CBB813;
+   -fx-category-color23: #7CFE80;
+   -fx-category-color24: #a6cee3;
+   -fx-category-color25: #b2df8a;
+   -fx-category-color26: #fb9a99;
+   -fx-category-color27: #fdbf6f;
+   -fx-category-color28: #cab2d6;
+   -fx-category-color29: #ffff99;
    
-   -fx-category-color0: #a6cee3;
-   -fx-category-color1: #b2df8a;
-   -fx-category-color2: #fb9a99;
-   -fx-category-color3: #fdbf6f;
-   -fx-category-color4: #cab2d6;
-   -fx-category-color5: #ffff99;
-   -fx-category-color6: #b15928;
-   -fx-category-color7: #1f78b4;
-   -fx-category-color8: #33a02c;
-   -fx-category-color9: #e31a1c;
-   -fx-category-color10: #ff7f00;
-   -fx-category-color11: #6a3d9a;
-   -fx-category-color12: #1D616A;
-   -fx-category-color13: #BB027D;
-   -fx-category-color14: #5E3A0A;
-   -fx-category-color15: #DB195A;
-   -fx-category-color16: #BE610C;
-   -fx-category-color17: #5D6B13;
-   -fx-category-color18: #8F329D;
-   -fx-category-color19: #6EAAF7;
-   -fx-category-color20: #3B1719;
-   -fx-category-color21: #A6F5C2;
-   -fx-category-color22: #7BD3EE;
-   -fx-category-color23: #F6A14E;
-   -fx-category-color24: #17557B;
-   -fx-category-color25: #F2558B;
-   -fx-category-color26: #5B3689;
-   -fx-category-color27: #246012;
-   -fx-category-color28: #CBB813;
-   -fx-category-color29: #7CFE80;
 }
 
 .chart, .chart-content, .chart-plot-background {
@@ -130,32 +131,32 @@
   -fx-fill: -fx-primary-color6;
 }
 
-.default-primary-color0-stroke {
-  -fx-stroke: -fx-primary-color0 !important;
+.default-secondary-color0-fill {
+  -fx-fill: -fx-secondary-color0 !important;
 }
 
-.default-primary-color1-stroke {
-  -fx-stroke: -fx-primary-color1 !important;
+.default-secondary-color1-fill {
+  -fx-fill: -fx-secondary-color1 !important;
 }
 
-.default-primary-color2-stroke {
-  -fx-stroke: -fx-primary-color2 !important;
+.default-secondary-color2-fill {
+  -fx-fill: -fx-secondary-color2 !important;
 }
 
-.default-primary-color3-stroke {
-  -fx-stroke: -fx-primary-color3 !important;
+.default-secondary-color3-fill {
+  -fx-fill: -fx-secondary-color3 !important;
 }
 
-.default-primary-color4-stroke {
-  -fx-stroke: -fx-primary-color4 !important;
+.default-secondary-color4-fill {
+  -fx-fill: -fx-secondary-color4 !important;
 }
 
-.default-secondarycolor5-stroke {
-  -fx-stroke: -fx-primary-color5 !important;
+.default-secondary-color5-fill {
+  -fx-fill: -fx-secondary-color5 !important;
 }
 
-.default-primary-color6-stroke {
-  -fx-stroke: -fx-primary-color6 !important;
+.default-secondary-color6-fill {
+  -fx-fill: -fx-secondary-color6 !important;
 }
 
 .default-color0.chart-series-line, .default-color0-stroke {
@@ -206,7 +207,7 @@
   -fx-stroke: -fx-secondary-color4 !important;
 }
 
-.default-secondarycolor5-stroke {
+.default-secondary-color5-stroke {
   -fx-stroke: -fx-secondary-color5 !important;
 }
 

@@ -4,7 +4,7 @@
       "charts": [
         {
           "charts": [],
-          "pos": "LEFT",
+          "pos": "TOP",
           "liveUpdate": true,
           "selectedTurtles": [
             0,
@@ -15,86 +15,13 @@
             5,
             6
           ],
-          "parameter": "Role ID",
-          "time": "2016-05-02T13:33:25.526",
+          "parameter": "*Goal",
+          "time": "2016-05-02T17:02:19.383",
           "chart": "Categorical-chart",
           "parameterIndex": 0,
-          "parameterValue": "current"
+          "parameterValue": "result"
         }
       ],
-      "pos": "BOTTOM",
-      "liveUpdate": true,
-      "selectedTurtles": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6
-      ],
-      "parameter": "Refbox command",
-      "time": "2016-05-02T13:33:25.459",
-      "chart": "Turtle-chart",
-      "parameterIndex": 0,
-      "parameterValue": "all"
-    },
-    {
-      "charts": [
-        {
-          "charts": [
-            {
-              "charts": [],
-              "pos": "BOTTOM",
-              "liveUpdate": true,
-              "selectedTurtles": [
-                3
-              ],
-              "parameter": "Battery voltage",
-              "time": "2016-05-02T13:33:25.569",
-              "chart": "Scatter-chart",
-              "parameterIndex": 0,
-              "parameterValue": "battery-voltage"
-            }
-          ],
-          "pos": "RIGHT",
-          "liveUpdate": true,
-          "selectedTurtles": [
-            0,
-            1,
-            2,
-            3,
-            4,
-            5,
-            6
-          ],
-          "parameter": "Battery voltage",
-          "time": "2016-05-02T13:33:25.561",
-          "chart": "Scatter-chart",
-          "parameterIndex": 0,
-          "parameterValue": "battery-voltage"
-        }
-      ],
-      "pos": "TOP",
-      "liveUpdate": true,
-      "selectedTurtles": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6
-      ],
-      "parameter": "Packetloss coach",
-      "time": "2016-05-02T13:33:25.551",
-      "chart": "Scatter-chart",
-      "parameterIndex": 0,
-      "parameterValue": "packetloss-coach"
-    },
-    {
-      "charts": [],
-      "turtleHistory": false,
       "pos": "RIGHT",
       "liveUpdate": true,
       "selectedTurtles": [
@@ -106,8 +33,50 @@
         5,
         6
       ],
-      "time": "2016-05-02T13:33:25.587",
-      "chart": "Field"
+      "parameter": "Skill ID",
+      "time": "2016-05-02T17:02:19.378",
+      "chart": "Categorical-chart",
+      "parameterIndex": 0,
+      "parameterValue": "skill ID"
+    },
+    {
+      "charts": [
+        {
+          "charts": [],
+          "pos": "BOTTOM",
+          "liveUpdate": true,
+          "selectedTurtles": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "parameter": "*Goal",
+          "time": "2016-05-02T17:02:19.398",
+          "chart": "Turtle-chart",
+          "parameterIndex": 0,
+          "parameterValue": "result"
+        }
+      ],
+      "pos": "RIGHT",
+      "liveUpdate": true,
+      "selectedTurtles": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "parameter": "*Goal",
+      "time": "2016-05-02T17:02:19.388",
+      "chart": "Scatter-chart",
+      "parameterIndex": 0,
+      "parameterValue": "result"
     }
   ]
 }

@@ -668,7 +668,7 @@ public class XYBaseChart implements Chart {
               .height(yAxis.getHeight())
               .width(0)
               .fill(Color.web("0x222222"))
-              .opacity(0.3)
+              .opacity(0.2)
               .id("selection")
               .build();
       selectionRectangle.setUserData(new Object[]{ -1, -1 });
@@ -690,7 +690,7 @@ public class XYBaseChart implements Chart {
               .height(yAxis.getHeight())
               .width(0)
               .fill(Color.web("0x222222"))
-              .opacity(0.6)
+              .opacity(0.4)
               .id("selection")
               .build();
       selectionFrame.setUserData(forward);

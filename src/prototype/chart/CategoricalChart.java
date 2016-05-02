@@ -184,8 +184,7 @@ public class CategoricalChart implements Chart {
 
   @Override
   public void selectFrames(int startIndex, int endIndex, boolean drag, boolean forward) {
-    if((!drag || liveUpdate) && data.size() > 0) {
-      
+    if((!drag || liveUpdate) && data. size() > 0) {
       selectedStartIndex = startIndex;
       selectedEndIndex = endIndex;
       this.forward = forward;
@@ -198,7 +197,7 @@ public class CategoricalChart implements Chart {
       if(start == end)
         end +=1;
       
-      if(selectionRectangle != null) {
+      if(selectionRectangle != null) {        
         selectionRectangle.setX(xAxisShift + start);
         selectionRectangle.setWidth(end - start);
         selectionRectangle.setUserData(new Object[]{ startIndex, endIndex });
@@ -554,7 +553,7 @@ public class CategoricalChart implements Chart {
                     .height(turtleHeight)
                     .width(Math.max(xPosition - currentPosition, MIN_WIDTH))
                     .userData(new Object[]{ value.getCategoryName((int)currentCategory), index, currentFrame, timeFrame })
-                    .styleClass(String.format("default-color%d-fill", turtleIndex))
+                    .styleClass(String.format("default-secondary-color%d-fill", turtleIndex))
                     .build();
 
             this.rootPane.getChildren().add(categoryBlock);
@@ -575,12 +574,12 @@ public class CategoricalChart implements Chart {
               .height(yAxis.getHeight() - 10)
               .width(initSelectionWidth)
               .fill(Color.web("0x222222"))
-              .opacity(0.3)
+              .opacity(0.2)
               .id("selection")
               .userData(initSelectionData)
               .build();    
       rootPane.getChildren().add(selectionRectangle);
-
+      
       if(selectionFrame != null) 
         rootPane.getChildren().remove(selectionFrame);
       
@@ -590,7 +589,7 @@ public class CategoricalChart implements Chart {
               .height(yAxis.getHeight())
               .width(2)
               .fill(Color.web("0x222222"))
-              .opacity(0.6)
+              .opacity(0.4)
               .id("selection")
               .build();
       selectionFrame.setUserData(true);
@@ -919,7 +918,7 @@ public class CategoricalChart implements Chart {
   private void createRectangleSelectionEvents(Node node, NumberAxis xAxis, CategoryAxis yAxis) {
     ScatterChart<Number,String> scattterChart = (ScatterChart<Number,String>)rootPane.getCenter();
     
-    node.setOnMousePressed((MouseEvent event) -> {
+    node.setOnMousePressed((MouseEvent event) -> {      
       double xAxisShift = getSceneXShift(xAxis);
       double yAxisShift = getSceneYShift(yAxis);
       
@@ -933,7 +932,7 @@ public class CategoricalChart implements Chart {
       notifyListeners(start, end, false, true);
     });
 
-    node.setOnMouseDragged((MouseEvent event) -> {
+    node.setOnMouseDragged((MouseEvent event) -> {      
       if(selectionPoint != null) {
         double xAxisShift = getSceneXShift(xAxis);
         double yAxisShift = getSceneYShift(yAxis);
@@ -950,13 +949,12 @@ public class CategoricalChart implements Chart {
         }
 
         notifyListeners(start, end, true, forward);
-
-        selectionRectangle.setX(selection.getX());
-        selectionRectangle.setWidth(selection.getWidth());
+        
+        selectFrames(start, end, false, forward); //Always update this selection
       }
     });
     
-    node.setOnMouseReleased((MouseEvent event) -> {
+    node.setOnMouseReleased((MouseEvent event) -> {      
       if(selectionPoint != null) {
         double xAxisShift = getSceneXShift(xAxis);
         double yAxisShift = getSceneYShift(yAxis);

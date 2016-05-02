@@ -557,7 +557,7 @@ public class AgentChart implements Chart {
               .height(yAxis.getHeight() - 10)
               .width(initSelectionWidth)
               .fill(Color.web("0x222222"))
-              .opacity(0.3)
+              .opacity(0.2)
               .id("selection")
               .userData(initSelectionData)
               .build();    
@@ -572,7 +572,7 @@ public class AgentChart implements Chart {
               .height(yAxis.getHeight())
               .width(2)
               .fill(Color.web("0x222222"))
-              .opacity(0.6)
+              .opacity(0.4)
               .id("selection")
               .build();
       selectionFrame.setUserData(true);
@@ -927,8 +927,7 @@ public class AgentChart implements Chart {
       
       notifyListeners(start, end, true, forward);
       
-      selectionRectangle.setX(selection.getX());
-      selectionRectangle.setWidth(selection.getWidth());
+      selectFrames(start, end, false, forward); //Always update this selection
     });
     
     node.setOnMouseReleased((MouseEvent event) -> {
