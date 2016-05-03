@@ -1,0 +1,253 @@
+{
+  "conditions": [
+    {
+      "valueName": "battery-voltage",
+      "rangeMax": 25,
+      "rangeMin": 0,
+      "name": "Battery low",
+      "equationType": "is",
+      "parameterName": "Battery voltage",
+      "parameterIndex": 0
+    },
+    {
+      "valueName": "CPB-team",
+      "values": [
+        {
+          "value": "None"
+        }
+      ],
+      "name": "CPB Not Team",
+      "equationType": "is",
+      "parameterName": "CPB team",
+      "parameterIndex": 0
+    },
+    {
+      "valueName": "CPB-team",
+      "values": [
+        {
+          "value": "None"
+        }
+      ],
+      "name": "CPB Team",
+      "equationType": "is not",
+      "parameterName": "CPB team",
+      "parameterIndex": 0
+    },
+    {
+      "valueName": "CPB",
+      "values": [
+        {
+          "value": "True"
+        }
+      ],
+      "name": "Has Ball",
+      "equationType": "is",
+      "parameterName": "CPB",
+      "parameterIndex": 0
+    },
+    {
+      "valueName": "CPB",
+      "values": [
+        {
+          "value": "False"
+        }
+      ],
+      "name": "Not Ball",
+      "equationType": "is",
+      "parameterName": "CPB",
+      "parameterIndex": 0
+    },
+    {
+      "valueName": "opponent-with-ball",
+      "values": [
+        {
+          "value": "None"
+        }
+      ],
+      "name": "Opponnant has ball",
+      "equationType": "is not",
+      "parameterName": "Opponent with ball",
+      "parameterIndex": 0
+    },
+    {
+      "valueName": "all",
+      "values": [
+        {
+          "value": "Goal magenta"
+        },
+        {
+          "value": "Goal cyan"
+        },
+        {
+          "value": "Kickoff magenta"
+        },
+        {
+          "value": "Kickoff cyan"
+        },
+        {
+          "value": "Subgoal magenta"
+        },
+        {
+          "value": "Subgoal cyan"
+        }
+      ],
+      "name": "Refbox Goal",
+      "equationType": "is",
+      "parameterName": "Refbox command",
+      "parameterIndex": 0
+    },
+    {
+      "valueName": "all",
+      "values": [
+        {
+          "value": "Stop"
+        },
+        {
+          "value": "Start"
+        },
+        {
+          "value": "Goal magenta"
+        },
+        {
+          "value": "Goal cyan"
+        },
+        {
+          "value": "Subgoal magenta"
+        },
+        {
+          "value": "Subgoal cyan"
+        },
+        {
+          "value": "Kickoff magenta"
+        },
+        {
+          "value": "Kickoff cyan"
+        },
+        {
+          "value": "Repair out magenta"
+        },
+        {
+          "value": "Repair out cyan"
+        },
+        {
+          "value": "Repair in magenta"
+        },
+        {
+          "value": "Repair in cyan"
+        }
+      ],
+      "name": "Refbox Not Goal",
+      "equationType": "is not",
+      "parameterName": "Refbox command",
+      "parameterIndex": 0
+    },
+    {
+      "valueName": "all",
+      "values": [
+        {
+          "value": "Stop"
+        }
+      ],
+      "name": "Refbox Stop",
+      "equationType": "is",
+      "parameterName": "Refbox command",
+      "parameterIndex": 0
+    },
+    {
+      "valueName": "shottype",
+      "values": [
+        {
+          "value": "Static pass"
+        },
+        {
+          "value": "Dynamic pass"
+        }
+      ],
+      "name": "ShotType Pass",
+      "equationType": "is",
+      "parameterName": "Skill ID",
+      "parameterIndex": 0
+    },
+    {
+      "valueName": "shottype",
+      "values": [
+        {
+          "value": "Flat shot"
+        },
+        {
+          "value": "Dynamic lob"
+        },
+        {
+          "value": "Static lob"
+        },
+        {
+          "value": "Dynamic push"
+        },
+        {
+          "value": "Penalty"
+        }
+      ],
+      "name": "ShotType Shot",
+      "equationType": "is",
+      "parameterName": "Skill ID",
+      "parameterIndex": 0
+    },
+    {
+      "valueName": "skill ID",
+      "values": [
+        {
+          "value": "Shield"
+        },
+        {
+          "value": "Kick"
+        },
+        {
+          "value": "Aim"
+        },
+        {
+          "value": "Dribbel"
+        }
+      ],
+      "name": "skillID Ball",
+      "equationType": "is",
+      "parameterName": "Skill ID",
+      "parameterIndex": 0
+    },
+    {
+      "valueName": "skill ID",
+      "values": [
+        {
+          "value": "Intercept"
+        }
+      ],
+      "name": "skillID Intercept",
+      "equationType": "is",
+      "parameterName": "Skill ID",
+      "parameterIndex": 0
+    },
+    {
+      "valueName": "skill ID",
+      "values": [
+        {
+          "value": "Move"
+        }
+      ],
+      "name": "skillID Move",
+      "equationType": "is",
+      "parameterName": "Skill ID",
+      "parameterIndex": 0
+    },
+    {
+      "valueName": "skill ID",
+      "values": [
+        {
+          "value": "Shield"
+        }
+      ],
+      "name": "skillID Shield",
+      "equationType": "is",
+      "parameterName": "Skill ID",
+      "parameterIndex": 0
+    }
+  ]
+}

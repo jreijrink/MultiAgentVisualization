@@ -15,7 +15,7 @@
             6
           ],
           "parameter": "Battery voltage",
-          "time": "2016-05-02T17:57:14.926",
+          "time": "2016-05-03T14:14:48.738",
           "chart": "Scatter-chart",
           "parameterIndex": 0,
           "parameterValue": "battery-voltage"
@@ -33,7 +33,7 @@
         6
       ],
       "parameter": "Packetloss coach",
-      "time": "2016-05-02T17:57:14.916",
+      "time": "2016-05-03T14:14:48.724",
       "chart": "Scatter-chart",
       "parameterIndex": 0,
       "parameterValue": "packetloss-coach"
@@ -54,7 +54,7 @@
             6
           ],
           "parameter": "Role ID",
-          "time": "2016-05-02T17:57:14.892",
+          "time": "2016-05-03T14:14:48.691",
           "chart": "Categorical-chart",
           "parameterIndex": 0,
           "parameterValue": "current"
@@ -72,7 +72,7 @@
         6
       ],
       "parameter": "Refbox command",
-      "time": "2016-05-02T17:57:14.817",
+      "time": "2016-05-03T14:14:48.617",
       "chart": "Turtle-chart",
       "parameterIndex": 0,
       "parameterValue": "goals"
@@ -86,7 +86,7 @@
         4,
         5
       ],
-      "time": "2016-05-02T17:57:14.938",
+      "time": "2016-05-03T14:14:48.753",
       "chart": "Field"
     }
   ]

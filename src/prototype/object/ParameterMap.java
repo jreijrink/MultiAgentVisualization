@@ -54,6 +54,10 @@ public class ParameterMap {
     return this.generated;
   }
   
+  public List<Parameter> GetMappedParameters() {
+    return this.parameters;
+  }
+  
   public List<Parameter> GetAllParameters() {
     List<Parameter> combined = new ArrayList<Parameter>(this.parameters);
     for(GeneratedParameter parameter : this.generated) {

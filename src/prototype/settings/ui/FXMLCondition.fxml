@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.collections.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import org.controlsfx.control.*?>
+
+<AnchorPane id="AnchorPane" disable="false" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="360.0" prefWidth="280.0" visible="true" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="prototype.settings.ui.FXMLConditionController">
+  <children>
+    <Label id="conditionName" text="Name" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="17.0" />
+    <TextField id="valueName" fx:id="conditionName" prefWidth="200.0" text="" AnchorPane.leftAnchor="66.0" AnchorPane.topAnchor="14.0" />
+    <Label id="parameter" layoutX="15.0" layoutY="56.0" text="Parameter:" />
+    <Label id="name2" text="Name" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="83.0" />
+    <ComboBox fx:id="parameterName" layoutX="68.0" layoutY="81.0" prefWidth="200.0"/>
+    <Label id="index" text="Index" AnchorPane.leftAnchor="14.0" AnchorPane.topAnchor="125.0" />
+    <ComboBox fx:id="parameterIndex" layoutX="66.0" layoutY="123.0" prefWidth="200.0"/>
+    <Label layoutX="14.0" layoutY="163.0" text="Value" />
+    <Label layoutX="14.0" layoutY="204.0" text="Equation:" />
+    <Label layoutX="15.0" layoutY="230.0" text="Type" />
+    <ComboBox fx:id="equationType" layoutX="66.0" layoutY="228.0" prefWidth="200.0"/>
+    <ComboBox fx:id="valueName" layoutX="66.0" layoutY="161.0" prefWidth="200.0"/>
+    <Label layoutX="15.0" layoutY="265.0" text="Range" />
+    <prototype.settings.ui.DoubleTextField id="valueMin"  disable="${ !controller.rangeEnabled }" fx:id="equationMin" layoutX="66.0" layoutY="262.0" prefWidth="74.0" />
+    <Label layoutX="163.0" layoutY="265.0" text="-" />
+    <prototype.settings.ui.DoubleTextField id="valuMax"  disable="${ !controller.rangeEnabled }" fx:id="equationMax" layoutX="192.0" layoutY="262.0" prefWidth="74.0" />
+    <Label layoutX="15.0" layoutY="298.0" text="Values" />
+    <CheckComboBox fx:id="equationValues" disable="${ !controller.valuesEnabled }" layoutX="66.0" layoutY="295.0" prefWidth="200.0"/>
+    <Button id="saveParameter" fx:id="saveCondition" defaultButton="true" mnemonicParsing="false" onAction="#saveConditionAction" text="Save" AnchorPane.leftAnchor="212.0" AnchorPane.topAnchor="328.0" />
+    <Button id="cancelParameter" fx:id="cancelCondition" cancelButton="true" mnemonicParsing="false" onAction="#cancelConditionAction" text="Cancel" AnchorPane.leftAnchor="140.0" AnchorPane.topAnchor="328.0" />
+  </children>
+</AnchorPane>

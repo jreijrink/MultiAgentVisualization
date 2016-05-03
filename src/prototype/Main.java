@@ -73,6 +73,7 @@ import prototype.listener.SelectionEventListener;
 import prototype.object.DateComparator;
 import prototype.object.LayoutChart;
 import prototype.settings.DataMapping;
+import prototype.settings.ui.FXMLConditionsController;
 
 public class Main extends Application {
   private List<Chart> charts;
@@ -355,6 +356,35 @@ public class Main extends Application {
       }
     });
     settingsMenu.getItems().add(configurationMenu);
+    
+    MenuItem conditionsMenu = new MenuItem("Conditions");
+    conditionsMenu.setAccelerator(new KeyCodeCombination(KeyCode.D, KeyCombination.CONTROL_DOWN));
+    conditionsMenu.setOnAction(new EventHandler() {
+      @Override
+      public void handle(Event t) {
+        try {
+          FXMLLoader loader = new FXMLLoader(FXMLConditionsController.class.getResource("FXMLConditions.fxml"));
+          AnchorPane page = (AnchorPane) loader.load();
+          Stage dialogStage = new Stage();
+          dialogStage.setTitle("Conditions");
+          dialogStage.initModality(Modality.WINDOW_MODAL);
+          dialogStage.initOwner(stage);
+
+          FXMLConditionsController controller = loader.getController();
+          controller.setDialogStage(dialogStage);
+
+          Scene dialogScene = new Scene(page);
+          dialogStage.setScene(dialogScene);
+
+          dialogStage.setResizable(false);
+          dialogStage.showAndWait();
+          
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+    });
+    settingsMenu.getItems().add(conditionsMenu);
     
     return settingsMenu;
   }

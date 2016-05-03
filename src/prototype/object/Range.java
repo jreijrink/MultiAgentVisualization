@@ -21,4 +21,9 @@ public class Range<T extends Number>  {
     public T GetMax() {
       return high;
     }
+    
+    @Override
+    public String toString() {      
+      return String.format("[%d - %d]", this.low, this.high);
+    }
 }
