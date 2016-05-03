@@ -5,7 +5,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javafx.util.Pair;
 import prototype.chart.Chart;
 import prototype.chart.DataPoint;
 
@@ -30,9 +29,9 @@ public class Turtle {
     
     for(GeneratedParameter parameter : parameters) {
 
-      Map<Condition, List<DataPoint>> preConditions = getConditionMap(parameter.getPreConditions());
-      Map<Condition, List<DataPoint>> postConditionsSuccess = getConditionMap(parameter.getPostConditionsSuccess());
-      Map<Condition, List<DataPoint>> postConditionsFailed = getConditionMap(parameter.getPostConditionsFailed());
+      List<Map<Condition, List<DataPoint>>> preConditions = getConditionMap(parameter.getPreConditions());
+      List<Map<Condition, List<DataPoint>>> postConditionsSuccess = getConditionMap(parameter.getPostConditionsSuccess());
+      List<Map<Condition, List<DataPoint>>> postConditionsFailed = getConditionMap(parameter.getPostConditionsFailed());
       
       for(Value value : parameter.getValues()) {
         try {
@@ -48,40 +47,65 @@ public class Turtle {
           for(int i = 0; i < newDataRow.length - 1; i++) {
             
             if(!active) {
-              boolean satisfied = (preConditions.size() > 0);
+              boolean anyCombinedSatisfied = false;
               
-              //AND type
-              for(Condition condition : preConditions.keySet()) {
-                satisfied = condition.IsSatisfied(parameterMap, preConditions.get(condition).get(i)) && satisfied;
-              }
+              for(Map<Condition, List<DataPoint>> andMap : preConditions) {
+                boolean combinedSatisfied = (andMap.size() > 0);
+                
+                //AND type
+                for(Condition condition : andMap.keySet()) {
+                  combinedSatisfied = condition.IsSatisfied(parameterMap, andMap.get(condition).get(i)) && combinedSatisfied;
+                }
+                
+                anyCombinedSatisfied = combinedSatisfied || anyCombinedSatisfied;
+              }          
               
-              if(satisfied) {
+              if(anyCombinedSatisfied) {
                 active = true;
                 finished = false;
                 activationIndex = i;
                 newDataRow[i] = 1;
-              }              
+              }         
               
             } else {
               boolean preConditionsFinished = false;
               
-              //Wait until one of the preconditions is unsatisfied.
-              for(Condition condition : preConditions.keySet()) {
-                preConditionsFinished = !condition.IsSatisfied(parameterMap, preConditions.get(condition).get(i)) || preConditionsFinished;
+              //Wait until the preconditions is unsatisfied.
+              for(Map<Condition, List<DataPoint>> andMap : preConditions) {
+                boolean combinedSatisfied = true;
+                
+                //AND type
+                for(Condition condition : andMap.keySet()) {
+                  combinedSatisfied = condition.IsSatisfied(parameterMap, andMap.get(condition).get(i)) && combinedSatisfied;
+                }
+                
+                preConditionsFinished = !combinedSatisfied || preConditionsFinished;
               }
-              
+                            
               if(preConditionsFinished || i == newDataRow.length - 1) {
-                boolean success = true;
+                boolean success = true; // If no conditions -> success
                 boolean failed = false;
 
-                //AND type
-                for(Condition condition : postConditionsSuccess.keySet()) {
-                  success = condition.IsSatisfied(parameterMap, postConditionsSuccess.get(condition).get(i)) && success;
-                }
+                for(Map<Condition, List<DataPoint>> andMap : postConditionsSuccess) {
+                  boolean combinedSatisfied = (andMap.size() > 0);
 
-                //OR type
-                for(Condition condition : postConditionsFailed.keySet()) {
-                  failed = condition.IsSatisfied(parameterMap, postConditionsFailed.get(condition).get(i)) || failed;
+                  //AND type
+                  for(Condition condition : andMap.keySet()) {
+                    combinedSatisfied = condition.IsSatisfied(parameterMap, andMap.get(condition).get(i)) && combinedSatisfied;
+                  }
+
+                  success = combinedSatisfied || success;
+                }
+                
+                for(Map<Condition, List<DataPoint>> andMap : postConditionsFailed) {
+                  boolean combinedSatisfied = (andMap.size() > 0);
+
+                  //AND type
+                  for(Condition condition : andMap.keySet()) {
+                    combinedSatisfied = condition.IsSatisfied(parameterMap, andMap.get(condition).get(i)) && combinedSatisfied;
+                  }
+
+                  failed = combinedSatisfied || failed;
                 }
 
                 //Don't end if the post conditions success and failed are both satisfied
@@ -113,12 +137,16 @@ public class Turtle {
     }
   }
   
-  private Map<Condition, List<DataPoint>> getConditionMap(List<Condition> conditions) {
-    Map<Condition, List<DataPoint>> conditionsMap = new HashMap();
+  private List<Map<Condition, List<DataPoint>>> getConditionMap(List<CombinedANDConditions> conditions) {
+    List<Map<Condition, List<DataPoint>>> conditionsMap = new ArrayList();
     
-    for(Condition condition : conditions) {
-      List<DataPoint> datapoints = GetAllValues(condition.GetParameterName(), condition.GetParameterIndex(), condition.GetValueName());
-      conditionsMap.put(condition, datapoints);
+    for(CombinedANDConditions Andcondition : conditions) {
+      Map<Condition, List<DataPoint>> andMap = new HashMap();
+      for(Condition condition : Andcondition.getConditions()) {
+        List<DataPoint> datapoints = GetAllValues(condition.GetParameterName(), condition.GetParameterIndex(), condition.GetValueName());
+        andMap.put(condition, datapoints);
+      }
+      conditionsMap.add(andMap);
     }
     
     return conditionsMap;

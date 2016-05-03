@@ -4,10 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GeneratedParameter extends Parameter {
-  private final List<Condition> preConditions;
-  private final List<Condition> postConditionsSuccess;
-  private final List<Condition> postConditionsFailed;
-    
+  private final List<CombinedANDConditions> preConditions;
+  private final List<CombinedANDConditions> postConditionsSuccess;
+  private final List<CombinedANDConditions> postConditionsFailed;
+  
   public GeneratedParameter(String name, Type type, int count, List<Value> values) {
     super.name = name;
     super.type = type;
@@ -19,27 +19,39 @@ public class GeneratedParameter extends Parameter {
     this.postConditionsFailed = new ArrayList();
   }
   
-  public void addANDPreCondition(Condition condition) {
+  public GeneratedParameter() {
+    this("", Type.Categorical, 1, new ArrayList());
+    
+    List<Category> categories = new ArrayList();
+    categories.add(new Category(1, "Success"));
+    categories.add(new Category(2, "Failed"));
+    
+    List<Value> initValues = new ArrayList();
+    initValues.add(new Value("result", 0, "", "", false, 0, 0, categories));
+    super.values = initValues;    
+  }
+  
+  public void addPreCondition(CombinedANDConditions condition) {
     preConditions.add(condition);
   }
   
-  public List<Condition> getPreConditions() {
+  public List<CombinedANDConditions> getPreConditions() {
     return preConditions;
   }
   
-  public void addANDPostConditionSuccess(Condition condition) {
+  public void addPostConditionSuccess(CombinedANDConditions condition) {
     postConditionsSuccess.add(condition);
   }
   
-  public List<Condition> getPostConditionsSuccess() {
+  public List<CombinedANDConditions> getPostConditionsSuccess() {
     return postConditionsSuccess;
   }
   
-  public void addORPostConditionFailed(Condition condition) {
+  public void addPostConditionFailed(CombinedANDConditions condition) {
     postConditionsFailed.add(condition);
   }
   
-  public List<Condition> getPostConditionsFailed() {
+  public List<CombinedANDConditions> getPostConditionsFailed() {
     return postConditionsFailed;
   }
 }

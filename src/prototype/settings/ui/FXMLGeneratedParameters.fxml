@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.collections.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane id="AnchorPane" prefHeight="300.0" prefWidth="500.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="prototype.settings.ui.FXMLGeneratedParametersController">
+  <children>
+    <Button id="addGenerated" fx:id="addGenerated" defaultButton="true" minWidth="30.0" onAction="#addGeneratedAction" prefHeight="30.0" prefWidth="30.0" text="+" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
+      <font>
+        <Font size="11.0" />
+      </font>
+    </Button>
+    <Button id="editGenerated" fx:id="editGenerated" minWidth="30.0" disable="${ !controller.generatedSelected }" onAction="#editGeneratedAction" prefHeight="30.0" prefWidth="30.0" text="✎" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="47.0">
+      <font>
+        <Font size="10.0" />
+      </font>
+    </Button>
+    <Button id="deleteGenerated" fx:id="deleteGenerated" minWidth="30.0"  disable="${ !controller.generatedSelected }" mnemonicParsing="false" onAction="#deleteGeneratedAction" prefHeight="30.0" prefWidth="30.0" text="x" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="80.0" />
+    <ListView id="generatedParameters" fx:id="generatedParameters" prefHeight="272.0" prefWidth="428.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="58.0" AnchorPane.topAnchor="14.0" />
+  </children>
+</AnchorPane>

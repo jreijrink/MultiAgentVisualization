@@ -4,24 +4,19 @@
       "charts": [
         {
           "charts": [],
-          "pos": "RIGHT",
+          "pos": "BOTTOM",
           "liveUpdate": true,
           "selectedTurtles": [
-            0,
-            1,
-            2,
-            4,
-            5,
-            6
+            4
           ],
-          "parameter": "Battery voltage",
-          "time": "2016-05-03T14:14:48.738",
-          "chart": "Scatter-chart",
+          "parameter": "Skill ID",
+          "time": "2016-05-03T16:23:17.159",
+          "chart": "Turtle-chart",
           "parameterIndex": 0,
-          "parameterValue": "battery-voltage"
+          "parameterValue": "skill ID"
         }
       ],
-      "pos": "TOP",
+      "pos": "RIGHT",
       "liveUpdate": true,
       "selectedTurtles": [
         0,
@@ -32,62 +27,38 @@
         5,
         6
       ],
-      "parameter": "Packetloss coach",
-      "time": "2016-05-03T14:14:48.724",
+      "parameter": "CPB",
+      "time": "2016-05-03T16:23:17.140",
       "chart": "Scatter-chart",
       "parameterIndex": 0,
-      "parameterValue": "packetloss-coach"
+      "parameterValue": "CPB"
     },
     {
       "charts": [
         {
           "charts": [],
-          "pos": "LEFT",
+          "pos": "TOP",
           "liveUpdate": true,
           "selectedTurtles": [
-            0,
-            1,
-            2,
-            3,
-            4,
-            5,
-            6
+            4
           ],
-          "parameter": "Role ID",
-          "time": "2016-05-03T14:14:48.691",
+          "parameter": "*Illegal Move (has ball)",
+          "time": "2016-05-03T16:23:17.105",
           "chart": "Categorical-chart",
           "parameterIndex": 0,
-          "parameterValue": "current"
+          "parameterValue": "result"
         }
       ],
-      "pos": "BOTTOM",
-      "liveUpdate": true,
-      "selectedTurtles": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6
-      ],
-      "parameter": "Refbox command",
-      "time": "2016-05-03T14:14:48.617",
-      "chart": "Turtle-chart",
-      "parameterIndex": 0,
-      "parameterValue": "goals"
-    },
-    {
-      "charts": [],
-      "turtleHistory": true,
       "pos": "RIGHT",
       "liveUpdate": true,
       "selectedTurtles": [
-        4,
-        5
+        4
       ],
-      "time": "2016-05-03T14:14:48.753",
-      "chart": "Field"
+      "parameter": "CPB",
+      "time": "2016-05-03T16:23:17.010",
+      "chart": "Categorical-chart",
+      "parameterIndex": 0,
+      "parameterValue": "CPB"
     }
   ]
 }

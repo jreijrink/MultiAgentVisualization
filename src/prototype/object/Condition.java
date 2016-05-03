@@ -1,10 +1,12 @@
 package prototype.object;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import prototype.chart.DataPoint;
 
 public class Condition {
+  private int id;
   private String name;
   private String parameterName;
   private int parameterIndex;
@@ -13,7 +15,8 @@ public class Condition {
   private List<String> values;
   private Range range;
   
-  public Condition(String name, String parameterName, int parameterIndex, String valueName, Equation equation) {
+  public Condition(int id, String name, String parameterName, int parameterIndex, String valueName, Equation equation) {
+    this.id = id;
     this.name = name;
     this.parameterName = parameterName;
     this.parameterIndex = parameterIndex;
@@ -21,18 +24,22 @@ public class Condition {
     this.equation = equation;
   }
   
-  public Condition(String name, String parameterName, int parameterIndex, String valueName, Equation equation, List<String> values) {
-    this(name, parameterName, parameterIndex, valueName, equation);
+  public Condition(int id, String name, String parameterName, int parameterIndex, String valueName, Equation equation, List<String> values) {
+    this(id, name, parameterName, parameterIndex, valueName, equation);
     this.values = values;
   }
   
-  public Condition(String name, String parameterName, int parameterIndex, String valueName, Equation equation, Range range) {
-    this(name, parameterName, parameterIndex, valueName, equation);
+  public Condition(int id, String name, String parameterName, int parameterIndex, String valueName, Equation equation, Range range) {
+    this(id, name, parameterName, parameterIndex, valueName, equation);
     this.range = range;
   }
   
   public Condition() {
-    this("", "", 0, "", Equation.IS);    
+    this((int)new Date().getTime(), "", "", 0, "", Equation.IS);    
+  }
+  
+  public int GetID() {
+    return this.id;
   }
   
   public String GetName() {

@@ -74,6 +74,7 @@ import prototype.object.DateComparator;
 import prototype.object.LayoutChart;
 import prototype.settings.DataMapping;
 import prototype.settings.ui.FXMLConditionsController;
+import prototype.settings.ui.FXMLGeneratedParametersController;
 
 public class Main extends Application {
   private List<Chart> charts;
@@ -357,20 +358,20 @@ public class Main extends Application {
     });
     settingsMenu.getItems().add(configurationMenu);
     
-    MenuItem conditionsMenu = new MenuItem("Conditions");
-    conditionsMenu.setAccelerator(new KeyCodeCombination(KeyCode.D, KeyCombination.CONTROL_DOWN));
-    conditionsMenu.setOnAction(new EventHandler() {
+    MenuItem generateMenu = new MenuItem("Generate Parameters");
+    generateMenu.setAccelerator(new KeyCodeCombination(KeyCode.G, KeyCombination.CONTROL_DOWN));
+    generateMenu.setOnAction(new EventHandler() {
       @Override
       public void handle(Event t) {
         try {
-          FXMLLoader loader = new FXMLLoader(FXMLConditionsController.class.getResource("FXMLConditions.fxml"));
+          FXMLLoader loader = new FXMLLoader(FXMLGeneratedParametersController.class.getResource("FXMLGeneratedParameters.fxml"));
           AnchorPane page = (AnchorPane) loader.load();
           Stage dialogStage = new Stage();
-          dialogStage.setTitle("Conditions");
+          dialogStage.setTitle("Generate Parameters");
           dialogStage.initModality(Modality.WINDOW_MODAL);
           dialogStage.initOwner(stage);
 
-          FXMLConditionsController controller = loader.getController();
+          FXMLGeneratedParametersController controller = loader.getController();
           controller.setDialogStage(dialogStage);
 
           Scene dialogScene = new Scene(page);
@@ -384,7 +385,7 @@ public class Main extends Application {
         }
       }
     });
-    settingsMenu.getItems().add(conditionsMenu);
+    settingsMenu.getItems().add(generateMenu);
     
     return settingsMenu;
   }
