@@ -75,9 +75,9 @@ public class FXMLConditionController implements Initializable {
     this.conditions = conditions;
     this.condition = condition;
         
-    conditionName.setText(condition.GetName());
+    conditionName.setText(condition.getName());
     
-    List<Parameter> parameters = this.parameterMap.GetMappedParameters();
+    List<Parameter> parameters = this.parameterMap.getMappedParameters();
     Collections.sort(parameters, (o1, o2) -> o1.getName().toLowerCase().compareTo(o2.getName().toLowerCase()));
     parameterName.setItems((ObservableList)parameters);
     
@@ -110,8 +110,8 @@ public class FXMLConditionController implements Initializable {
       }      
       parameterIndex.setItems(indexOptions);
       
-      if(initial != null && indexOptions.contains(initial.GetParameterIndex())) {
-        parameterIndex.getSelectionModel().select(initial.GetParameterIndex());
+      if(initial != null && indexOptions.contains(initial.getParameterIndex())) {
+        parameterIndex.getSelectionModel().select(initial.getParameterIndex());
       }
     } else {
       parameterIndex.setItems(indexOptions);
@@ -134,8 +134,8 @@ public class FXMLConditionController implements Initializable {
         loadEquation(null);        
       });
       
-      if(initial != null && valueOptions.contains(initial.GetValueName())) {
-        valueName.getSelectionModel().select(initial.GetValueName());
+      if(initial != null && valueOptions.contains(initial.getValueName())) {
+        valueName.getSelectionModel().select(initial.getValueName());
       }
     }
     
@@ -145,7 +145,7 @@ public class FXMLConditionController implements Initializable {
   private void loadEquation(Condition initial) {
     if(initial != null) {
       equationType.setItems(FXCollections.observableArrayList(Equation.values()));
-      equationType.getSelectionModel().select(initial.GetEquationType());
+      equationType.getSelectionModel().select(initial.getEquationType());
     }
 
     setRangeEnabled(false);
@@ -164,7 +164,7 @@ public class FXMLConditionController implements Initializable {
         equationValues.getItems().setAll(FXCollections.observableList(value.getCategories()));
       
         if(initial != null) {
-          initial.GetValues().stream().forEach((conditionValue) -> {
+          initial.getValues().stream().forEach((conditionValue) -> {
             for(Category category : (ObservableList<Category>)equationValues.getItems()) {
               if(category.getName().equals(conditionValue)) {
                 equationValues.getCheckModel().check(category);
@@ -176,17 +176,17 @@ public class FXMLConditionController implements Initializable {
     } else {
       setRangeEnabled(true);
       
-      if(condition != null && condition.GetRange() != null) {
-        Range range = condition.GetRange();
-        equationMin.setText(range.GetMin().toString());
-        equationMax.setText(range.GetMax().toString());
+      if(condition != null && condition.getRange() != null) {
+        Range range = condition.getRange();
+        equationMin.setText(range.getMin().toString());
+        equationMax.setText(range.getMax().toString());
       }
     }
   }
   
   private Parameter getParameter(Condition inital) {
     if(inital != null)
-      return this.parameterMap.GetParameter(inital.GetParameterName());
+      return this.parameterMap.getParameter(inital.getParameterName());
     else
       return (Parameter)parameterName.getValue();
   }
@@ -195,7 +195,7 @@ public class FXMLConditionController implements Initializable {
     Parameter parameter = getParameter(inital);
     if(parameter != null) {
       if(inital != null) {
-        return parameter.getValue(inital.GetValueName());
+        return parameter.getValue(inital.getValueName());
       } else {
         return parameter.getValue((String)valueName.getValue());        
       }
@@ -206,20 +206,20 @@ public class FXMLConditionController implements Initializable {
   @FXML
   private void saveConditionAction() {
     if (isInputValid()) {
-      condition.SetName(conditionName.getText());
+      condition.setName(conditionName.getText());
       
-      condition.SetParameterName(((Parameter)parameterName.getValue()).getName());
-      condition.SetParameterIndex((int)parameterIndex.getValue());
-      condition.SetValueName((String)valueName.getValue());
+      condition.setParameterName(((Parameter)parameterName.getValue()).getName());
+      condition.setParameterIndex((int)parameterIndex.getValue());
+      condition.setValueName((String)valueName.getValue());
       
-      condition.SetEquation((Equation)equationType.getValue());
+      condition.setEquation((Equation)equationType.getValue());
       
       if(getRangeEnabled()) {
         int min = Integer.parseInt(equationMin.getText());
         int max = Integer.parseInt(equationMax.getText());
-        condition.SetRange(new Range(min, max));
+        condition.setRange(new Range(min, max));
       } else {
-        condition.SetRange(null);
+        condition.setRange(null);
       }
       
       if(getValuesEnabled()) {
@@ -228,9 +228,9 @@ public class FXMLConditionController implements Initializable {
         for(Category category : selection) {
           values.add(category.getName());
         }
-        condition.SetValue(values);
+        condition.setValue(values);
       } else {
-        condition.SetValue(null);
+        condition.setValue(null);
       }
       
       save = true;
@@ -282,7 +282,7 @@ public class FXMLConditionController implements Initializable {
     }
     
     for(Condition existing : this.conditions) {
-      if(existing != this.condition && existing.GetName().equals(conditionName.getText())) {
+      if(existing != this.condition && existing.getName().equals(conditionName.getText())) {
         errorMessage += "Name must be unique! \n"; 
       }
     }

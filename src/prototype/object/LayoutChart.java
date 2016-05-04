@@ -39,7 +39,7 @@ public class LayoutChart {
     this.turtleHistory = turtleHistory;
   }
   
-  public Chart GetChart(Scene scene, List<Turtle> data) {
+  public Chart getChart(Scene scene, List<Turtle> data) {
     switch(this.type)
     {
       case "Field":
@@ -56,7 +56,7 @@ public class LayoutChart {
     return null;
   }
   
-  public DockPos GetPosition() {
+  public DockPos getPosition() {
     switch(this.position)
     {
       case "BOTTOM":
@@ -73,7 +73,7 @@ public class LayoutChart {
     return null;
   }
   
-  public LocalDateTime GetTime() {
+  public LocalDateTime getTime() {
     try {
       if(this.time != null && this.time != "")
         return LocalDateTime.parse(this.time);

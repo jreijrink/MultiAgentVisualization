@@ -31,19 +31,19 @@ public class Filter {
     this.values = values;
   }
   
-  public String ParameterName() {
+  public String parameterName() {
     return this.parameterName;
   }
   
-  public int ParameterIndex() {
+  public int parameterIndex() {
     return this.parameterIndex;
   }
   
-  public String ValueName() {
+  public String valueName() {
     return this.valueName;
   }
   
-  public boolean SatisfiesFilter(int turtle, double value) {
+  public boolean satisfiesFilter(int turtle, double value) {
     if(!turtles.contains(turtle))
       return false;
     
@@ -56,11 +56,11 @@ public class Filter {
     return false;
   }
   
-  public Chart GetChart() {
+  public Chart getChart() {
     return this.chart;
   }
   
-  public boolean Equals(Chart chart) {
+  public boolean equals(Chart chart) {
     return this.chart == chart;
   }
 }

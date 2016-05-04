@@ -209,19 +209,6 @@ public class FieldCanvas extends Pane implements Chart{
     setDockTitle();
   }
   
-  private void setDockTitle() {
-    if(this.dockNode != null) {
-      this.dockNode.setTitle(String.format("%s [%d - %d] %s", getName(), this.selection.GetMin(), this.selection.GetMax(), getHistoryString()));
-    }
-  }
-  
-  private String getHistoryString() {
-    if(turtleHistory)
-      return String.format("History shown of turtle %s", selectionToString(selectedTurtles));
-    else
-      return "";
-  }
-  
   @Override
   protected void layoutChildren() {
     super.layoutChildren();
@@ -229,32 +216,6 @@ public class FieldCanvas extends Pane implements Chart{
     resizePanel();
   }
 
-  private void initField() {    
-    int width = 500;
-    int height = 500;
-    
-    double fieldRatio = (double)this.configuration.FieldLength / (double)this.configuration.FieldWidth;
-    double canvasRatio = (double)height / (double)width;
-    
-    int rectHeight = height;
-    int rectWidth = width;
-    if(fieldRatio > canvasRatio) {
-      rectWidth = (int)((double)height / fieldRatio);
-    } else {
-      rectHeight = (int)((double)width * fieldRatio);
-    }
-    
-    field = new Rectangle(0, 0, rectWidth, rectHeight);
-      
-    initial_width= rectWidth;
-    initial_height= rectHeight;
-  }
-  
-  private void setClipping() {
-    Rectangle clip = new Rectangle(0, 0, Math.max(500, this.getWidth()), Math.max(500, this.getHeight()));
-    this.setClip(clip);    
-  }
-  
   @Override
   public void showParameterDialog() {
     GridPane grid = new GridPane();
@@ -306,14 +267,53 @@ public class FieldCanvas extends Pane implements Chart{
     }
   }
   
+  private void setDockTitle() {
+    if(this.dockNode != null) {
+      this.dockNode.setTitle(String.format("%s [%d - %d] %s", getName(), this.selection.getMin(), this.selection.getMax(), getHistoryString()));
+    }
+  }
+  
+  private String getHistoryString() {
+    if(turtleHistory)
+      return String.format("History shown of turtle %s", selectionToString(selectedTurtles));
+    else
+      return "";
+  }
+  
+  private void initField() {    
+    int width = 500;
+    int height = 500;
+    
+    double fieldRatio = (double)this.configuration.FieldLength / (double)this.configuration.FieldWidth;
+    double canvasRatio = (double)height / (double)width;
+    
+    int rectHeight = height;
+    int rectWidth = width;
+    if(fieldRatio > canvasRatio) {
+      rectWidth = (int)((double)height / fieldRatio);
+    } else {
+      rectHeight = (int)((double)width * fieldRatio);
+    }
+    
+    field = new Rectangle(0, 0, rectWidth, rectHeight);
+      
+    initial_width= rectWidth;
+    initial_height= rectHeight;
+  }
+  
+  private void setClipping() {
+    Rectangle clip = new Rectangle(0, 0, Math.max(500, this.getWidth()), Math.max(500, this.getHeight()));
+    this.setClip(clip);    
+  }
+  
   private void drawMovingShapes() {
     if(field != null && selection != null) {
       
       int index = 0;
       if(this.forward)
-        index = selection.GetMax();
+        index = selection.getMax();
       else
-        index = selection.GetMin();
+        index = selection.getMin();
       
       targets = new HashMap();
       
@@ -345,10 +345,10 @@ public class FieldCanvas extends Pane implements Chart{
         for(int selectedTurtle : getAllTurtles()) {
           Turtle turtle  = data.get(selectedTurtle);
 
-          DataPoint inField = turtle.GetValue(this.configuration.RobotInField, 0, this.configuration.RobotInFieldIndex, index);
-          DataPoint poseX = turtle.GetValue(this.configuration.Pose, 0, this.configuration.PoseX, index);
-          DataPoint poseY = turtle.GetValue(this.configuration.Pose, 0, this.configuration.PoseY, index);
-          DataPoint orientationValue = turtle.GetValue(this.configuration.Pose, 0, this.configuration.PoseRot, index);
+          DataPoint inField = turtle.getValue(this.configuration.RobotInField, 0, this.configuration.RobotInFieldIndex, index);
+          DataPoint poseX = turtle.getValue(this.configuration.Pose, 0, this.configuration.PoseX, index);
+          DataPoint poseY = turtle.getValue(this.configuration.Pose, 0, this.configuration.PoseY, index);
+          DataPoint orientationValue = turtle.getValue(this.configuration.Pose, 0, this.configuration.PoseRot, index);
 
           if(inField != null && inField.getValue() > 0) {
             Point2D turtlePos = getPosition(poseX.getValue(), poseY.getValue());
@@ -438,12 +438,12 @@ public class FieldCanvas extends Pane implements Chart{
           
           Turtle turtle  = data.get(turtleIndex);
 
-          Parameter parameter = this.parameterMap.GetParameter(this.configuration.Opponent);
+          Parameter parameter = this.parameterMap.getParameter(this.configuration.Opponent);
 
           for(int i = 0; i < parameter.getCount(); i++) {
 
-            DataPoint opponentX = turtle.GetValue(this.configuration.Opponent, i, this.configuration.OpponentX, index);
-            DataPoint opponentY = turtle.GetValue(this.configuration.Opponent, i, this.configuration.OpponentY, index);
+            DataPoint opponentX = turtle.getValue(this.configuration.Opponent, i, this.configuration.OpponentX, index);
+            DataPoint opponentY = turtle.getValue(this.configuration.Opponent, i, this.configuration.OpponentY, index);
             
             if(opponentX != null && opponentX.getValue() != 0 && opponentY.getValue() != 0) {
               Point2D opponentPos = getPosition(opponentX.getValue(), opponentY.getValue());
@@ -527,9 +527,9 @@ public class FieldCanvas extends Pane implements Chart{
         for(int turtleIndex : getAllTurtles()) {
           Turtle turtle  = data.get(turtleIndex);
 
-          DataPoint ballFound = turtle.GetValue(this.configuration.BallFound, 0, this.configuration.BallFoundIndex, index);
-          DataPoint ballX = turtle.GetValue(this.configuration.Ball, 0, this.configuration.BallX, index);
-          DataPoint ballY = turtle.GetValue(this.configuration.Ball, 0, this.configuration.BallY, index);
+          DataPoint ballFound = turtle.getValue(this.configuration.BallFound, 0, this.configuration.BallFoundIndex, index);
+          DataPoint ballX = turtle.getValue(this.configuration.Ball, 0, this.configuration.BallX, index);
+          DataPoint ballY = turtle.getValue(this.configuration.Ball, 0, this.configuration.BallY, index);
 
           if(ballFound != null&& ballFound.getValue() > 0 && ballX.getValue() != 0 && ballY.getValue() != 0) {
             Point2D ballPos = getPosition(ballX.getValue(), ballY.getValue());
@@ -780,12 +780,12 @@ public class FieldCanvas extends Pane implements Chart{
       for(int selectedTurtle : getHistoryTurtles()) {
         Turtle turtle  = data.get(selectedTurtle);
 
-        Parameter parameter = this.parameterMap.GetParameter(this.configuration.Pose);
+        Parameter parameter = this.parameterMap.getParameter(this.configuration.Pose);
             
         for(int parameterIndex = 0; parameterIndex < parameter.getCount(); parameterIndex++) {
 
-          List<DataPoint> posXValues = turtle.GetValues(this.configuration.Pose, parameterIndex, this.configuration.PoseX, selection.GetMin(), selection.GetMax());
-          List<DataPoint> posYValues = turtle.GetValues(this.configuration.Pose, parameterIndex, this.configuration.PoseY, selection.GetMin(), selection.GetMax());          
+          List<DataPoint> posXValues = turtle.getValues(this.configuration.Pose, parameterIndex, this.configuration.PoseX, selection.getMin(), selection.getMax());
+          List<DataPoint> posYValues = turtle.getValues(this.configuration.Pose, parameterIndex, this.configuration.PoseY, selection.getMin(), selection.getMax());          
           
           List<Point2D> newPath = new ArrayList();
 

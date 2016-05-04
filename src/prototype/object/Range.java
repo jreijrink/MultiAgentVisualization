@@ -14,11 +14,11 @@ public class Range<T extends Number>  {
         return (number.doubleValue() >= low.doubleValue() && number.doubleValue() <= high.doubleValue());
     }
     
-    public T GetMin() {
+    public T getMin() {
       return low;
     }
     
-    public T GetMax() {
+    public T getMax() {
       return high;
     }
     

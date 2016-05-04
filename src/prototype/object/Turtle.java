@@ -24,178 +24,8 @@ public class Turtle {
     createGeneratedParameters();
   }
   
-  private void createGeneratedParameters() {
-    List<GeneratedParameter> parameters = this.parameterMap.GetGeneratedParameters();
-    
-    for(GeneratedParameter parameter : parameters) {
-
-      List<Map<Condition, List<DataPoint>>> preConditions = getConditionMap(parameter.getPreConditions());
-      List<Map<Condition, List<DataPoint>>> postConditionsSuccess = getConditionMap(parameter.getPostConditionsSuccess());
-      List<Map<Condition, List<DataPoint>>> postConditionsFailed = getConditionMap(parameter.getPostConditionsFailed());
-      
-      for(Value value : parameter.getValues()) {
-        try {
-          int valueIndex = this.parameterMap.GetValueIndex(parameter.getName(), 0, value.getName());
-          double[] newDataRow = new double[this.data[0].length];
-          
-          boolean active = false;
-          int activationIndex = 0;
-          int endIndex = 0;
-          int result = 0;
-          boolean finished = false;
-          
-          for(int i = 0; i < newDataRow.length - 1; i++) {
-            
-            if(!active) {
-              boolean anyCombinedSatisfied = false;
-              
-              for(Map<Condition, List<DataPoint>> andMap : preConditions) {
-                boolean combinedSatisfied = (andMap.size() > 0);
-                
-                //AND type
-                for(Condition condition : andMap.keySet()) {
-                  combinedSatisfied = condition.IsSatisfied(parameterMap, andMap.get(condition).get(i)) && combinedSatisfied;
-                }
-                
-                anyCombinedSatisfied = combinedSatisfied || anyCombinedSatisfied;
-              }          
-              
-              if(anyCombinedSatisfied) {
-                active = true;
-                finished = false;
-                activationIndex = i;
-                newDataRow[i] = 1;
-              }         
-              
-            } else {
-              boolean preConditionsFinished = false;
-              
-              //Wait until the preconditions is unsatisfied.
-              for(Map<Condition, List<DataPoint>> andMap : preConditions) {
-                boolean combinedSatisfied = true;
-                
-                //AND type
-                for(Condition condition : andMap.keySet()) {
-                  combinedSatisfied = condition.IsSatisfied(parameterMap, andMap.get(condition).get(i)) && combinedSatisfied;
-                }
-                  
-                preConditionsFinished = !combinedSatisfied || preConditionsFinished;
-              }
-              
-              if(preConditionsFinished || i == newDataRow.length - 2) {
-                boolean success = (postConditionsSuccess.size() == 0); // If no conditions -> success
-                boolean failed = false;
-
-                for(Map<Condition, List<DataPoint>> andMap : postConditionsSuccess) {
-                  boolean combinedSatisfied = (andMap.size() > 0);
-
-                  //AND type
-                  for(Condition condition : andMap.keySet()) {
-                    combinedSatisfied = condition.IsSatisfied(parameterMap, andMap.get(condition).get(i)) && combinedSatisfied;
-                  }
-
-                  success = combinedSatisfied || success;
-                }
-                
-                for(Map<Condition, List<DataPoint>> andMap : postConditionsFailed) {
-                  boolean combinedSatisfied = (andMap.size() > 0);
-
-                  //AND type
-                  for(Condition condition : andMap.keySet()) {
-                    combinedSatisfied = condition.IsSatisfied(parameterMap, andMap.get(condition).get(i)) && combinedSatisfied;
-                  }
-
-                  failed = combinedSatisfied || failed;
-                }
-
-                //Don't end if the post conditions success and failed are both satisfied
-                if((success || failed) && !(success && failed)) {
-                  endIndex = i;
-                  if(success) {
-                    result = 1; //Succes
-                  } else {
-                    result = 2; //Failed
-                  }
-                  finished = true;
-                }
-              }
-            }
-            
-            if(finished) {
-              for(int index = activationIndex; index <= endIndex; index++) {
-                newDataRow[index] = result;
-              }              
-              active = false;
-            }
-          }
-
-          this.data = addElement(this.data, valueIndex, newDataRow);
-        } catch(Exception ex) {
-          ex.printStackTrace();
-        }
-      }
-    }
-  }
-  
-  private List<Map<Condition, List<DataPoint>>> getConditionMap(List<CombinedANDConditions> conditions) {
-    List<Map<Condition, List<DataPoint>>> conditionsMap = new ArrayList();
-    
-    for(CombinedANDConditions Andcondition : conditions) {
-      Map<Condition, List<DataPoint>> andMap = new HashMap();
-      for(Condition condition : Andcondition.getConditions()) {
-        List<DataPoint> datapoints = GetAllValues(condition.GetParameterName(), condition.GetParameterIndex(), condition.GetValueName());
-        andMap.put(condition, datapoints);
-      }
-      conditionsMap.add(andMap);
-    }
-    
-    return conditionsMap;
-  }
-  
-  private double[][] addElement(double[][] a, int index, double[] e) {
-    a  = Arrays.copyOf(a, Math.max(a.length, a.length + (index - a.length) + 1));
-    a[index] = e;
-    return a;
-  }
-  
-  private void applyFilters() {
-    try {
-      this.filterMap = new boolean[this.data[0].length];
-      for(int i = 0; i < this.data[0].length; i++) {
-        this.filterMap[i] = true;
-      }
-      
-      for(Chart chart : filters.keySet()) {
-        if(filters.get(chart).size() > 0) {
-          boolean[] localFilterMap = new boolean[this.data[0].length];
-          for(int i = 0; i < this.data[0].length; i++) {
-            localFilterMap[i] = false;
-          }
-
-          for(Filter filter : filters.get(chart)) {
-            int valueIndex = this.parameterMap.GetValueIndex(filter.ParameterName(), filter.ParameterIndex(), filter.ValueName());
-            double[] dataset = this.data[valueIndex];            
-            dataset = applyDecimalMask(dataset, this.parameterMap.GetParameter(filter.ParameterName()).getValue(filter.ValueName()));
-          
-            for(int i = 0; i < this.data[0].length; i++) {
-              if(filter.SatisfiesFilter(turtleID, dataset[i])) {
-                localFilterMap[i] = true;
-              }
-            }
-          }
-
-          for(int i = 0; i < this.data[0].length; i++) {
-            this.filterMap[i] = this.filterMap[i] && localFilterMap[i];
-          }
-        }
-      }
-    } catch(Exception ex) {
-      ex.printStackTrace();
-    }
-  }
-  
   public void setFilter(Filter newFilter) {
-    Chart chart = newFilter.GetChart();
+    Chart chart = newFilter.getChart();
     if(!filters.containsKey(chart))
       filters.put(chart, new ArrayList());
     filters.get(chart).add(newFilter);
@@ -212,7 +42,7 @@ public class Turtle {
   }
     
   public boolean removeFilter(Filter filter) {
-    Chart chart = filter.GetChart();
+    Chart chart = filter.getChart();
     boolean success = false;
     
     if(filters.containsKey(chart) && filters.get(chart).size() > 0) {
@@ -224,7 +54,7 @@ public class Turtle {
     return success;
   }
   
-  public DataPoint GetValue(String parameterName, int parameterIndex, String valueName, int index) {
+  public DataPoint getValue(String parameterName, int parameterIndex, String valueName, int index) {
     try {
       int startIndex = index;
       int endIndex = index + 1;
@@ -234,7 +64,7 @@ public class Turtle {
         endIndex = this.data[0].length - 1;
       }
       
-      List<DataPoint> values = GetValues(parameterName, parameterIndex, valueName, startIndex, endIndex);
+      List<DataPoint> values = getValues(parameterName, parameterIndex, valueName, startIndex, endIndex);
       if(values.size() > 0) {
         return values.get(0);
       }
@@ -244,19 +74,19 @@ public class Turtle {
       return null;
   }
   
-  public List<DataPoint> GetAllValues(String parameterName, int parameterIndex, String valueName) {
+  public List<DataPoint> getAllValues(String parameterName, int parameterIndex, String valueName) {
     try {
-      return GetValues(parameterName, parameterIndex, valueName, 0, this.data[0].length - 1);
+      return getValues(parameterName, parameterIndex, valueName, 0, this.data[0].length - 1);
     } catch(Exception ex) {
       ex.printStackTrace();
       return new ArrayList();
     }
   }
   
-  public List<DataPoint> GetValues(String parameterName, int parameterIndex, String valueName, int startIndex, int endIndex) {    
+  public List<DataPoint> getValues(String parameterName, int parameterIndex, String valueName, int startIndex, int endIndex) {    
     try {
-      Value value = this.parameterMap.GetParameter(parameterName).getValue(valueName);
-      int valueIndex = this.parameterMap.GetValueIndex(parameterName, parameterIndex, valueName);
+      Value value = this.parameterMap.getParameter(parameterName).getValue(valueName);
+      int valueIndex = this.parameterMap.getValueIndex(parameterName, parameterIndex, valueName);
 
       startIndex = Math.max(startIndex, 0);
       startIndex = Math.min(startIndex, this.data[valueIndex].length - 1);
@@ -338,5 +168,175 @@ public class Turtle {
       }
     }
     return data;
+  }
+
+  private void createGeneratedParameters() {
+    List<GeneratedParameter> parameters = this.parameterMap.getGeneratedParameters();
+    
+    for(GeneratedParameter parameter : parameters) {
+
+      List<Map<Condition, List<DataPoint>>> preConditions = getConditionMap(parameter.getPreConditions());
+      List<Map<Condition, List<DataPoint>>> postConditionsSuccess = getConditionMap(parameter.getPostConditionsSuccess());
+      List<Map<Condition, List<DataPoint>>> postConditionsFailed = getConditionMap(parameter.getPostConditionsFailed());
+      
+      for(Value value : parameter.getValues()) {
+        try {
+          int valueIndex = this.parameterMap.getValueIndex(parameter.getName(), 0, value.getName());
+          double[] newDataRow = new double[this.data[0].length];
+          
+          boolean active = false;
+          int activationIndex = 0;
+          int endIndex = 0;
+          int result = 0;
+          boolean finished = false;
+          
+          for(int i = 0; i < newDataRow.length - 1; i++) {
+            
+            if(!active) {
+              boolean anyCombinedSatisfied = false;
+              
+              for(Map<Condition, List<DataPoint>> andMap : preConditions) {
+                boolean combinedSatisfied = (andMap.size() > 0);
+                
+                //AND type
+                for(Condition condition : andMap.keySet()) {
+                  combinedSatisfied = condition.isSatisfied(parameterMap, andMap.get(condition).get(i)) && combinedSatisfied;
+                }
+                
+                anyCombinedSatisfied = combinedSatisfied || anyCombinedSatisfied;
+              }          
+              
+              if(anyCombinedSatisfied) {
+                active = true;
+                finished = false;
+                activationIndex = i;
+                newDataRow[i] = 1;
+              }         
+              
+            } else {
+              boolean preConditionsFinished = false;
+              
+              //Wait until the preconditions is unsatisfied.
+              for(Map<Condition, List<DataPoint>> andMap : preConditions) {
+                boolean combinedSatisfied = true;
+                
+                //AND type
+                for(Condition condition : andMap.keySet()) {
+                  combinedSatisfied = condition.isSatisfied(parameterMap, andMap.get(condition).get(i)) && combinedSatisfied;
+                }
+                  
+                preConditionsFinished = !combinedSatisfied || preConditionsFinished;
+              }
+              
+              if(preConditionsFinished || i == newDataRow.length - 2) {
+                boolean success = (postConditionsSuccess.size() == 0); // If no conditions -> success
+                boolean failed = false;
+
+                for(Map<Condition, List<DataPoint>> andMap : postConditionsSuccess) {
+                  boolean combinedSatisfied = (andMap.size() > 0);
+
+                  //AND type
+                  for(Condition condition : andMap.keySet()) {
+                    combinedSatisfied = condition.isSatisfied(parameterMap, andMap.get(condition).get(i)) && combinedSatisfied;
+                  }
+
+                  success = combinedSatisfied || success;
+                }
+                
+                for(Map<Condition, List<DataPoint>> andMap : postConditionsFailed) {
+                  boolean combinedSatisfied = (andMap.size() > 0);
+
+                  //AND type
+                  for(Condition condition : andMap.keySet()) {
+                    combinedSatisfied = condition.isSatisfied(parameterMap, andMap.get(condition).get(i)) && combinedSatisfied;
+                  }
+
+                  failed = combinedSatisfied || failed;
+                }
+
+                //Don't end if the post conditions success and failed are both satisfied
+                if((success || failed) && !(success && failed)) {
+                  endIndex = i;
+                  if(success) {
+                    result = 1; //Succes
+                  } else {
+                    result = 2; //Failed
+                  }
+                  finished = true;
+                }
+              }
+            }
+            
+            if(finished) {
+              for(int index = activationIndex; index <= endIndex; index++) {
+                newDataRow[index] = result;
+              }              
+              active = false;
+            }
+          }
+
+          this.data = addElement(this.data, valueIndex, newDataRow);
+        } catch(Exception ex) {
+          ex.printStackTrace();
+        }
+      }
+    }
+  }
+  
+  private List<Map<Condition, List<DataPoint>>> getConditionMap(List<CombinedANDConditions> conditions) {
+    List<Map<Condition, List<DataPoint>>> conditionsMap = new ArrayList();
+    
+    for(CombinedANDConditions Andcondition : conditions) {
+      Map<Condition, List<DataPoint>> andMap = new HashMap();
+      for(Condition condition : Andcondition.getConditions()) {
+        List<DataPoint> datapoints = getAllValues(condition.getParameterName(), condition.getParameterIndex(), condition.getValueName());
+        andMap.put(condition, datapoints);
+      }
+      conditionsMap.add(andMap);
+    }
+    
+    return conditionsMap;
+  }
+  
+  private double[][] addElement(double[][] a, int index, double[] e) {
+    a  = Arrays.copyOf(a, Math.max(a.length, a.length + (index - a.length) + 1));
+    a[index] = e;
+    return a;
+  }
+  
+  private void applyFilters() {
+    try {
+      this.filterMap = new boolean[this.data[0].length];
+      for(int i = 0; i < this.data[0].length; i++) {
+        this.filterMap[i] = true;
+      }
+      
+      for(Chart chart : filters.keySet()) {
+        if(filters.get(chart).size() > 0) {
+          boolean[] localFilterMap = new boolean[this.data[0].length];
+          for(int i = 0; i < this.data[0].length; i++) {
+            localFilterMap[i] = false;
+          }
+
+          for(Filter filter : filters.get(chart)) {
+            int valueIndex = this.parameterMap.getValueIndex(filter.parameterName(), filter.parameterIndex(), filter.valueName());
+            double[] dataset = this.data[valueIndex];            
+            dataset = applyDecimalMask(dataset, this.parameterMap.getParameter(filter.parameterName()).getValue(filter.valueName()));
+          
+            for(int i = 0; i < this.data[0].length; i++) {
+              if(filter.satisfiesFilter(turtleID, dataset[i])) {
+                localFilterMap[i] = true;
+              }
+            }
+          }
+
+          for(int i = 0; i < this.data[0].length; i++) {
+            this.filterMap[i] = this.filterMap[i] && localFilterMap[i];
+          }
+        }
+      }
+    } catch(Exception ex) {
+      ex.printStackTrace();
+    }
   }
 }

@@ -123,8 +123,8 @@ public class XYBaseChart implements Chart {
     this.selectedEndIndex = selectionEnd;
     this.forward = forward;
     
-    if(this.parameterMap.GetAllParameters().size() > 0) {
-    Parameter firstParameter = this.parameterMap.GetAllParameters().get(0);
+    if(this.parameterMap.getAllParameters().size() > 0) {
+    Parameter firstParameter = this.parameterMap.getAllParameters().get(0);
       this.parameter = firstParameter.getName();
       if(firstParameter.getValues().size() > 0) {
         this.parameterValue = firstParameter.getValues().get(0).getName();
@@ -242,12 +242,6 @@ public class XYBaseChart implements Chart {
     setDockTitle();
   }
   
-  private void setDockTitle() {
-    if(this.dockNode != null) {
-      this.dockNode.setTitle(String.format("%s - %s[%d] (%s) [%d - %d]", getName(), this.parameter, this.parameterIndex, this.parameterValue, this.selectedStartIndex, this.selectedEndIndex));
-    }
-  }
-  
   @Override
   public void showParameterDialog() {
     GridPane grid = new GridPane();
@@ -270,7 +264,7 @@ public class XYBaseChart implements Chart {
     ChoiceBox<Integer> indexChoiceBox = new ChoiceBox();
     ChoiceBox<String> valueChoiceBox = new ChoiceBox();
 
-    List<Parameter> choices = parameterMap.GetAllParameters();
+    List<Parameter> choices = parameterMap.getAllParameters();
     ObservableList<String> options = FXCollections.observableArrayList();
     for(Parameter choise : choices) {
       options.add(choise.getName());
@@ -280,7 +274,7 @@ public class XYBaseChart implements Chart {
     parameterChoiceBox.setItems(options);
     if(options.contains(parameter)) {
       parameterChoiceBox.getSelectionModel().select(parameter);
-      Parameter parameter = parameterMap.GetParameter(this.parameter);
+      Parameter parameter = parameterMap.getParameter(this.parameter);
       
       int count = parameter.getCount();
       ObservableList<Integer> indexOptions = FXCollections.observableArrayList();
@@ -306,7 +300,7 @@ public class XYBaseChart implements Chart {
     parameterChoiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
       @Override
       public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-        Parameter parameter = parameterMap.GetParameter(newValue.toString());
+        Parameter parameter = parameterMap.getParameter(newValue.toString());
         
         int count = parameter.getCount();
         ObservableList<Integer> indexOptions = FXCollections.observableArrayList();
@@ -373,6 +367,12 @@ public class XYBaseChart implements Chart {
     }
   }
     
+  private void setDockTitle() {
+    if(this.dockNode != null) {
+      this.dockNode.setTitle(String.format("%s - %s[%d] (%s) [%d - %d]", getName(), this.parameter, this.parameterIndex, this.parameterValue, this.selectedStartIndex, this.selectedEndIndex));
+    }
+  }
+  
   private void initRootPaneListeners() {
 
     resizeTimer = new Timer();
@@ -499,7 +499,7 @@ public class XYBaseChart implements Chart {
       double min = Double.MAX_VALUE;
       double max = Double.MIN_VALUE;
       for(Turtle turlte : data) {
-        for(DataPoint value : turlte.GetAllValues(parameter, parameterIndex, parameterValue)) {
+        for(DataPoint value : turlte.getAllValues(parameter, parameterIndex, parameterValue)) {
           if(!value.outOfRange()) {
             min = Math.min(value.getValue(), min);
             max = Math.max(value.getValue(), max);
@@ -935,7 +935,7 @@ public class XYBaseChart implements Chart {
       
       for (int i : selectedTurtles) {
         Turtle turtle = data.get(i);
-        List<DataPoint> values = turtle.GetAllValues(parameter, parameterIndex, parameterValue);
+        List<DataPoint> values = turtle.getAllValues(parameter, parameterIndex, parameterValue);
         timeframes = values.size();
         before += values.size();
         datapoints.get(i).addAll(values);
@@ -992,7 +992,7 @@ public class XYBaseChart implements Chart {
     if(data.size() > 0) {  
       for(int turtleIndex : selectedTurtles) {
         Turtle turtle = data.get(turtleIndex);
-        List<DataPoint> data = turtle.GetAllValues(parameter, parameterIndex, parameterValue);
+        List<DataPoint> data = turtle.getAllValues(parameter, parameterIndex, parameterValue);
 
         NumberAxis yAxis = (NumberAxis) XYChart.getYAxis();
         NumberAxis xAxis = (NumberAxis) XYChart.getXAxis();

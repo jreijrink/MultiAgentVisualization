@@ -373,7 +373,7 @@ public class Main extends Application {
 
           FXMLConditionsController controller = loader.getController();
           controller.setDialogStage(dialogStage);
-          controller.DisableSelection();
+          controller.disableSelection();
 
           Scene dialogScene = new Scene(page);
           dialogStage.setScene(dialogScene);
@@ -381,7 +381,7 @@ public class Main extends Application {
           dialogStage.setResizable(false);
           dialogStage.showAndWait();
           
-          if(controller.HasChanged())
+          if(controller.hasChanged())
             loadData(stage, scene);   
         } catch (IOException e) {
           e.printStackTrace();
@@ -774,8 +774,8 @@ public class Main extends Application {
   
   private void createLayout(Scene scene, LayoutChart root, SortedMap<LayoutChart, SortedMap> children, DockNode sibling) {
     
-    Chart newChart = root.GetChart(scene, new ArrayList());    
-    DockPos position = root.GetPosition();
+    Chart newChart = root.getChart(scene, new ArrayList());    
+    DockPos position = root.getPosition();
     
     DockNode newNode = null;
     if(newChart != null)

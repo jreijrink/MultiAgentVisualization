@@ -10,19 +10,19 @@ public class CombinedANDConditions {
   public CombinedANDConditions(Condition... initConditions) {
     this.conditionIDs = new ArrayList();
     for(Condition condition : initConditions) {
-      this.conditionIDs.add(condition.GetID());
+      this.conditionIDs.add(condition.getID());
     }
   }
   
   public void setConditions(List<Condition> conditions) {
     this.conditionIDs = new ArrayList();
     for(Condition condition : conditions) {
-      this.conditionIDs.add(condition.GetID());
+      this.conditionIDs.add(condition.getID());
     }
   }
   
   public void addCondition(Condition condition) {
-    this.conditionIDs.add(condition.GetID());
+    this.conditionIDs.add(condition.getID());
   }
   
   public void addCondition(int conditionId) {
@@ -35,7 +35,7 @@ public class CombinedANDConditions {
     
     for(Condition condition : allConditions) {
       for(int conditionID : conditionIDs) {
-        if(conditionID == condition.GetID()) {
+        if(conditionID == condition.getID()) {
           conditions.add(condition);
         }
       }
@@ -63,8 +63,8 @@ public class CombinedANDConditions {
       
       int conditionID = conditionIDs.get(i);
       for(Condition condition : conditions) {
-        if(conditionID == condition.GetID()) {
-          sb.append(condition.GetName());
+        if(conditionID == condition.getID()) {
+          sb.append(condition.getName());
 
           if(i < conditionIDs.size() - 1)
             sb.append(" AND ");

@@ -14,7 +14,7 @@ public class ParameterMap {
     this.generated = DataGeneration.loadGenerated();
   }
   
-  public boolean ContainsParameter(String parameterName) {
+  public boolean containsParameter(String parameterName) {
     for(Parameter parameter : this.parameters) {
       if(parameter.getName().equals(parameterName))
         return true;
@@ -26,7 +26,7 @@ public class ParameterMap {
     return false;
   }
   
-  public boolean ParameterContainsValues(String parameterName, String valueName) {
+  public boolean parameterContainsValues(String parameterName, String valueName) {
     for(Parameter parameter : this.parameters) {
       if(parameter.getName().equals(parameterName)) {
         for(Value value : parameter.getValuesCopy()) {
@@ -38,7 +38,7 @@ public class ParameterMap {
     return false;
   }
   
-  public Parameter GetParameter(String parameterName) {
+  public Parameter getParameter(String parameterName) {
     for(Parameter parameter : this.parameters) {
       if(parameter.getName().equals(parameterName))
         return parameter;
@@ -50,15 +50,15 @@ public class ParameterMap {
     return null;
   }
   
-  public List<GeneratedParameter> GetGeneratedParameters() {
+  public List<GeneratedParameter> getGeneratedParameters() {
     return this.generated;
   }
   
-  public List<Parameter> GetMappedParameters() {
+  public List<Parameter> getMappedParameters() {
     return this.parameters;
   }
   
-  public List<Parameter> GetAllParameters() {
+  public List<Parameter> getAllParameters() {
     List<Parameter> combined = new ArrayList<Parameter>(this.parameters);
     for(GeneratedParameter parameter : this.generated) {
      combined.add(parameter);
@@ -66,7 +66,7 @@ public class ParameterMap {
     return combined;
   }
   
-  public List<Parameter> GetParametersOfType(Type type) {
+  public List<Parameter> getParametersOfType(Type type) {
     List<Parameter> typeParameters = new ArrayList();
     for(Parameter parameter : this.parameters) {
       if(parameter.getType() == type) {
@@ -82,7 +82,7 @@ public class ParameterMap {
     return typeParameters;
   }
   
-  public List<Value> GetParametersValues(String parameterName) {
+  public List<Value> getParametersValues(String parameterName) {
     for(Parameter parameter : this.parameters) {
       if(parameter.getName().equals(parameterName)) {
         return parameter.getValuesCopy();
@@ -96,12 +96,12 @@ public class ParameterMap {
     return null;
   }
   
-  public int GetValueIndex(String parameterName, int parameterIndex, String valueName) throws Exception {
-    if(!ContainsParameter(parameterName))
+  public int getValueIndex(String parameterName, int parameterIndex, String valueName) throws Exception {
+    if(!containsParameter(parameterName))
       throw new Exception("Parameter does not exist");
-    if(!GetParameter(parameterName).containsValue(valueName))
+    if(!getParameter(parameterName).containsValue(valueName))
       throw new Exception("Value does not exist");
-    if(GetParameter(parameterName).getCount() <= parameterIndex)
+    if(getParameter(parameterName).getCount() <= parameterIndex)
       throw new Exception("Parameter index does not exist");
     
     int index = 0;
@@ -148,7 +148,7 @@ public class ParameterMap {
     return index;
   }
   
-  public int GetMappingSize() {
+  public int getMappingSize() {
     int size = 0;    
     for(Parameter parameter : this.parameters) {
       size += parameter.getSize();

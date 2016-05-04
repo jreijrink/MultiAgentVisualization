@@ -3,7 +3,6 @@ package prototype.object;
 import java.util.ArrayList;
 import java.util.List;
 import javafx.geometry.Point2D;
-import javafx.scene.shape.Rectangle;
 import prototype.settings.Configuration;
 
 public class CombinedBall {

@@ -38,70 +38,70 @@ public class Condition {
     this((int)new Date().getTime(), "", "", 0, "", Equation.IS);    
   }
   
-  public int GetID() {
+  public int getID() {
     return this.id;
   }
   
-  public String GetName() {
+  public String getName() {
     return this.name;
   }
   
-  public void SetName(String name) {
+  public void setName(String name) {
     this.name = name;
   }
   
-  public String GetParameterName() {
+  public String getParameterName() {
     return this.parameterName;
   }
   
-  public void SetParameterName(String parameterName) {
+  public void setParameterName(String parameterName) {
     this.parameterName = parameterName;
   }
   
-  public int GetParameterIndex() {
+  public int getParameterIndex() {
     return this.parameterIndex;
   }
   
-  public void SetParameterIndex(int parameterIndex) {
+  public void setParameterIndex(int parameterIndex) {
     this.parameterIndex = parameterIndex;
   }
   
-  public String GetValueName() {
+  public String getValueName() {
     return this.valueName;
   }
   
-  public void SetValueName(String valueName) {
+  public void setValueName(String valueName) {
     this.valueName = valueName;
   }
   
-  public Equation GetEquationType() {
+  public Equation getEquationType() {
     return this.equation;
   }
   
-  public void SetEquation(Equation equation) {
+  public void setEquation(Equation equation) {
     this.equation = equation;
   }
   
-  public Range GetRange() {
+  public Range getRange() {
     return this.range;
   }
   
-  public void SetRange(Range range) {
+  public void setRange(Range range) {
     this.range = range;
   }
   
-  public List<String> GetValues() {
+  public List<String> getValues() {
     return this.values;
   }
   
-  public void SetValue(List<String> values) {
+  public void setValue(List<String> values) {
     this.values = values;
   }
   
-  public boolean IsSatisfied(ParameterMap parameterMap, DataPoint point) {
-    List<Double> conditionValues = getValues(parameterMap);
+  public boolean isSatisfied(ParameterMap parameterMap, DataPoint point) {
+    List<Double> conditionValues = Condition.this.getValues(parameterMap);
 
-    switch(GetEquationType()) {
+    switch(getEquationType()) {
       case IS:
         if(this.values != null && conditionValues.contains(point.getValue())) {
           return true;
@@ -135,7 +135,7 @@ public class Condition {
     
     if(this.values != null) {
       try {
-        Value value = parameterMap.GetParameter(parameterName).getValue(valueName);
+        Value value = parameterMap.getParameter(parameterName).getValue(valueName);
 
         for(String categoryValue : this.values) {
           results.add((double)value.getCategoryValue(categoryValue));

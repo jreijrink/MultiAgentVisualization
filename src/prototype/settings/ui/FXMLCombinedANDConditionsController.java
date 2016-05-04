@@ -100,7 +100,7 @@ public class FXMLCombinedANDConditionsController implements Initializable {
   }
 
   private void update() {
-    Collections.sort(conditions, (o1, o2) -> o1.GetName().toLowerCase().compareTo(o2.GetName().toLowerCase()));
+    Collections.sort(conditions, (o1, o2) -> o1.getName().toLowerCase().compareTo(o2.getName().toLowerCase()));
     conditionsListView.setItems(conditions);
   }
   

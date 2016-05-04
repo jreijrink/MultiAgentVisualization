@@ -162,22 +162,22 @@ public abstract class DataGeneration {
       
       for(Condition condition : conditions) {
         JSONObject jsonCondition = new JSONObject();
-        jsonCondition.put("id", condition.GetID());
-        jsonCondition.put("name", condition.GetName());
+        jsonCondition.put("id", condition.getID());
+        jsonCondition.put("name", condition.getName());
         
-        jsonCondition.put("parameterName", condition.GetParameterName());
-        jsonCondition.put("parameterIndex", condition.GetParameterIndex());
-        jsonCondition.put("valueName", condition.GetValueName());
+        jsonCondition.put("parameterName", condition.getParameterName());
+        jsonCondition.put("parameterIndex", condition.getParameterIndex());
+        jsonCondition.put("valueName", condition.getValueName());
         
-        jsonCondition.put("equationType", condition.GetEquationType().toString());
+        jsonCondition.put("equationType", condition.getEquationType().toString());
         
-        Range range = condition.GetRange();
+        Range range = condition.getRange();
         if(range != null) {
-          jsonCondition.put("rangeMin", range.GetMin());
-          jsonCondition.put("rangeMax", range.GetMax());          
+          jsonCondition.put("rangeMin", range.getMin());
+          jsonCondition.put("rangeMax", range.getMax());          
         }
         
-        List<String> values = condition.GetValues();
+        List<String> values = condition.getValues();
         if(values != null && values.size() > 0) {
           JSONArray jsonValues = new JSONArray();
           for(String value : values) {
@@ -216,7 +216,7 @@ public abstract class DataGeneration {
 
         for(Condition condition : preCondition.getConditions()) {
           JSONObject jsonCondition = new JSONObject();
-          jsonCondition.put("id", condition.GetID());
+          jsonCondition.put("id", condition.getID());
           jsonConditions.add(jsonCondition);
         }
 

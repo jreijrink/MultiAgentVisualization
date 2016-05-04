@@ -13,12 +13,13 @@ import prototype.object.Turtle;
 import prototype.settings.Configuration;
 
 public class Parser {
+  
   public List<Turtle> parse(String fileName ) throws Exception {
     String name = "replay";
     List<Turtle> turtles = new ArrayList();
     ParameterMap parameterMap = new ParameterMap();
     Configuration configuration = new Configuration();
-    int mappingSize = parameterMap.GetMappingSize();
+    int mappingSize = parameterMap.getMappingSize();
     
     try {
         MatFileReader mfr = new MatFileReader(fileName);
@@ -44,4 +45,5 @@ public class Parser {
       throw ex;
     }
   }
+  
 }

@@ -45,7 +45,7 @@ public class FXMLConditionsController implements Initializable {
   @Override
   public void initialize(URL location, ResourceBundle resources) {
     conditions = FXCollections.observableArrayList(DataGeneration.loadConditions());
-    Collections.sort(conditions, (o1, o2) -> o1.GetName().toLowerCase().compareTo(o2.GetName().toLowerCase()));
+    Collections.sort(conditions, (o1, o2) -> o1.getName().toLowerCase().compareTo(o2.getName().toLowerCase()));
     valueConditions.setItems(conditions);
     
     valueConditions.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
@@ -67,7 +67,7 @@ public class FXMLConditionsController implements Initializable {
     this.dialogStage = dialogStage;
   }
 
-  public void DisableSelection() {
+  public void disableSelection() {
     setSelectedEnabled(false);
   }
   
@@ -115,7 +115,7 @@ public class FXMLConditionsController implements Initializable {
   }
   
   private void update() {
-    Collections.sort(conditions, (o1, o2) -> o1.GetName().toLowerCase().compareTo(o2.GetName().toLowerCase()));
+    Collections.sort(conditions, (o1, o2) -> o1.getName().toLowerCase().compareTo(o2.getName().toLowerCase()));
     valueConditions.setItems(conditions);
     DataGeneration.saveConditions(conditions);
     this.changed = true;
@@ -125,7 +125,7 @@ public class FXMLConditionsController implements Initializable {
     return selectedCondition;
   }
   
-  public boolean HasChanged() {
+  public boolean hasChanged() {
     return this.changed;
   }
   

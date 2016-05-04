@@ -54,7 +54,7 @@ public class Configuration {
     load();
   }
   
-  public void Save() {    
+  public void save() {    
     try
     {
       JSONObject rootObject = new JSONObject();
@@ -111,27 +111,27 @@ public class Configuration {
   public boolean complete() {
     ParameterMap parameterMap = new ParameterMap();
     
-    if(Pose == null || Pose.equals("") || !parameterMap.ContainsParameter(Pose)) return false;
-    if(PoseX == null || PoseX.equals("") || !parameterMap.GetParameter(Pose).containsValue(PoseX)) return false;
-    if(PoseY == null || PoseY.equals("") || !parameterMap.GetParameter(Pose).containsValue(PoseY)) return false;
-    if(PoseRot == null || PoseRot.equals("") || !parameterMap.GetParameter(Pose).containsValue(PoseRot)) return false;  
+    if(Pose == null || Pose.equals("") || !parameterMap.containsParameter(Pose)) return false;
+    if(PoseX == null || PoseX.equals("") || !parameterMap.getParameter(Pose).containsValue(PoseX)) return false;
+    if(PoseY == null || PoseY.equals("") || !parameterMap.getParameter(Pose).containsValue(PoseY)) return false;
+    if(PoseRot == null || PoseRot.equals("") || !parameterMap.getParameter(Pose).containsValue(PoseRot)) return false;  
     
-    if(RobotInField == null || RobotInField.equals("") || !parameterMap.ContainsParameter(RobotInField)) return false;
-    if(RobotInFieldIndex == null || RobotInFieldIndex.equals("") || !parameterMap.GetParameter(RobotInField).containsValue(RobotInFieldIndex)) return false;
+    if(RobotInField == null || RobotInField.equals("") || !parameterMap.containsParameter(RobotInField)) return false;
+    if(RobotInFieldIndex == null || RobotInFieldIndex.equals("") || !parameterMap.getParameter(RobotInField).containsValue(RobotInFieldIndex)) return false;
     
-    if(Opponent == null || Opponent.equals("") || !parameterMap.ContainsParameter(Opponent)) return false;
-    if(OpponentX == null || OpponentX.equals("") || !parameterMap.GetParameter(Opponent).containsValue(OpponentX)) return false;
-    if(OpponentY == null || OpponentY.equals("") || !parameterMap.GetParameter(Opponent).containsValue(OpponentY)) return false;
+    if(Opponent == null || Opponent.equals("") || !parameterMap.containsParameter(Opponent)) return false;
+    if(OpponentX == null || OpponentX.equals("") || !parameterMap.getParameter(Opponent).containsValue(OpponentX)) return false;
+    if(OpponentY == null || OpponentY.equals("") || !parameterMap.getParameter(Opponent).containsValue(OpponentY)) return false;
     
-    if(Opponentlabelnumber == null || Opponentlabelnumber.equals("") || !parameterMap.ContainsParameter(Opponentlabelnumber)) return false;
-    if(OpponentlabelnumberIndex == null || OpponentlabelnumberIndex.equals("") || !parameterMap.GetParameter(Opponentlabelnumber).containsValue(OpponentlabelnumberIndex)) return false;  
+    if(Opponentlabelnumber == null || Opponentlabelnumber.equals("") || !parameterMap.containsParameter(Opponentlabelnumber)) return false;
+    if(OpponentlabelnumberIndex == null || OpponentlabelnumberIndex.equals("") || !parameterMap.getParameter(Opponentlabelnumber).containsValue(OpponentlabelnumberIndex)) return false;  
     
-    if(Ball == null || Ball.equals("") || !parameterMap.ContainsParameter(Ball)) return false;
-    if(BallX == null || BallX.equals("") || !parameterMap.GetParameter(Ball).containsValue(BallX)) return false;
-    if(BallY == null || BallY.equals("") || !parameterMap.GetParameter(Ball).containsValue(BallY)) return false;  
+    if(Ball == null || Ball.equals("") || !parameterMap.containsParameter(Ball)) return false;
+    if(BallX == null || BallX.equals("") || !parameterMap.getParameter(Ball).containsValue(BallX)) return false;
+    if(BallY == null || BallY.equals("") || !parameterMap.getParameter(Ball).containsValue(BallY)) return false;  
     
-    if(BallFound == null || BallFound.equals("") || !parameterMap.ContainsParameter(BallFound)) return false;
-    if(BallFoundIndex == null || BallFoundIndex.equals("") || !parameterMap.GetParameter(BallFound).containsValue(BallFoundIndex)) return false;
+    if(BallFound == null || BallFound.equals("") || !parameterMap.containsParameter(BallFound)) return false;
+    if(BallFoundIndex == null || BallFoundIndex.equals("") || !parameterMap.getParameter(BallFound).containsValue(BallFoundIndex)) return false;
     
     return true;
   }

@@ -121,8 +121,8 @@ public class CategoricalChart implements Chart {
     this.data = data;
     this.liveUpdate = true;
     
-    if(this.parameterMap.GetParametersOfType(Type.Categorical).size() > 0) {
-    Parameter firstParameter = this.parameterMap.GetParametersOfType(Type.Categorical).get(0);
+    if(this.parameterMap.getParametersOfType(Type.Categorical).size() > 0) {
+    Parameter firstParameter = this.parameterMap.getParametersOfType(Type.Categorical).get(0);
       this.parameter = firstParameter.getName();
       if(firstParameter.getValues().size() > 0) {
         this.parameterValue = firstParameter.getValues().get(0).getName();
@@ -230,6 +230,131 @@ public class CategoricalChart implements Chart {
     setDockTitle();
   }
   
+  @Override
+  public void showParameterDialog() {
+    GridPane grid = new GridPane();
+    grid.setHgap(10);
+    grid.setVgap(10);
+    grid.setPadding(new Insets(10, 10, 10, 10));
+    
+    Dialog<Boolean> dialog = new Dialog();
+    dialog.setTitle("Categorical-chart options");
+    dialog.setHeaderText("Choose categorical-chart options");
+    dialog.setContentText("Choose categorical-chart options:");
+
+    dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+    CheckBox liveCheckbox = getCheckbox("Live update", liveUpdate);
+    
+    ListView listView = getTurtleListView(selectedTurtles); 
+    
+    ChoiceBox<String> parameterChoiceBox = new ChoiceBox();
+    ChoiceBox<Integer> indexChoiceBox = new ChoiceBox();
+    ChoiceBox<String> valueChoiceBox = new ChoiceBox();
+
+    List<Parameter> choices = parameterMap.getParametersOfType(Type.Categorical);
+    ObservableList<String> options = FXCollections.observableArrayList();
+    for(Parameter choise : choices) {
+      options.add(choise.getName());
+    }
+    options = options.sorted();
+
+    parameterChoiceBox.setItems(options);
+    if(options.contains(parameter)) {
+      parameterChoiceBox.getSelectionModel().select(parameter);
+      Parameter parameter = parameterMap.getParameter(this.parameter);
+      
+      int count = parameter.getCount();
+      ObservableList<Integer> indexOptions = FXCollections.observableArrayList();
+      for(int index = 0; index < count; index++) {
+        indexOptions.add(index);
+      }      
+      indexChoiceBox.setItems(indexOptions);
+      if(indexOptions.contains(parameterIndex)) {
+        indexChoiceBox.getSelectionModel().select(parameterIndex);
+      }
+      
+      List<Value> values = parameter.getValues();
+      ObservableList<String> valueOptions = FXCollections.observableArrayList();
+      for(Value value : values) {
+        valueOptions.add(value.getName());
+      }
+      valueChoiceBox.setItems(valueOptions);
+      if(valueOptions.contains(parameterValue)) {
+        valueChoiceBox.getSelectionModel().select(parameterValue);
+      }
+    }
+
+    parameterChoiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
+      @Override
+      public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+        Parameter parameter = parameterMap.getParameter(newValue.toString());
+        
+        int count = parameter.getCount();
+        ObservableList<Integer> indexOptions = FXCollections.observableArrayList();
+        for(int index = 0; index < count; index++) {
+          indexOptions.add(index);
+        }      
+        indexChoiceBox.setItems(indexOptions);
+        indexChoiceBox.getSelectionModel().select(0);
+
+        List<Value> values = parameter.getValues();
+        ObservableList<String> valueOptions = FXCollections.observableArrayList();
+        for(Value value : values) {
+          valueOptions.add(value.getName());
+        }
+        valueChoiceBox.setItems(valueOptions);
+        valueChoiceBox.getSelectionModel().select(0);
+      }
+    });
+    
+    grid.add(liveCheckbox, 0, 0);
+    
+    grid.add(new Label("Parameter:"), 0, 1);
+    grid.add(parameterChoiceBox, 0, 2);
+    grid.add(new Label("Index:"), 0, 3);
+    grid.add(indexChoiceBox, 0, 4);
+    grid.add(new Label("Value:"), 0, 5);
+    grid.add(valueChoiceBox, 0, 6);
+
+    grid.add(new Label("Turtles"), 0, 7);
+    grid.add(listView, 0, 8);
+    
+    dialog.getDialogPane().setContent(grid);
+    listView.setPrefHeight(200);
+        
+    dialog.setResultConverter(dialogButton -> {
+      if(dialogButton == ButtonType.OK) {
+        ObservableList<StringValuePair<String, Integer>> selectedItems = listView.getSelectionModel().getSelectedItems();
+        selectedTurtles = new int[selectedItems.size()];
+        for(int i = 0; i < selectedItems.size(); i++) {
+          selectedTurtles[i] = selectedItems.get(i).getValue();
+        }
+        
+        if(parameterChoiceBox.getSelectionModel().getSelectedItem() != null) {
+          clearFilter();
+          
+          parameter = parameterChoiceBox.getSelectionModel().getSelectedItem();
+          parameterIndex = indexChoiceBox.getSelectionModel().getSelectedItem();
+          parameterValue = valueChoiceBox.getSelectionModel().getSelectedItem();
+        }
+        
+        liveUpdate = liveCheckbox.isSelected();
+        
+        setDockTitle();
+
+        return true;
+      }
+      return null;
+    });
+
+    Optional<Boolean> result = dialog.showAndWait();
+
+    if(result.isPresent() && result.get() != null) {
+      initialize();
+    }
+  }
+  
   private void setDockTitle() {
     if(this.dockNode != null) {
       this.dockNode.setTitle(String.format("%s - %s[%d] (%s) [%d - %d]", getName(), this.parameter, this.parameterIndex, this.parameterValue, this.selectedStartIndex, this.selectedEndIndex));
@@ -256,7 +381,7 @@ public class CategoricalChart implements Chart {
     ObservableList<String> categories = FXCollections.observableArrayList();
     
     try {
-      Parameter parameter = this.parameterMap.GetParameter(this.parameter);
+      Parameter parameter = this.parameterMap.getParameter(this.parameter);
       Value value = parameter.getValue(parameterValue);
       for(Category category : value.getCategories()) {
         categories.add(category.getName());
@@ -338,131 +463,6 @@ public class CategoricalChart implements Chart {
       }, 100);
   }
   
-  @Override
-  public void showParameterDialog() {
-    GridPane grid = new GridPane();
-    grid.setHgap(10);
-    grid.setVgap(10);
-    grid.setPadding(new Insets(10, 10, 10, 10));
-    
-    Dialog<Boolean> dialog = new Dialog();
-    dialog.setTitle("Categorical-chart options");
-    dialog.setHeaderText("Choose categorical-chart options");
-    dialog.setContentText("Choose categorical-chart options:");
-
-    dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-    CheckBox liveCheckbox = getCheckbox("Live update", liveUpdate);
-    
-    ListView listView = getTurtleListView(selectedTurtles); 
-    
-    ChoiceBox<String> parameterChoiceBox = new ChoiceBox();
-    ChoiceBox<Integer> indexChoiceBox = new ChoiceBox();
-    ChoiceBox<String> valueChoiceBox = new ChoiceBox();
-
-    List<Parameter> choices = parameterMap.GetParametersOfType(Type.Categorical);
-    ObservableList<String> options = FXCollections.observableArrayList();
-    for(Parameter choise : choices) {
-      options.add(choise.getName());
-    }
-    options = options.sorted();
-
-    parameterChoiceBox.setItems(options);
-    if(options.contains(parameter)) {
-      parameterChoiceBox.getSelectionModel().select(parameter);
-      Parameter parameter = parameterMap.GetParameter(this.parameter);
-      
-      int count = parameter.getCount();
-      ObservableList<Integer> indexOptions = FXCollections.observableArrayList();
-      for(int index = 0; index < count; index++) {
-        indexOptions.add(index);
-      }      
-      indexChoiceBox.setItems(indexOptions);
-      if(indexOptions.contains(parameterIndex)) {
-        indexChoiceBox.getSelectionModel().select(parameterIndex);
-      }
-      
-      List<Value> values = parameter.getValues();
-      ObservableList<String> valueOptions = FXCollections.observableArrayList();
-      for(Value value : values) {
-        valueOptions.add(value.getName());
-      }
-      valueChoiceBox.setItems(valueOptions);
-      if(valueOptions.contains(parameterValue)) {
-        valueChoiceBox.getSelectionModel().select(parameterValue);
-      }
-    }
-
-    parameterChoiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
-      @Override
-      public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-        Parameter parameter = parameterMap.GetParameter(newValue.toString());
-        
-        int count = parameter.getCount();
-        ObservableList<Integer> indexOptions = FXCollections.observableArrayList();
-        for(int index = 0; index < count; index++) {
-          indexOptions.add(index);
-        }      
-        indexChoiceBox.setItems(indexOptions);
-        indexChoiceBox.getSelectionModel().select(0);
-
-        List<Value> values = parameter.getValues();
-        ObservableList<String> valueOptions = FXCollections.observableArrayList();
-        for(Value value : values) {
-          valueOptions.add(value.getName());
-        }
-        valueChoiceBox.setItems(valueOptions);
-        valueChoiceBox.getSelectionModel().select(0);
-      }
-    });
-    
-    grid.add(liveCheckbox, 0, 0);
-    
-    grid.add(new Label("Parameter:"), 0, 1);
-    grid.add(parameterChoiceBox, 0, 2);
-    grid.add(new Label("Index:"), 0, 3);
-    grid.add(indexChoiceBox, 0, 4);
-    grid.add(new Label("Value:"), 0, 5);
-    grid.add(valueChoiceBox, 0, 6);
-
-    grid.add(new Label("Turtles"), 0, 7);
-    grid.add(listView, 0, 8);
-    
-    dialog.getDialogPane().setContent(grid);
-    listView.setPrefHeight(200);
-        
-    dialog.setResultConverter(dialogButton -> {
-      if(dialogButton == ButtonType.OK) {
-        ObservableList<StringValuePair<String, Integer>> selectedItems = listView.getSelectionModel().getSelectedItems();
-        selectedTurtles = new int[selectedItems.size()];
-        for(int i = 0; i < selectedItems.size(); i++) {
-          selectedTurtles[i] = selectedItems.get(i).getValue();
-        }
-        
-        if(parameterChoiceBox.getSelectionModel().getSelectedItem() != null) {
-          clearFilter();
-          
-          parameter = parameterChoiceBox.getSelectionModel().getSelectedItem();
-          parameterIndex = indexChoiceBox.getSelectionModel().getSelectedItem();
-          parameterValue = valueChoiceBox.getSelectionModel().getSelectedItem();
-        }
-        
-        liveUpdate = liveCheckbox.isSelected();
-        
-        setDockTitle();
-
-        return true;
-      }
-      return null;
-    });
-
-    Optional<Boolean> result = dialog.showAndWait();
-
-    if(result.isPresent() && result.get() != null) {
-      initialize();
-    }
-  }
-  
   private Collection getData() {
     List<XYChart.Series> seriesList = new ArrayList<>();
     
@@ -488,7 +488,7 @@ public class CategoricalChart implements Chart {
 
       double height = getRowHeigt();
             
-      Parameter parameter = this.parameterMap.GetParameter(this.parameter);
+      Parameter parameter = this.parameterMap.getParameter(this.parameter);
       Value value = parameter.getValue(parameterValue);
       
       for(Category category : value.getCategories()) {        
@@ -521,7 +521,7 @@ public class CategoricalChart implements Chart {
         double currentPosition = xAxis.getDisplayPosition(0);
         
         Turtle turtle = data.get(turtleIndex);
-        List<DataPoint> categoricalValues = turtle.GetAllValues(this.parameter, parameterIndex, parameterValue);
+        List<DataPoint> categoricalValues = turtle.getAllValues(this.parameter, parameterIndex, parameterValue);
         
         for(int timeFrame = 0; timeFrame < categoricalValues.size(); timeFrame++) {
           DataPoint category = categoricalValues.get(timeFrame);
@@ -788,7 +788,7 @@ public class CategoricalChart implements Chart {
     
   private Filter filter(List<String> filterCategories) {
     if(filterCategories.size() > 0) {
-      Parameter selectedParameter = this.parameterMap.GetParameter(this.parameter);
+      Parameter selectedParameter = this.parameterMap.getParameter(this.parameter);
       Value value = selectedParameter.getValue(parameterValue);
 
       List<Double> filterValues = new ArrayList();

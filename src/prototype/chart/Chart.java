@@ -25,16 +25,19 @@ public interface Chart extends EventListener {
   public void updateData(List<Turtle> data);
   
   public String getName();  
+  
   public Node getNode();
   
   public Chart getCopy();
   
   public void update();
+  
   public void clearFilter();
   
   public void setDockNode(DockNode dockNode);
   
   public void addSelectionEventListener(SelectionEventListener listener);
+  
   public void selectFrames(int startIndex, int endIndex, boolean drag, boolean forward);
     
   public void showParameterDialog();
