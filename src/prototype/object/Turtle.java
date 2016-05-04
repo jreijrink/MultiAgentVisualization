@@ -78,12 +78,12 @@ public class Turtle {
                 for(Condition condition : andMap.keySet()) {
                   combinedSatisfied = condition.IsSatisfied(parameterMap, andMap.get(condition).get(i)) && combinedSatisfied;
                 }
-                
+                  
                 preConditionsFinished = !combinedSatisfied || preConditionsFinished;
               }
-                            
-              if(preConditionsFinished || i == newDataRow.length - 1) {
-                boolean success = true; // If no conditions -> success
+              
+              if(preConditionsFinished || i == newDataRow.length - 2) {
+                boolean success = (postConditionsSuccess.size() == 0); // If no conditions -> success
                 boolean failed = false;
 
                 for(Map<Condition, List<DataPoint>> andMap : postConditionsSuccess) {

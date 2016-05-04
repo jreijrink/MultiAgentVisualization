@@ -358,6 +358,38 @@ public class Main extends Application {
     });
     settingsMenu.getItems().add(configurationMenu);
     
+    MenuItem conditionsMenu = new MenuItem("Conditions");
+    conditionsMenu.setAccelerator(new KeyCodeCombination(KeyCode.D, KeyCombination.CONTROL_DOWN));
+    conditionsMenu.setOnAction(new EventHandler() {
+      @Override
+      public void handle(Event t) {
+        try {
+          FXMLLoader loader = new FXMLLoader(FXMLConditionsController.class.getResource("FXMLConditions.fxml"));
+          AnchorPane page = (AnchorPane) loader.load();
+          Stage dialogStage = new Stage();
+          dialogStage.setTitle("Conditions");
+          dialogStage.initModality(Modality.WINDOW_MODAL);
+          dialogStage.initOwner(stage);
+
+          FXMLConditionsController controller = loader.getController();
+          controller.setDialogStage(dialogStage);
+          controller.DisableSelection();
+
+          Scene dialogScene = new Scene(page);
+          dialogStage.setScene(dialogScene);
+
+          dialogStage.setResizable(false);
+          dialogStage.showAndWait();
+          
+          if(controller.HasChanged())
+            loadData(stage, scene);   
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+    });
+    settingsMenu.getItems().add(conditionsMenu);
+    
     MenuItem generateMenu = new MenuItem("Generate Parameters");
     generateMenu.setAccelerator(new KeyCodeCombination(KeyCode.G, KeyCombination.CONTROL_DOWN));
     generateMenu.setOnAction(new EventHandler() {
@@ -380,6 +412,8 @@ public class Main extends Application {
           dialogStage.setResizable(false);
           dialogStage.showAndWait();
           
+          if(controller.hasChanged())
+            loadData(stage, scene);          
         } catch (IOException e) {
           e.printStackTrace();
         }

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.collections.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane id="AnchorPane" prefHeight="479.0" prefWidth="500.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="prototype.settings.ui.FXMLGeneratedParameterController">
+  <children>
+        <Label layoutX="14.0" layoutY="17.0" text="Name" />
+    <TextField fx:id="generatedName" layoutX="64.0" layoutY="14.0" prefWidth="378.0" />
+    <Label layoutX="14.0" layoutY="53.0" text="Pre-conditions (OR)" />
+    <ListView id="preConditionsListView" fx:id="preConditionsListView" prefHeight="96.0" prefWidth="428.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="58.0" AnchorPane.topAnchor="76.0" />
+    <Button id="addGenerated" fx:id="addPreCondition" defaultButton="true" minWidth="30.0" onAction="#addPreCondition" prefHeight="30.0" prefWidth="30.0" text="+" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="76.0">
+      <font>
+        <Font size="11.0" fx:id="x1" />
+      </font>
+    </Button>
+    <Button id="editGenerated" fx:id="editPreCondition" disable="${ !controller.preConditionSelected }" minWidth="30.0" onAction="#editPreCondition" prefHeight="30.0" prefWidth="30.0" text="✎" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="109.0">
+      <font>
+        <Font size="10.0" fx:id="x2" />
+      </font>
+    </Button>
+    <Button id="deleteGenerated" fx:id="deletePreCondition" disable="${ !controller.preConditionSelected }" minWidth="30.0" mnemonicParsing="false" onAction="#deletePreCondition" prefHeight="30.0" prefWidth="30.0" text="x" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="142.0" />
+    <Label layoutX="14.0" layoutY="182.0" text="Post-conditions Success (OR)" />
+    <ListView id="postConditionsSuccessListView" fx:id="postConditionsSuccessListView" layoutX="14.0" layoutY="205.0" prefHeight="96.0" prefWidth="428.0" />
+    <Button id="addGenerated" fx:id="addPostConditionSuccess" defaultButton="true" font="$x1" layoutX="456.0" layoutY="205.0" minWidth="30.0" onAction="#addPostConditionSuccess" prefHeight="30.0" prefWidth="30.0" text="+" />
+    <Button id="editGenerated" fx:id="editPostConditionSuccess" disable="${ !controller.postConditionSuccessSelected }" font="$x2" layoutX="456.0" layoutY="238.0" minWidth="30.0" onAction="#editPostConditionSuccess" prefHeight="30.0" prefWidth="30.0" text="✎" />
+    <Button id="deleteGenerated" fx:id="deletePostConditionSuccess" disable="${ !controller.postConditionSuccessSelected }" layoutX="456.0" layoutY="271.0" minWidth="30.0" mnemonicParsing="false" onAction="#deletePostConditionSuccess" prefHeight="30.0" prefWidth="30.0" text="x" />
+    <Label layoutX="14.0" layoutY="313.0" text="Post-conditions Failed (OR)" />
+    <ListView id="postConditionsFailedListView" fx:id="postConditionsFailedListView" layoutX="14.0" layoutY="336.0" prefHeight="96.0" prefWidth="428.0" />
+    <Button id="addGenerated" fx:id="addPostConditionFailed" defaultButton="true" font="$x1" layoutX="456.0" layoutY="336.0" minWidth="30.0" onAction="#addPostConditionFailed" prefHeight="30.0" prefWidth="30.0" text="+" />
+    <Button id="editGenerated" fx:id="editPostConditionFailed" disable="${ !controller.postConditionFailedSelected }" font="$x2" layoutX="456.0" layoutY="369.0" minWidth="30.0" onAction="#editPostConditionFailed" prefHeight="30.0" prefWidth="30.0" text="✎" />
+    <Button id="deleteGenerated" fx:id="deletePostConditionFailed" disable="${ !controller.postConditionFailedSelected }" layoutX="456.0" layoutY="402.0" minWidth="30.0" mnemonicParsing="false" onAction="#deletePostConditionFailed" prefHeight="30.0" prefWidth="30.0" text="x" />
+    <Button fx:id="saveGenerated" defaultButton="true" mnemonicParsing="false" onAction="#saveGeneratedAction" text="Save" AnchorPane.leftAnchor="388.0" AnchorPane.topAnchor="444.0" />
+    <Button fx:id="cancelGenerated" cancelButton="true" mnemonicParsing="false" onAction="#cancelGeneratedAction" text="Cancel" AnchorPane.leftAnchor="316.0" AnchorPane.topAnchor="444.0" />
+  </children>
+</AnchorPane>

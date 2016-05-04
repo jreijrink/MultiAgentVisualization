@@ -1,0 +1,241 @@
+{
+  "generated": [
+    {
+      "name": "*Ball loss",
+      "post-conditions-succes": [
+        {
+          "and-conditions": [
+            {
+              "id": 2
+            },
+            {
+              "id": 5
+            },
+            {
+              "id": 6
+            }
+          ]
+        }
+      ],
+      "pre-conditions": [
+        {
+          "and-conditions": [
+            {
+              "id": 4
+            }
+          ]
+        }
+      ],
+      "post-conditions-failed": [
+        {
+          "and-conditions": [
+            {
+              "id": 3
+            }
+          ]
+        },
+        {
+          "and-conditions": [
+            {
+              "id": 9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "*Goal",
+      "post-conditions-succes": [
+        {
+          "and-conditions": [
+            {
+              "id": 7
+            }
+          ]
+        }
+      ],
+      "pre-conditions": [
+        {
+          "and-conditions": [
+            {
+              "id": 4
+            },
+            {
+              "id": 11
+            }
+          ]
+        }
+      ],
+      "post-conditions-failed": [
+        {
+          "and-conditions": [
+            {
+              "id": 8
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "*Illegal Move (has ball)",
+      "post-conditions-succes": [],
+      "pre-conditions": [
+        {
+          "and-conditions": [
+            {
+              "id": 4
+            },
+            {
+              "id": 14
+            }
+          ]
+        }
+      ],
+      "post-conditions-failed": []
+    },
+    {
+      "name": "*Illegal SkillID (no ball)",
+      "post-conditions-succes": [],
+      "pre-conditions": [
+        {
+          "and-conditions": [
+            {
+              "id": 5
+            },
+            {
+              "id": 12
+            }
+          ]
+        }
+      ],
+      "post-conditions-failed": []
+    },
+    {
+      "name": "*Intercept",
+      "post-conditions-succes": [
+        {
+          "and-conditions": [
+            {
+              "id": 4
+            }
+          ]
+        }
+      ],
+      "pre-conditions": [
+        {
+          "and-conditions": [
+            {
+              "id": 13
+            }
+          ]
+        }
+      ],
+      "post-conditions-failed": [
+        {
+          "and-conditions": [
+            {
+              "id": 6
+            }
+          ]
+        },
+        {
+          "and-conditions": [
+            {
+              "id": 9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "*Pass",
+      "post-conditions-succes": [
+        {
+          "and-conditions": [
+            {
+              "id": 3
+            },
+            {
+              "id": 5
+            }
+          ]
+        }
+      ],
+      "pre-conditions": [
+        {
+          "and-conditions": [
+            {
+              "id": 4
+            },
+            {
+              "id": 10
+            }
+          ]
+        }
+      ],
+      "post-conditions-failed": [
+        {
+          "and-conditions": [
+            {
+              "id": 4
+            }
+          ]
+        },
+        {
+          "and-conditions": [
+            {
+              "id": 6
+            }
+          ]
+        },
+        {
+          "and-conditions": [
+            {
+              "id": 9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "*Shield",
+      "post-conditions-succes": [
+        {
+          "and-conditions": [
+            {
+              "id": 4
+            }
+          ]
+        }
+      ],
+      "pre-conditions": [
+        {
+          "and-conditions": [
+            {
+              "id": 4
+            },
+            {
+              "id": 15
+            }
+          ]
+        }
+      ],
+      "post-conditions-failed": [
+        {
+          "and-conditions": [
+            {
+              "id": 6
+            }
+          ]
+        },
+        {
+          "and-conditions": [
+            {
+              "id": 9
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

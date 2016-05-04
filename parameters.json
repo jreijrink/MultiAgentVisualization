@@ -476,7 +476,7 @@
       "values": [
         {
           "unit": "volt",
-          "min": -50,
+          "min": 0,
           "max": 150,
           "name": "battery-voltage",
           "index": 0,

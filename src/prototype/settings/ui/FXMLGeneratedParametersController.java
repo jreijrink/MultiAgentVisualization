@@ -14,6 +14,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Modality;
@@ -62,7 +64,7 @@ public class FXMLGeneratedParametersController implements Initializable {
 
   @FXML
   private void addGeneratedAction() {
-    GeneratedParameter selectedGenerated = new GeneratedParameter();
+    GeneratedParameter selectedGenerated = new GeneratedParameter("");
     if(showGeneratedParameterDialog(selectedGenerated)) {
       generated.add(selectedGenerated);
       update();
@@ -81,8 +83,14 @@ public class FXMLGeneratedParametersController implements Initializable {
   @FXML
   private void deleteGeneratedAction() {
     if(selectedGenerated != null) {
-      generated.remove(selectedGenerated);
-      update();
+      Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+      alert.setTitle("Confirmation Dialog");
+      alert.setHeaderText("Please confirm");
+      alert.setContentText("Sure you want to delete?");
+      if (alert.showAndWait().get() == ButtonType.OK) {
+        generated.remove(selectedGenerated);
+        update();
+      }
     }
   }
   
@@ -99,7 +107,7 @@ public class FXMLGeneratedParametersController implements Initializable {
   
   private boolean showGeneratedParameterDialog(GeneratedParameter selectedGenerated) {
     try {
-      FXMLLoader loader = new FXMLLoader(FXMLConditionController.class.getResource("FXMLCondition.fxml"));
+      FXMLLoader loader = new FXMLLoader(FXMLGeneratedParameterController.class.getResource("FXMLGeneratedParameter.fxml"));
       AnchorPane page = (AnchorPane) loader.load();
       Stage dialogStage = new Stage();
       dialogStage.setTitle("Generate Parameter");
@@ -110,9 +118,9 @@ public class FXMLGeneratedParametersController implements Initializable {
 
       dialogStage.setResizable(false);
 
-      FXMLConditionController controller = loader.getController();
+      FXMLGeneratedParameterController controller = loader.getController();
       controller.setDialogStage(dialogStage);
-      //controller.setGeneratedParameter(this.generated, selectedGenerated);
+      controller.setGeneratedParameter(this.generated, selectedGenerated);
 
       dialogStage.showAndWait();
 

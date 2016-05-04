@@ -9,17 +9,13 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import prototype.object.Category;
 import prototype.object.CombinedANDConditions;
-import prototype.object.Type;
-import prototype.object.Value;
 import prototype.object.Condition;
 import prototype.object.Equation;
 import prototype.object.GeneratedParameter;
@@ -28,89 +24,78 @@ import prototype.object.Range;
 public abstract class DataGeneration {
   
   public static List<GeneratedParameter> loadGenerated() {
-    List<GeneratedParameter> result = new ArrayList();
+    JSONParser parser = new JSONParser();
+    List<GeneratedParameter> generated = new ArrayList();
     
-    List<Category> categories = new ArrayList();
-    categories.add(new Category(1, "Success"));
-    categories.add(new Category(2, "Failed"));
-    
-    List<Value> values = new ArrayList();
-    values.add(new Value("result", 0, "", "", false, 0, 0, categories));
-    
-    Condition opponentWithBallCondition = new Condition(1, "Opponnant has ball", "Opponent with ball", 0, "opponent-with-ball", Equation.IS_NOT, Arrays.asList("None"));
-    Condition skillIDInterceptCondition = new Condition(2, "skillID Intercept", "Skill ID", 0, "skill ID", Equation.IS, Arrays.asList("Intercept"));
-    Condition skillIDShieldCondition = new Condition(3, "skillID Shield", "Skill ID", 0, "skill ID", Equation.IS, Arrays.asList("Shield"));
-    Condition skillIDSMoveCondition = new Condition(4, "skillID Move", "Skill ID", 0, "skill ID", Equation.IS, Arrays.asList("Move"));
-    Condition skillIDBallCondition = new Condition(5, "skillID Ball", "Skill ID", 0, "skill ID", Equation.IS, Arrays.asList("Shield", "Kick", "Aim", "Dribbel"));
-    
-    Condition shotTypePassCondition = new Condition(6, "ShotType Pass", "Skill ID", 0, "shottype", Equation.IS, Arrays.asList("Static pass", "Dynamic pass"));
-    Condition shotTypeShotLobCondition = new Condition(7, "ShotType Shot", "Skill ID", 0, "shottype", Equation.IS, Arrays.asList("Flat shot", "Dynamic lob", "Static lob", "Dynamic push", "Penalty"));
+    try
+    {
+      Object obj = parser.parse(new FileReader(getGeneratedFile()));
 
-    Condition HasBallCondition = new Condition(8, "Has Ball", "CPB", 0, "CPB", Equation.IS, Arrays.asList("True"));
-    Condition NotBallCondition = new Condition(9, "Not Ball", "CPB", 0, "CPB", Equation.IS, Arrays.asList("False"));
-    Condition CPBTeamCondition = new Condition(10, "CPB Team", "CPB team", 0, "CPB-team", Equation.IS_NOT, Arrays.asList("None"));
-    Condition NotBallTeamCondition = new Condition(11, "Team Not Ball", "CPB team", 0, "CPB-team", Equation.IS, Arrays.asList("None"));
-    
-    Condition refboxStopCondition = new Condition(12, "Refbox Stop", "Refbox command", 0, "all", Equation.IS, Arrays.asList("Stop"));
-    Condition refboxNotGoalCondition = new Condition(13, "Refbox Not Goal", "Refbox command", 0, "all", Equation.IS_NOT, Arrays.asList("Stop", "Start", "Goal magenta", "Goal cyan", "Kickoff magenta", "Kickoff cyan", "Subgoal magenta", "Subgoal cyan", "Repair in cyan", "Repair out cyan", "Repair in magenta", "Repair out magenta"));
-    Condition refboxGoalCondition = new Condition(14, "Refbox Goal", "Refbox command", 0, "all", Equation.IS, Arrays.asList("Goal magenta", "Goal cyan", "Kickoff magenta", "Kickoff cyan", "Subgoal magenta", "Subgoal cyan"));
-    
-    //Goal
-    GeneratedParameter goalParameter = new GeneratedParameter("*Goal", Type.Categorical, 1, values);    
-    goalParameter.addPreCondition(new CombinedANDConditions(HasBallCondition, shotTypeShotLobCondition));
-    goalParameter.addPostConditionSuccess(new CombinedANDConditions(refboxGoalCondition));
-    goalParameter.addPostConditionFailed(new CombinedANDConditions(refboxNotGoalCondition));    
-    result.add(goalParameter);
-    
-    //INTERCEPT
-    GeneratedParameter interceptParameter = new GeneratedParameter("*Intercept", Type.Categorical, 1, values);
-    interceptParameter.addPreCondition(new CombinedANDConditions(skillIDInterceptCondition));    
-    interceptParameter.addPostConditionSuccess(new CombinedANDConditions(HasBallCondition));    
-    interceptParameter.addPostConditionFailed(new CombinedANDConditions(opponentWithBallCondition));
-    interceptParameter.addPostConditionFailed(new CombinedANDConditions(refboxStopCondition));
-    result.add(interceptParameter);
-    
-    //SHIELD
-    GeneratedParameter shieldParameter = new GeneratedParameter("*Shield", Type.Categorical, 1, values);
-    shieldParameter.addPreCondition(new CombinedANDConditions(HasBallCondition, skillIDShieldCondition));
-    shieldParameter.addPostConditionSuccess(new CombinedANDConditions(HasBallCondition));
-    shieldParameter.addPostConditionFailed(new CombinedANDConditions(opponentWithBallCondition));
-    shieldParameter.addPostConditionFailed(new CombinedANDConditions(refboxStopCondition));    
-    result.add(shieldParameter);
-    
-    //PASS
-    GeneratedParameter passParameter = new GeneratedParameter("*Pass", Type.Categorical, 1, values);
-    passParameter.addPreCondition(new CombinedANDConditions(HasBallCondition, shotTypePassCondition));
-    passParameter.addPostConditionSuccess(new CombinedANDConditions(CPBTeamCondition, NotBallCondition));
-    passParameter.addPostConditionFailed(new CombinedANDConditions(HasBallCondition));
-    passParameter.addPostConditionFailed(new CombinedANDConditions(opponentWithBallCondition));
-    passParameter.addPostConditionFailed(new CombinedANDConditions(refboxStopCondition));    
-    result.add(passParameter);
-    
+      JSONObject jsonObject = (JSONObject) obj;
+
+      JSONArray jsonGenerated = (JSONArray)jsonObject.get("generated");
+      for(Object parameter : jsonGenerated) {
+        JSONObject jsonParameter = (JSONObject)parameter;
+        String name = (String)jsonParameter.get("name");
         
-    //Ball loss
-    GeneratedParameter ballLossParameter = new GeneratedParameter("*Ball loss", Type.Categorical, 1, values);    
-    ballLossParameter.addPreCondition(new CombinedANDConditions(HasBallCondition));    
-    ballLossParameter.addPostConditionSuccess(new CombinedANDConditions(NotBallTeamCondition, NotBallCondition, opponentWithBallCondition));
-    ballLossParameter.addPostConditionFailed(new CombinedANDConditions(CPBTeamCondition));
-    ballLossParameter.addPostConditionFailed(new CombinedANDConditions(refboxStopCondition)); 
-    result.add(ballLossParameter);
-    
-    //Illegal SkillID
-    GeneratedParameter illegalBallParameter = new GeneratedParameter("*Illegal SkillID (no ball)", Type.Categorical, 1, values);    
-    illegalBallParameter.addPreCondition(new CombinedANDConditions(NotBallCondition, skillIDBallCondition));    
-    result.add(illegalBallParameter);
-            
-    //Illegal SkillID Ball
-    GeneratedParameter illegalSkillParameter = new GeneratedParameter("*Illegal Move (has ball)", Type.Categorical, 1, values);    
-    illegalSkillParameter.addPreCondition(new CombinedANDConditions(HasBallCondition, skillIDSMoveCondition));
-    result.add(illegalSkillParameter);
-            
-    return result;
+        GeneratedParameter newParameter = new GeneratedParameter(name);
+        
+        List<CombinedANDConditions> preConditions = getConditionFromJSON((JSONArray)jsonParameter.get("pre-conditions"));
+        newParameter.setPreConditions(preConditions);
+        
+        List<CombinedANDConditions> postConditionsSuccess = getConditionFromJSON((JSONArray)jsonParameter.get("post-conditions-succes"));
+        newParameter.setPostConditionsSuccess(postConditionsSuccess);
+        
+        List<CombinedANDConditions> postConditionsFailed = getConditionFromJSON((JSONArray)jsonParameter.get("post-conditions-failed"));                
+        newParameter.setPostConditionsFailed(postConditionsFailed);
+        
+        generated.add(newParameter);
+      }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    return generated;
   }
   
   public static void saveGenerated(List<GeneratedParameter> generated) {
-    
+    try
+    {
+      JSONObject rootObject = new JSONObject();
+      JSONArray jsonGenerated = new JSONArray();
+      
+      for(GeneratedParameter parameter : generated) {
+        JSONObject jsonParameter = new JSONObject();
+        jsonParameter.put("name", parameter.getName());
+                
+        JSONArray preConditions = createJSONConditions(parameter.getPreConditions());
+        if(preConditions != null)
+          jsonParameter.put("pre-conditions", preConditions);
+        
+        JSONArray postConditionsSuccess = createJSONConditions(parameter.getPostConditionsSuccess());
+        if(postConditionsSuccess != null)
+          jsonParameter.put("post-conditions-succes", postConditionsSuccess);
+        
+        JSONArray postConditionsFailed = createJSONConditions(parameter.getPostConditionsFailed());
+        if(postConditionsFailed != null)
+          jsonParameter.put("post-conditions-failed", postConditionsFailed);
+      
+        jsonGenerated.add(jsonParameter);
+      }
+      
+      rootObject.put("generated", jsonGenerated);
+      
+      Gson gson = new GsonBuilder().setPrettyPrinting().create();
+      JsonParser jp = new JsonParser();
+      JsonElement je = jp.parse(rootObject.toJSONString());
+      String prettyJsonString = gson.toJson(je);
+      
+      FileWriter file = new FileWriter(getGeneratedFile());
+      file.write(prettyJsonString);
+      file.close();      
+    }
+    catch(Exception ex) {
+      ex.printStackTrace();
+    }    
   }
   
   public static List<Condition> loadConditions() {
@@ -220,10 +205,61 @@ public abstract class DataGeneration {
       ex.printStackTrace();
     }
   }
+    
+  private static JSONArray createJSONConditions(List<CombinedANDConditions> conditions) {
+    JSONArray jsonCombinedAndConditions = new JSONArray();
+    
+    if(conditions != null) {
+      for(CombinedANDConditions preCondition : conditions) {
+        JSONObject jsonCombinedAndCondition = new JSONObject();
+        JSONArray jsonConditions = new JSONArray();
+
+        for(Condition condition : preCondition.getConditions()) {
+          JSONObject jsonCondition = new JSONObject();
+          jsonCondition.put("id", condition.GetID());
+          jsonConditions.add(jsonCondition);
+        }
+
+        jsonCombinedAndCondition.put("and-conditions", jsonConditions);
+        jsonCombinedAndConditions.add(jsonCombinedAndCondition);
+      }
+    }
+    
+    return jsonCombinedAndConditions;
+  }
+  
+  private static List<CombinedANDConditions> getConditionFromJSON(JSONArray jsonConditionsArray) {
+    List<CombinedANDConditions> conditions = new ArrayList();
+    
+    for(Object combinedAndCondition : jsonConditionsArray) {
+      CombinedANDConditions combinedANDConditions = new CombinedANDConditions();
+      
+      JSONObject jsonCombinedAndCondition = (JSONObject)combinedAndCondition;
+      JSONArray jsonConditions = (JSONArray)jsonCombinedAndCondition.get("and-conditions");
+      
+      for(Object condition : jsonConditions) {
+        JSONObject jsonCondition = (JSONObject)condition;
+        int id = (int)(long)jsonCondition.get("id");
+        combinedANDConditions.addCondition(id);
+      }
+      
+      conditions.add(combinedANDConditions);
+    }
+    
+    return conditions;
+  }
   
   private static File getConditionsFile() throws Exception {
-    String fileName = "conditions.json";    
+    String fileName = "conditions.json";
+    return getFile(fileName);
+  }
     
+  private static File getGeneratedFile() throws Exception {
+    String fileName = "generated.json";
+    return getFile(fileName);
+  }
+
+  private static File getFile(String fileName) throws Exception {    
     URL url = DataMapping.class.getProtectionDomain().getCodeSource().getLocation();
     String jarPath = new File(url.toURI()).getParentFile() + File.separator + fileName;
     
@@ -237,5 +273,6 @@ public abstract class DataGeneration {
       return localFile;
     
     return jarFile;
+    
   }
 }

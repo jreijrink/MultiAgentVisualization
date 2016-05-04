@@ -6,6 +6,7 @@
       "rangeMin": 0,
       "name": "Battery low",
       "equationType": "is",
+      "id": 1,
       "parameterName": "Battery voltage",
       "parameterIndex": 0
     },
@@ -18,6 +19,7 @@
       ],
       "name": "CPB Not Team",
       "equationType": "is",
+      "id": 2,
       "parameterName": "CPB team",
       "parameterIndex": 0
     },
@@ -30,6 +32,7 @@
       ],
       "name": "CPB Team",
       "equationType": "is not",
+      "id": 3,
       "parameterName": "CPB team",
       "parameterIndex": 0
     },
@@ -42,6 +45,7 @@
       ],
       "name": "Has Ball",
       "equationType": "is",
+      "id": 4,
       "parameterName": "CPB",
       "parameterIndex": 0
     },
@@ -54,6 +58,7 @@
       ],
       "name": "Not Ball",
       "equationType": "is",
+      "id": 5,
       "parameterName": "CPB",
       "parameterIndex": 0
     },
@@ -66,6 +71,7 @@
       ],
       "name": "Opponnant has ball",
       "equationType": "is not",
+      "id": 6,
       "parameterName": "Opponent with ball",
       "parameterIndex": 0
     },
@@ -93,6 +99,7 @@
       ],
       "name": "Refbox Goal",
       "equationType": "is",
+      "id": 7,
       "parameterName": "Refbox command",
       "parameterIndex": 0
     },
@@ -138,6 +145,7 @@
       ],
       "name": "Refbox Not Goal",
       "equationType": "is not",
+      "id": 8,
       "parameterName": "Refbox command",
       "parameterIndex": 0
     },
@@ -150,6 +158,7 @@
       ],
       "name": "Refbox Stop",
       "equationType": "is",
+      "id": 9,
       "parameterName": "Refbox command",
       "parameterIndex": 0
     },
@@ -165,6 +174,7 @@
       ],
       "name": "ShotType Pass",
       "equationType": "is",
+      "id": 10,
       "parameterName": "Skill ID",
       "parameterIndex": 0
     },
@@ -189,6 +199,7 @@
       ],
       "name": "ShotType Shot",
       "equationType": "is",
+      "id": 11,
       "parameterName": "Skill ID",
       "parameterIndex": 0
     },
@@ -210,6 +221,7 @@
       ],
       "name": "skillID Ball",
       "equationType": "is",
+      "id": 12,
       "parameterName": "Skill ID",
       "parameterIndex": 0
     },
@@ -222,6 +234,7 @@
       ],
       "name": "skillID Intercept",
       "equationType": "is",
+      "id": 13,
       "parameterName": "Skill ID",
       "parameterIndex": 0
     },
@@ -234,6 +247,7 @@
       ],
       "name": "skillID Move",
       "equationType": "is",
+      "id": 14,
       "parameterName": "Skill ID",
       "parameterIndex": 0
     },
@@ -246,6 +260,7 @@
       ],
       "name": "skillID Shield",
       "equationType": "is",
+      "id": 15,
       "parameterName": "Skill ID",
       "parameterIndex": 0
     }

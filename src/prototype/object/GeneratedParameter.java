@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GeneratedParameter extends Parameter {
-  private final List<CombinedANDConditions> preConditions;
-  private final List<CombinedANDConditions> postConditionsSuccess;
-  private final List<CombinedANDConditions> postConditionsFailed;
+  private List<CombinedANDConditions> preConditions;
+  private List<CombinedANDConditions> postConditionsSuccess;
+  private List<CombinedANDConditions> postConditionsFailed;
   
   public GeneratedParameter(String name, Type type, int count, List<Value> values) {
     super.name = name;
@@ -19,8 +19,8 @@ public class GeneratedParameter extends Parameter {
     this.postConditionsFailed = new ArrayList();
   }
   
-  public GeneratedParameter() {
-    this("", Type.Categorical, 1, new ArrayList());
+  public GeneratedParameter(String name) {
+    this(name, Type.Categorical, 1, new ArrayList());
     
     List<Category> categories = new ArrayList();
     categories.add(new Category(1, "Success"));
@@ -31,6 +31,10 @@ public class GeneratedParameter extends Parameter {
     super.values = initValues;    
   }
   
+  public void setPreConditions(List<CombinedANDConditions> conditions) {
+    preConditions = conditions;
+  }
+    
   public void addPreCondition(CombinedANDConditions condition) {
     preConditions.add(condition);
   }
@@ -39,6 +43,10 @@ public class GeneratedParameter extends Parameter {
     return preConditions;
   }
   
+  public void setPostConditionsSuccess(List<CombinedANDConditions> conditions) {
+    postConditionsSuccess = conditions;
+  }
+    
   public void addPostConditionSuccess(CombinedANDConditions condition) {
     postConditionsSuccess.add(condition);
   }
@@ -47,6 +55,10 @@ public class GeneratedParameter extends Parameter {
     return postConditionsSuccess;
   }
   
+  public void setPostConditionsFailed(List<CombinedANDConditions> conditions) {
+    postConditionsFailed = conditions;
+  }
+    
   public void addPostConditionFailed(CombinedANDConditions condition) {
     postConditionsFailed.add(condition);
   }

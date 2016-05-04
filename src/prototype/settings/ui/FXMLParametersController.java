@@ -20,6 +20,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
@@ -154,10 +155,16 @@ public class FXMLParametersController implements Initializable {
   @FXML
   private void deleteParameterAction(ActionEvent event) {
     if(selectedParameter != null) {
-      parameters.remove(selectedParameter);
-      DataMapping.saveParameters(parameters);
-      listParameters.getSelectionModel().select(null);
-      changes = true;
+      Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+      alert.setTitle("Confirmation Dialog");
+      alert.setHeaderText("Please confirm");
+      alert.setContentText("Sure you want to delete?");
+      if (alert.showAndWait().get() == ButtonType.OK) {
+        parameters.remove(selectedParameter);
+        DataMapping.saveParameters(parameters);
+        listParameters.getSelectionModel().select(null);
+        changes = true;
+      }
     }
   }
   
@@ -200,8 +207,14 @@ public class FXMLParametersController implements Initializable {
   @FXML
   private void deleteValueAction(ActionEvent event) {
     if(selectedValue != null) {
-      selectedValues.remove(selectedValue);
-      listValues.getItems().setAll(selectedValues);
+      Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+      alert.setTitle("Confirmation Dialog");
+      alert.setHeaderText("Please confirm");
+      alert.setContentText("Sure you want to delete?");
+      if (alert.showAndWait().get() == ButtonType.OK) {
+        selectedValues.remove(selectedValue);
+        listValues.getItems().setAll(selectedValues);
+      }
     }
   }  
     

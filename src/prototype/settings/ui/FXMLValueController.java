@@ -13,6 +13,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
@@ -125,8 +126,14 @@ public class FXMLValueController implements Initializable {
   @FXML
   private void deleteCategoryAction() {
     if(selectedCategory != null) {
-      value.getCategories().remove(selectedCategory);
-      valueCategories.getItems().setAll(value.getCategories());
+      Alert alert = new Alert(AlertType.CONFIRMATION);
+      alert.setTitle("Confirmation Dialog");
+      alert.setHeaderText("Please confirm");
+      alert.setContentText("Sure you want to delete?");
+      if (alert.showAndWait().get() == ButtonType.OK) {
+        value.getCategories().remove(selectedCategory);
+        valueCategories.getItems().setAll(value.getCategories());
+      }
     }
   }
 
