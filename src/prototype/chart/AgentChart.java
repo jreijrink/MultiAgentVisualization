@@ -677,7 +677,7 @@ public class AgentChart implements Chart {
                 .opacity(0.3)
                 .id("filter")
                 .build();
-        filterRectangle.setUserData(new Object[]{ 0.0, 0.0 });
+        filterRectangle.setUserData(new Object[]{ "", "" });
         rootPane.getChildren().add(filterRectangle);
         filterRectangles.add(filterRectangle);
         selectedFilterIndex = filterRectangles.indexOf(filterRectangle);

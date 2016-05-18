@@ -482,7 +482,7 @@
           "index": 0,
           "decimalmask": "",
           "categories": [],
-          "rangeEnabled": true
+          "rangeEnabled": false
         }
       ],
       "name": "Battery voltage",
