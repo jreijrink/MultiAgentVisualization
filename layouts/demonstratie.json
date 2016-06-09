@@ -1,0 +1,59 @@
+{
+  "charts": [
+    {
+      "charts": [],
+      "turtleHistory": true,
+      "pos": "RIGHT",
+      "liveUpdate": true,
+      "selectedTurtles": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "time": "2016-06-09T20:54:27.539",
+      "chart": "Field"
+    },
+    {
+      "charts": [
+        {
+          "charts": [],
+          "pos": "BOTTOM",
+          "liveUpdate": true,
+          "selectedTurtles": [
+            0,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "parameter": "Role ID",
+          "time": "2016-06-09T21:00:08.148",
+          "chart": "Categorical-chart",
+          "parameterIndex": 0,
+          "parameterValue": "current"
+        }
+      ],
+      "pos": "TOP",
+      "liveUpdate": true,
+      "selectedTurtles": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "parameter": "Role ID",
+      "time": "2016-06-09T20:48:35.115",
+      "chart": "Turtle-chart",
+      "parameterIndex": 0,
+      "parameterValue": "current"
+    }
+  ]
+}

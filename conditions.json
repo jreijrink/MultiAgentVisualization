@@ -263,6 +263,16 @@
       "id": 15,
       "parameterName": "Skill ID",
       "parameterIndex": 0
+    },
+    {
+      "valueName": "battery-voltage",
+      "rangeMax": 100,
+      "rangeMin": 50,
+      "name": "Test",
+      "equationType": "is",
+      "id": 915967453,
+      "parameterName": "Battery voltage",
+      "parameterIndex": 0
     }
   ]
 }

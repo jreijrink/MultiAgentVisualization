@@ -91,7 +91,8 @@ public class CombinedOpponent {
       double height = (rectSize - offsetY) / this.configuration.MaxTurtles;
       
       for(int index = 0; index < this.configuration.MaxTurtles; index++) {
-        if(containsTurtle(index)) {
+        if(containsTurtle(index)) { // Show opponents that see the opponent
+        //if(!containsTurtle(index)) { // Show opponents that NOT see the opponent
           Rectangle turtleRect = new Rectangle(position.getX() - ((rectSize - offsetX) / 2), (position.getY() - ((rectSize - offsetY) / 2)) + (height * index) , rectSize - offsetX, height);
           turtleRect.getStyleClass().add(String.format("default-color%d-fill", index));
           turtleRect.setOpacity(opacity - 0.1);

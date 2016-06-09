@@ -90,7 +90,7 @@ public class Main extends Application {
   
   @Override
   public void start(Stage stage) {
-    stage.setTitle("Prototype");
+    stage.setTitle("FoRoVis");
     
     charts = new ArrayList();
     data = new ArrayList();
@@ -433,7 +433,7 @@ public class Main extends Application {
           try {
             Parser parser = new Parser();
             List<Turtle> result = parser.parse(currentFile.getAbsolutePath());
-            Platform.runLater(()-> stage.setTitle("Prototype [" + currentFile.getName() + "]"));
+            Platform.runLater(()-> stage.setTitle("FoRoVis [" + currentFile.getName() + "]"));
             Platform.runLater(()-> updateLayout(result));
           } catch (Exception ex) {          
             ex.printStackTrace();            

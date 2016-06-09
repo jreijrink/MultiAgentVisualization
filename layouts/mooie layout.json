@@ -1,0 +1,75 @@
+{
+  "charts": [
+    {
+      "charts": [
+        {
+          "charts": [],
+          "pos": "BOTTOM",
+          "liveUpdate": true,
+          "selectedTurtles": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "parameter": "Role ID",
+          "time": "2016-06-09T15:22:28.426",
+          "chart": "Categorical-chart",
+          "parameterIndex": 0,
+          "parameterValue": "current"
+        },
+        {
+          "charts": [],
+          "pos": "BOTTOM",
+          "liveUpdate": true,
+          "selectedTurtles": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "parameter": "Role ID",
+          "time": "2016-06-09T15:19:52.949",
+          "chart": "Turtle-chart",
+          "parameterIndex": 0,
+          "parameterValue": "current"
+        }
+      ],
+      "pos": "TOP",
+      "liveUpdate": true,
+      "selectedTurtles": [
+        0,
+        2,
+        4
+      ],
+      "parameter": "Cpu0 load",
+      "time": "2016-06-09T15:09:54.360",
+      "chart": "Scatter-chart",
+      "parameterIndex": 0,
+      "parameterValue": "cpu0-load"
+    },
+    {
+      "charts": [],
+      "turtleHistory": true,
+      "pos": "RIGHT",
+      "liveUpdate": true,
+      "selectedTurtles": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "time": "2016-06-09T15:14:22.503",
+      "chart": "Field"
+    }
+  ]
+}

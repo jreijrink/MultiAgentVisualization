@@ -1,0 +1,99 @@
+{
+  "charts": [
+    {
+      "charts": [
+        {
+          "charts": [],
+          "pos": "RIGHT",
+          "liveUpdate": true,
+          "selectedTurtles": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "parameter": "Motor temperature",
+          "time": "2016-06-07T13:07:38.831",
+          "chart": "Line-chart",
+          "parameterIndex": 0,
+          "parameterValue": "temperature"
+        },
+        {
+          "charts": [
+            {
+              "charts": [],
+              "pos": "RIGHT",
+              "liveUpdate": true,
+              "selectedTurtles": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              "parameter": "*Goal",
+              "time": "2016-06-07T13:07:38.818",
+              "chart": "Turtle-chart",
+              "parameterIndex": 0,
+              "parameterValue": "result"
+            }
+          ],
+          "pos": "BOTTOM",
+          "liveUpdate": true,
+          "selectedTurtles": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ],
+          "parameter": "Role ID",
+          "time": "2016-06-07T13:07:38.783",
+          "chart": "Categorical-chart",
+          "parameterIndex": 0,
+          "parameterValue": "current"
+        }
+      ],
+      "pos": "LEFT",
+      "liveUpdate": true,
+      "selectedTurtles": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "parameter": "Battery voltage",
+      "time": "2016-06-07T13:07:38.721",
+      "chart": "Scatter-chart",
+      "parameterIndex": 0,
+      "parameterValue": "battery-voltage"
+    },
+    {
+      "charts": [],
+      "turtleHistory": false,
+      "pos": "RIGHT",
+      "liveUpdate": true,
+      "selectedTurtles": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "time": "2016-06-07T13:07:38.845",
+      "chart": "Field"
+    }
+  ]
+}
