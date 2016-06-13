@@ -148,6 +148,20 @@
       ]
     },
     {
+      "name": "*NotAttacker",
+      "post-conditions-succes": [],
+      "pre-conditions": [
+        {
+          "and-conditions": [
+            {
+              "id": 1070501723
+            }
+          ]
+        }
+      ],
+      "post-conditions-failed": []
+    },
+    {
       "name": "*Pass",
       "post-conditions-succes": [
         {
@@ -236,6 +250,56 @@
           ]
         }
       ]
+    },
+    {
+      "name": "+GoalWouter",
+      "post-conditions-succes": [
+        {
+          "and-conditions": [
+            {
+              "id": 7
+            }
+          ]
+        }
+      ],
+      "pre-conditions": [
+        {
+          "and-conditions": [
+            {
+              "id": 4
+            },
+            {
+              "id": 11
+            }
+          ]
+        }
+      ],
+      "post-conditions-failed": [
+        {
+          "and-conditions": [
+            {
+              "id": 8
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "+ShotOnGoalWouter",
+      "post-conditions-succes": [],
+      "pre-conditions": [
+        {
+          "and-conditions": [
+            {
+              "id": 4
+            },
+            {
+              "id": 11
+            }
+          ]
+        }
+      ],
+      "post-conditions-failed": []
     }
   ]
 }

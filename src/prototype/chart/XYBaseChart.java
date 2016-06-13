@@ -38,6 +38,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.RectangleBuilder;
+import org.apache.pivot.util.Console;
 import prototype.object.ParameterMap;
 import prototype.listener.SelectionEventListener;
 import prototype.object.StringValuePair;
@@ -946,8 +947,8 @@ public class XYBaseChart implements Chart {
         }
       }
 
-      double xTolerance = (timeframes / rootPane.getWidth()) * 3.0f;
-      double yTolerance = ((maxValue - minValue) / rootPane.getHeight()) * 3.0f;
+      double xTolerance = (timeframes / rootPane.getWidth()) * 2.0f;
+      double yTolerance = ((maxValue - minValue) / rootPane.getHeight()) * 2.0f;
       
       Map<Integer, List<DataPoint>> filteredPoints = simplifyRadialDistance(datapoints, xTolerance, yTolerance);
           
@@ -1066,8 +1067,8 @@ public class XYBaseChart implements Chart {
     Collections.sort(sortedPoints, (SimpleEntry<Integer, DataPoint> p1, SimpleEntry<Integer, DataPoint> p2) -> Double.compare(p1.getValue().getLocation().getX(), p2.getValue().getLocation().getX()));     
     sortedPoints = filterPoints(sortedPoints, xTolerance, yTolerance);    
 
-    Collections.sort(sortedPoints, (SimpleEntry<Integer, DataPoint> p1, SimpleEntry<Integer, DataPoint> p2) -> Double.compare(p1.getValue().getLocation().getY(), p2.getValue().getLocation().getY()));
-    sortedPoints = filterPoints(sortedPoints, xTolerance, yTolerance);
+    //Collections.sort(sortedPoints, (SimpleEntry<Integer, DataPoint> p1, SimpleEntry<Integer, DataPoint> p2) -> Double.compare(p1.getValue().getLocation().getY(), p2.getValue().getLocation().getY()));
+    //sortedPoints = filterPoints(sortedPoints, xTolerance, yTolerance);
     
     Map<Integer, List<DataPoint>> result = new HashMap();
     for(Integer turtleIndex : data.keySet()) {
@@ -1085,24 +1086,48 @@ public class XYBaseChart implements Chart {
   }
   
   private List<SimpleEntry<Integer, DataPoint>> filterPoints(List<SimpleEntry<Integer, DataPoint>> points, double xTolerance, double yTolerance) {
+    Console.log("X: " + xTolerance);
+    Console.log("Y: " + yTolerance);
+    
     int len = points.size();
     
     List<SimpleEntry<Integer, DataPoint>> newPoints = new ArrayList();
     
     if(len > 0) {
       SimpleEntry<Integer, DataPoint> point;
-      SimpleEntry<Integer, DataPoint> prevPoint = points.get(0);
-
-      newPoints.add(prevPoint);
-
-      for (int i = 1; i < len; i++) {
+        
+      for (int i = 0; i < len; i++) {
         point = points.get(i);
+        
+        if(point != null) {
 
-        if (getDistance(point.getValue().getLocation().getX(), prevPoint.getValue().getLocation().getX()) > xTolerance || getDistance(point.getValue().getLocation().getY(), prevPoint.getValue().getLocation().getY()) > yTolerance) {
-            newPoints.add(point);
-            prevPoint = point;
-        } else {
-          newPoints.get(newPoints.size() - 1).getValue().addIndices(point.getValue().getIndices());
+          newPoints.add(point);
+          double x1 = point.getValue().getLocation().getX();
+          double y1 = point.getValue().getLocation().getY();
+          
+          int offset = 1;
+          boolean pointHandled = false;
+          
+          while(!pointHandled && i + offset < points.size()) {
+            SimpleEntry<Integer, DataPoint> neighbourPoint = points.get(i + offset);
+            
+            if(neighbourPoint != null) {
+              
+              if (getDistance(x1, neighbourPoint.getValue().getLocation().getX()) <= xTolerance) {
+                double y2 = neighbourPoint.getValue().getLocation().getY();
+
+                if (getDistance(y1, y2) <= yTolerance) {
+                  //REMOVE THIS POINT!
+                  newPoints.get(newPoints.size() - 1).getValue().addIndices(neighbourPoint.getValue().getIndices());
+                  points.set(i + offset, null);
+                }
+              } else {
+                pointHandled = true;
+              }
+            }
+
+            offset++;
+          }
         }
       }
     }

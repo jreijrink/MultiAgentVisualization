@@ -1,6 +1,19 @@
 {
   "conditions": [
     {
+      "valueName": "current",
+      "values": [
+        {
+          "value": "Attacker main"
+        }
+      ],
+      "name": "AMpresent",
+      "equationType": "is",
+      "id": 917237989,
+      "parameterName": "Role ID",
+      "parameterIndex": 0
+    },
+    {
       "valueName": "battery-voltage",
       "rangeMax": 25,
       "rangeMin": 0,
@@ -60,6 +73,19 @@
       "equationType": "is",
       "id": 5,
       "parameterName": "CPB",
+      "parameterIndex": 0
+    },
+    {
+      "valueName": "current",
+      "values": [
+        {
+          "value": "Attacker main"
+        }
+      ],
+      "name": "NotAttackerMain",
+      "equationType": "is not",
+      "id": 1070501723,
+      "parameterName": "Role ID",
       "parameterIndex": 0
     },
     {
