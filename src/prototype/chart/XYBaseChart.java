@@ -42,87 +42,33 @@ import org.apache.pivot.util.Console;
 import prototype.object.ParameterMap;
 import prototype.listener.SelectionEventListener;
 import prototype.object.StringValuePair;
-import static prototype.chart.Chart.getCheckbox;
-import static prototype.chart.Chart.getScale;
-import static prototype.chart.Chart.getTurtleListView;
 import prototype.object.Parameter;
 import prototype.object.Turtle;
 import prototype.object.Value;
 import org.dockfx.DockNode;
-import static prototype.chart.Chart.getAllTurtles;
+import static prototype.chart.DockElement.getAllTurtles;
+import static prototype.chart.DockElement.getCheckbox;
+import static prototype.chart.DockElement.getScale;
+import static prototype.chart.DockElement.getTurtleListView;
 import prototype.object.Filter;
 import prototype.object.Range;
 
-public class XYBaseChart implements Chart {  
-  public enum ChartType { Scatter, Line };
-  
-  private Scene scene;
-  private List<Turtle> data;
-  private ChartType type;
-  private List<SelectionEventListener> listenerList = new ArrayList();
-  
-  public int[] selectedTurtles;
-  public String parameter;
-  public int parameterIndex;
-  public String parameterValue;
-  public boolean liveUpdate;
-  
-  private DockNode dockNode;
-  
-  private ParameterMap parameterMap;
-  
-  private BorderPane rootPane; 
-  private XYChart<Number,Number> XYChart;
-  
-  private Point2D selectionPoint;
-  private Rectangle selectionRectangle;
-  private Rectangle selectionFrame;
-  private Point2D basePoint;
-  private List<Rectangle> filterRectangles;
-  private int selectedFilterIndex;
-  private boolean newFilter;
-  
-  private int selectedStartIndex;
-  private int selectedEndIndex;
-  private boolean forward;
-    
+public final class XYBaseChart extends BaseChart {  
+  public enum ChartType { Scatter, Line };  
+  private ChartType type;  
+  private XYChart<Number,Number> XYChart;  
   private Timer resizeTimer;
   private TimerTask resizeTask;
   private int visibleDataPoints;
   
   public XYBaseChart(Scene scene, ChartType type, int[] selectedTurtles, String yParameter, int yParameterIndex, String yParameterValue, List<Turtle> data,  boolean liveUpdate) {
-    this.scene = scene;
-    this.type = type;
-    this.parameterMap = new ParameterMap();
-    this.selectedTurtles = selectedTurtles;
-    this.parameter = yParameter;
-    this.parameterIndex = yParameterIndex;
-    this.parameterValue = yParameterValue;
-    this.data = data;
-    this.liveUpdate = liveUpdate;
-    
-    this.rootPane = new BorderPane();
-    this.rootPane.getStylesheets().add("prototype/plot.css");
-    this.visibleDataPoints = 0;
-    this.filterRectangles = new ArrayList();
-    
+    super(scene, selectedTurtles, yParameter, yParameterIndex, yParameterValue, data,  liveUpdate);
+    this.type = type;    
     initRootPaneListeners();
-        
-    initialize(false);
   }
   
   public XYBaseChart(Scene scene, ChartType type, List<Turtle> data, int selectionStart, int selectionEnd, boolean forward) {
-    this.scene = scene;
-    this.type = type;
-    this.data = data;
-    this.parameterMap = new ParameterMap();
-    this.selectedTurtles = new int[]{ 0 };    
-    this.parameterIndex = 0;
-    this.liveUpdate = true;
-    
-    this.selectedStartIndex = selectionStart;    
-    this.selectedEndIndex = selectionEnd;
-    this.forward = forward;
+    super(scene, data, selectionStart, selectionEnd, forward);
     
     if(this.parameterMap.getAllParameters().size() > 0) {
     Parameter firstParameter = this.parameterMap.getAllParameters().get(0);
@@ -132,20 +78,8 @@ public class XYBaseChart implements Chart {
       }
     }
     
-    this.rootPane = new BorderPane();
-    this.rootPane.getStylesheets().add("prototype/plot.css");
-    this.visibleDataPoints = 0;
-    this.filterRectangles = new ArrayList();
-
-    
-    initRootPaneListeners();
-    
+    initRootPaneListeners();    
     initialize(false);
-  }
-  
-  @Override
-  public Node getNode() {
-    return rootPane;
   }
   
   @Override
@@ -157,23 +91,6 @@ public class XYBaseChart implements Chart {
       return "Line-chart";
     }
     return "XY-chart";
-  }
-  
-  @Override
-  public Chart getCopy() {
-    return new XYBaseChart(scene, type, selectedTurtles, parameter, parameterIndex,parameterValue, data,  liveUpdate);
-  }
-  
-  @Override
-  public void addSelectionEventListener(SelectionEventListener listener) {
-    listenerList.add(listener);
-  }
-  
-  @Override
-  public void updateData(List<Turtle> data) {
-    clearFilter();
-    this.data = data;
-    initialize(false);
   }
   
   @Override
@@ -214,167 +131,6 @@ public class XYBaseChart implements Chart {
       }
       
       setDockTitle();
-    }
-  }
-  
-  @Override
-  public void update() {
-    initialize(false);
-  }
-  
-  @Override
-  public void clearFilter() {
-    boolean hadFilters = false;
-    for(Turtle turtle : data) {
-      hadFilters = turtle.removeFilters(this) || hadFilters;
-    }
-    
-    for(Rectangle filter : filterRectangles) {
-      this.rootPane.getChildren().remove(filter);
-    }
-    filterRectangles.clear();
-
-    if(hadFilters) {
-      for(SelectionEventListener listener : listenerList) {
-        listener.update();
-      }
-    }
-  }
-  
-  @Override
-  public void setDockNode(DockNode dockNode) {
-    this.dockNode = dockNode;
-    setDockTitle();
-  }
-  
-  @Override
-  public void showParameterDialog() {
-    GridPane grid = new GridPane();
-    grid.setHgap(10);
-    grid.setVgap(10);
-    grid.setPadding(new Insets(10, 10, 10, 10));
-    
-    Dialog<Boolean> dialog = new Dialog();
-    dialog.setTitle("Chart options");
-    dialog.setHeaderText("Choose chart options");
-    dialog.setContentText("Choose chart options:");
-    
-    dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-    CheckBox liveCheckbox = getCheckbox("Live update", liveUpdate);
-    
-    ListView listView = getTurtleListView(selectedTurtles); 
-    
-    ChoiceBox<String> parameterChoiceBox = new ChoiceBox();
-    ChoiceBox<Integer> indexChoiceBox = new ChoiceBox();
-    ChoiceBox<String> valueChoiceBox = new ChoiceBox();
-
-    List<Parameter> choices = parameterMap.getAllParameters();
-    ObservableList<String> options = FXCollections.observableArrayList();
-    for(Parameter choise : choices) {
-      options.add(choise.getName());
-    }
-    options = options.sorted();
-
-    parameterChoiceBox.setItems(options);
-    if(options.contains(parameter)) {
-      parameterChoiceBox.getSelectionModel().select(parameter);
-      Parameter parameter = parameterMap.getParameter(this.parameter);
-      
-      int count = parameter.getCount();
-      ObservableList<Integer> indexOptions = FXCollections.observableArrayList();
-      for(int index = 0; index < count; index++) {
-        indexOptions.add(index);
-      }      
-      indexChoiceBox.setItems(indexOptions);
-      if(indexOptions.contains(parameterIndex)) {
-        indexChoiceBox.getSelectionModel().select(parameterIndex);
-      }
-      
-      List<Value> values = parameter.getValues();
-      ObservableList<String> valueOptions = FXCollections.observableArrayList();
-      for(Value value : values) {
-        valueOptions.add(value.getName());
-      }
-      valueChoiceBox.setItems(valueOptions);
-      if(valueOptions.contains(parameterValue)) {
-        valueChoiceBox.getSelectionModel().select(parameterValue);
-      }
-    }
-
-    parameterChoiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
-      @Override
-      public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-        Parameter parameter = parameterMap.getParameter(newValue.toString());
-        
-        int count = parameter.getCount();
-        ObservableList<Integer> indexOptions = FXCollections.observableArrayList();
-        for(int index = 0; index < count; index++) {
-          indexOptions.add(index);
-        }      
-        indexChoiceBox.setItems(indexOptions);
-        indexChoiceBox.getSelectionModel().select(0);
-
-        List<Value> values = parameter.getValues();
-        ObservableList<String> valueOptions = FXCollections.observableArrayList();
-        for(Value value : values) {
-          valueOptions.add(value.getName());
-        }
-        valueChoiceBox.setItems(valueOptions);
-        valueChoiceBox.getSelectionModel().select(0);
-      }
-    });
-    
-    grid.add(liveCheckbox, 0, 0);
-    
-    grid.add(new Label("Parameter:"), 0, 1);
-    grid.add(parameterChoiceBox, 0, 2);
-    grid.add(new Label("Index:"), 0, 3);
-    grid.add(indexChoiceBox, 0, 4);
-    grid.add(new Label("Value:"), 0, 5);
-    grid.add(valueChoiceBox, 0, 6);
-
-    grid.add(new Label("Turtles"), 0, 7);
-    grid.add(listView, 0, 8);
-    
-    dialog.getDialogPane().setContent(grid);
-    listView.setPrefHeight(200);
-        
-    dialog.setResultConverter(dialogButton -> {
-      if(dialogButton == ButtonType.OK) {
-        ObservableList<StringValuePair<String, Integer>> selectedItems = listView.getSelectionModel().getSelectedItems();
-        selectedTurtles = new int[selectedItems.size()];
-        for(int i = 0; i < selectedItems.size(); i++) {
-          selectedTurtles[i] = selectedItems.get(i).getValue();
-        }
-        
-        if(parameterChoiceBox.getSelectionModel().getSelectedItem() != null) {
-          clearFilter();
-          
-          parameter = parameterChoiceBox.getSelectionModel().getSelectedItem();
-          parameterIndex = indexChoiceBox.getSelectionModel().getSelectedItem();
-          parameterValue = valueChoiceBox.getSelectionModel().getSelectedItem();
-        }
-        
-        liveUpdate = liveCheckbox.isSelected();
-
-        setDockTitle();
-
-        return true;
-      }
-      return null;
-    });
-
-    Optional<Boolean> result = dialog.showAndWait();
-
-    if(result.isPresent() && result.get() != null) {
-      initialize(false);
-    }
-  }
-    
-  private void setDockTitle() {
-    if(this.dockNode != null) {
-      this.dockNode.setTitle(String.format("%s - %s[%d] (%s) [%d - %d]", getName(), this.parameter, this.parameterIndex, this.parameterValue, this.selectedStartIndex, this.selectedEndIndex));
     }
   }
   
@@ -423,12 +179,6 @@ public class XYBaseChart implements Chart {
     });    
   }
   
-  private void notifyListeners(int startIndex, int endIndex, boolean drag, boolean forward) {
-    for(SelectionEventListener listener : listenerList) {
-      listener.timeFrameSelected(startIndex, endIndex, drag, forward);
-    }
-  }
-  
   private void clearSelection() {    
     if(XYChart != null) {
       NumberAxis yAxis = (NumberAxis) XYChart.getYAxis();
@@ -450,7 +200,8 @@ public class XYBaseChart implements Chart {
     }
   }
   
-  private void initialize(boolean resize) {
+  @Override
+  void initialize(boolean resize) {
     setCursor(Cursor.WAIT);
     
     this.parameterMap = new ParameterMap();
@@ -468,10 +219,10 @@ public class XYBaseChart implements Chart {
       }
     }).start();
   }
-  
-  private void setCursor(Cursor cursor) {
-    scene.setCursor(cursor);
-    rootPane.setCursor(cursor);    
+    
+  @Override
+  boolean isCategorical() {
+    return false;
   }
   
   private boolean dataIncreaseAchieved(List<XYChart.Series> data) {
@@ -496,7 +247,10 @@ public class XYBaseChart implements Chart {
     try {
         int timeframes = this.data.get(0).getTimeFrameCount();
         double scale = getScale(timeframes);
-        xAxis = new NumberAxis(0, timeframes, scale);
+        if(zoomRange == null)
+          xAxis = new NumberAxis(0, timeframes, scale);
+        else
+          xAxis = new NumberAxis(zoomRange.getMin(), zoomRange.getMax(), scale);
     } catch(Exception ex) { }
     
     NumberAxis yAxis = new NumberAxis();
@@ -711,6 +465,7 @@ public class XYBaseChart implements Chart {
     });
     
     createAxisFilter();
+    createAxisZoom(xAxis, yAxis);
   }
   
   private void createAxisFilter() {
@@ -844,83 +599,6 @@ public class XYBaseChart implements Chart {
       }
     });
   }
-  
-  private void createRectangleSelectionEvents(Node node, Node parent, NumberAxis xAxis, NumberAxis yAxis) {    
-    node.setOnMousePressed((MouseEvent event) -> {
-      double xShift = getXShift(node, parent, xAxis);
-      double yShift = getYShift(node, parent, yAxis);
-      
-      selectionPoint = new Point2D(event.getX(), event.getY());
-      
-      Rectangle selection = getSelectionRectangle(selectionPoint, event.getX(), event.getY(), xShift, yShift, xAxis.getWidth(), xAxis.getHeight());
-            
-      int start = xAxis.getValueForDisplay(selection.getX()).intValue();
-      int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth()).intValue();
-      
-      notifyListeners(start, end, false, true);
-    });
-
-    node.setOnMouseDragged((MouseEvent event) -> {
-      double xShift = getXShift(node, parent, xAxis);
-      double yShift = getYShift(node, parent, yAxis);
-      
-      Rectangle selection = getSelectionRectangle(selectionPoint, event.getX(), event.getY(), xShift, yShift, xAxis.getWidth(), xAxis.getHeight());
-            
-      int start = xAxis.getValueForDisplay(selection.getX()).intValue();
-      int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth()).intValue();
-      
-      boolean forward = true;
-      if(selectionPoint.getX() == (selection.getX() + selection.getWidth() + xShift)) {
-        //Backward selection
-        forward = false;
-      }
-      
-      notifyListeners(start, end, true, forward);
-      
-      //selectFrames(start, end, false, forward);      
-    });
-    
-    node.setOnMouseReleased((MouseEvent event) -> {
-      double xShift = getXShift(node, parent, xAxis);
-      double yShift = getYShift(node, parent, yAxis);
-
-      Rectangle selection = getSelectionRectangle(selectionPoint, event.getX(), event.getY(), xShift, yShift, xAxis.getWidth(), xAxis.getHeight());
-      
-      int start = xAxis.getValueForDisplay(selection.getX()).intValue();
-      int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth()).intValue();
-      
-      boolean forward = true;
-      if(selectionPoint.getX() == (selection.getX() + selection.getWidth() + xShift)) {
-        //Backward selection
-        forward = false;
-      }
-      
-      notifyListeners(start, end, false, forward);
-    });
-  }
-  
-  private Rectangle getSelectionRectangle(Point2D start, double mouseX, double mouseY, double xShift, double yShift, double chartWidth, double chartHeight) {
-    
-    mouseX = (mouseX - xShift);
-    mouseY = (mouseY - yShift);
-    
-    //Bound the rectangle to be only within the chart
-    mouseX = Math.max(mouseX, 0);
-    mouseX = Math.min(mouseX, chartWidth);
-    
-    mouseY = Math.max(mouseY, 0);
-    mouseY = Math.min(mouseY, chartHeight);
-    
-    double startX = start.getX() - xShift;
-    double endX = mouseX;
-    double width = Math.abs(endX - startX);
-    
-    double startY = start.getY() - yShift;
-    double endY = mouseY;
-    double height = Math.abs(endY - startY);
-    
-    return new Rectangle(Math.min(startX, endX), Math.min(startY, endY), width, height);
-  }
     
   private List<XYChart.Series> getData() { 
     List<XYChart.Series> seriesList = new ArrayList<>();
@@ -940,7 +618,9 @@ public class XYBaseChart implements Chart {
       
       for (int i : selectedTurtles) {
         Turtle turtle = data.get(i);
-        List<DataPoint> values = turtle.getAllValues(parameter, parameterIndex, parameterValue);
+        List<DataPoint> values = turtle.getAllValues(parameter, parameterIndex, parameterValue);        
+        if(zoomRange != null)
+          values = values.subList(Math.max(zoomRange.getMin(), 0), Math.min(zoomRange.getMax(), values.size() - 1));
         timeframes = values.size();
         before += values.size();
         datapoints.get(i).addAll(values);
@@ -1140,39 +820,5 @@ public class XYBaseChart implements Chart {
   
   private double getDistance(double p1, double p2) {
     return Math.sqrt((p1 - p2) * (p1 - p2));
-  }
-
-  private double getXShift(Node node, Node parent, Node axis) {
-    double xChartShift = getSceneXShift(node);
-    double xAxisShift = getSceneXShift(axis);
-    double xParentShift = parent != null ? getSceneXShift(parent) : 0;
-    double xShift = xAxisShift - (xChartShift - xParentShift);
-    return xShift;
-  }
-  
-  private double getYShift(Node node, Node parent, Node axis) {
-    double yChartShift = getSceneYShift(node);
-    double yAxisShift = getSceneYShift(axis);
-    double yParentShift = parent != null ? getSceneYShift(parent) : 0;
-    double yShift = yAxisShift - (yChartShift - yParentShift);
-    return yShift;
-  }
-  
-  private double getSceneXShift(Node node) { 
-    double shift = 0; 
-    do {  
-        shift += node.getLayoutX();  
-        node = node.getParent(); 
-    } while (node != null && (node.getClass() != LineChart.class && node.getClass() != ScatterChart.class));
-    return shift; 
-  }
-  
-  private double getSceneYShift(Node node) { 
-    double shift = 0; 
-    do {  
-        shift += node.getLayoutY();
-        node = node.getParent(); 
-    } while (node != null && (node.getClass() != LineChart.class && node.getClass() != ScatterChart.class));
-    return shift; 
   }
 }

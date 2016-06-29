@@ -1,11 +1,12 @@
 package prototype.object;
 
 import java.util.List;
-import prototype.chart.Chart;
+import prototype.chart.BaseChart;
+import prototype.chart.DockElement;
 
 public class Filter {
 
-  private final Chart chart;
+  private final BaseChart chart;
   private final String parameterName;
   private final int parameterIndex;
   private final String valueName;
@@ -13,7 +14,7 @@ public class Filter {
   private List<Double> values;
   private List<Integer> turtles;
 
-  public Filter(Chart chart, String parameterName, int parameterIndex, String valueName, List<Integer> turtles, Range range) {
+  public Filter(BaseChart chart, String parameterName, int parameterIndex, String valueName, List<Integer> turtles, Range range) {
     this.chart = chart;
     this.parameterName = parameterName;
     this.parameterIndex = parameterIndex;
@@ -22,7 +23,7 @@ public class Filter {
     this.range = range;
   }
   
-  public Filter(Chart chart, String parameterName, int parameterIndex, String valueName, List<Integer> turtles, List<Double> values) {
+  public Filter(BaseChart chart, String parameterName, int parameterIndex, String valueName, List<Integer> turtles, List<Double> values) {
     this.chart = chart;
     this.parameterName = parameterName;
     this.parameterIndex = parameterIndex;
@@ -56,11 +57,11 @@ public class Filter {
     return false;
   }
   
-  public Chart getChart() {
+  public BaseChart getChart() {
     return this.chart;
   }
   
-  public boolean equals(Chart chart) {
+  public boolean equals(DockElement chart) {
     return this.chart == chart;
   }
 }

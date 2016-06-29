@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import prototype.chart.Chart;
+import prototype.chart.DockElement;
 import prototype.chart.XYBaseChart;
 import prototype.chart.FieldCanvas;
 import prototype.chart.AgentChart;
@@ -77,7 +77,7 @@ import prototype.settings.ui.FXMLConditionsController;
 import prototype.settings.ui.FXMLGeneratedParametersController;
 
 public class Main extends Application {
-  private List<Chart> charts;
+  private List<DockElement> charts;
   private List<Turtle> data;
   private DockPane dockPane;
   private NodeManager nodeManager;
@@ -678,7 +678,7 @@ public class Main extends Application {
     JSONArray childList = new JSONArray();
 
     if(node != null) {
-      Chart chart = (Chart)node.getUserData();
+      DockElement chart = (DockElement)node.getUserData();
       root.put("chart", chart.getName());
       
       if(chart.getClass() ==  FieldCanvas.class) {
@@ -774,7 +774,7 @@ public class Main extends Application {
   
   private void createLayout(Scene scene, LayoutChart root, SortedMap<LayoutChart, SortedMap> children, DockNode sibling) {
     
-    Chart newChart = root.getChart(scene, new ArrayList());    
+    DockElement newChart = root.getChart(scene, new ArrayList());    
     DockPos position = root.getPosition();
     
     DockNode newNode = null;
@@ -790,7 +790,7 @@ public class Main extends Application {
   private void setEventListener(Scene scene) {
     nodeManager.addEventListener(new DockNodeEventListenerInterface() {
       @Override public void dockNodeClosed(DockNodeEvent e) {  
-        Chart chart = (Chart)e.getSource().getUserData();
+        DockElement chart = (DockElement)e.getSource().getUserData();
         if(e.getSource().isEnlarged()) {
           DockNode node = e.getSource().getEnlargedDockNode();      
           chart.setDockNode(node);
@@ -807,14 +807,14 @@ public class Main extends Application {
 
       @Override
       public void dockNodeSettings(DockNodeEvent e) {
-        Chart chart = (Chart)e.getSource().getUserData();
+        DockElement chart = (DockElement)e.getSource().getUserData();
         chart.showParameterDialog();
         saveLayout("default");
       }
 
       @Override
       public void dockNodeEnlarge(DockNodeEvent e) {
-        Chart chart = (Chart)e.getSource().getUserData();
+        DockElement chart = (DockElement)e.getSource().getUserData();
         DockNode node = addChart(scene, dockPane, null, null, chart, true);        
         node.setEnlargedDockNode(e.getSource());
         e.getSource().setEnlargingDockNode(node);
@@ -836,7 +836,7 @@ public class Main extends Application {
     });
   }
     
-  private DockNode addChart(Scene scene, DockPane dockPane, DockPos position, DockNode sibling, Chart chart, boolean enlarged) {
+  private DockNode addChart(Scene scene, DockPane dockPane, DockPos position, DockNode sibling, DockElement chart, boolean enlarged) {
     if(!enlarged) {
       this.charts.add(chart);
 
@@ -846,7 +846,7 @@ public class Main extends Application {
 
       @Override
       public void timeFrameSelected(int startIndex, int endIndex, boolean drag, boolean forward) {        
-        for (Chart chart : charts) {
+        for (DockElement chart : charts) {
           Main.this.startIndex = startIndex;
           Main.this.endIndex = endIndex;
           Main.this.drag = drag;
@@ -857,7 +857,7 @@ public class Main extends Application {
 
       @Override
       public void update() {
-        for (Chart chart : charts) {
+        for (DockElement chart : charts) {
           chart.update();
         }
       }
@@ -900,7 +900,7 @@ public class Main extends Application {
   private void updateLayout(List<Turtle> data) {
     this.data = data;
     
-    for (Chart chart : this.charts) {
+    for (DockElement chart : this.charts) {
       chart.updateData(data);
     }
   }

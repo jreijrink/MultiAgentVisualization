@@ -3,46 +3,8 @@
     {
       "charts": [
         {
-          "charts": [
-            {
-              "charts": [],
-              "pos": "LEFT",
-              "liveUpdate": true,
-              "selectedTurtles": [
-                0,
-                1,
-                2,
-                3,
-                4,
-                5,
-                6
-              ],
-              "parameter": "Ball",
-              "time": "2016-06-29T11:49:54.362",
-              "chart": "Scatter-chart",
-              "parameterIndex": 0,
-              "parameterValue": "y"
-            },
-            {
-              "charts": [],
-              "pos": "LEFT",
-              "liveUpdate": true,
-              "selectedTurtles": [
-                0,
-                2,
-                3,
-                4,
-                5,
-                6
-              ],
-              "parameter": "Skill ID",
-              "time": "2016-06-29T11:49:54.346",
-              "chart": "Turtle-chart",
-              "parameterIndex": 0,
-              "parameterValue": "shottype"
-            }
-          ],
-          "pos": "TOP",
+          "charts": [],
+          "pos": "RIGHT",
           "liveUpdate": true,
           "selectedTurtles": [
             0,
@@ -54,22 +16,50 @@
             6
           ],
           "parameter": "Skill ID",
-          "time": "2016-06-29T11:49:54.321",
-          "chart": "Categorical-chart",
+          "time": "2016-06-29T15:46:46.966",
+          "chart": "Turtle-chart",
           "parameterIndex": 0,
-          "parameterValue": "shottype"
+          "parameterValue": "skill ID"
         }
       ],
       "pos": "TOP",
       "liveUpdate": true,
       "selectedTurtles": [
+        3
+      ],
+      "parameter": "Battery voltage",
+      "time": "2016-06-29T15:46:46.866",
+      "chart": "Scatter-chart",
+      "parameterIndex": 0,
+      "parameterValue": "battery-voltage"
+    },
+    {
+      "charts": [
+        {
+          "charts": [],
+          "pos": "RIGHT",
+          "liveUpdate": true,
+          "selectedTurtles": [
+            0
+          ],
+          "parameter": "Turtle",
+          "time": "2016-06-29T15:46:47.008",
+          "chart": "Line-chart",
+          "parameterIndex": 0,
+          "parameterValue": "x"
+        }
+      ],
+      "pos": "BOTTOM",
+      "liveUpdate": true,
+      "selectedTurtles": [
         1,
+        2,
         3,
         4,
         5
       ],
       "parameter": "Role ID",
-      "time": "2016-06-29T11:49:54.247",
+      "time": "2016-06-29T15:46:47.001",
       "chart": "Categorical-chart",
       "parameterIndex": 0,
       "parameterValue": "current"

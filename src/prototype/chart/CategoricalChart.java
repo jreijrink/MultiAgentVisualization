@@ -33,9 +33,10 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.RectangleBuilder;
-import static prototype.chart.Chart.getCheckbox;
-import static prototype.chart.Chart.getScale;
-import static prototype.chart.Chart.getTurtleListView;
+import static prototype.chart.DockElement.getAllTurtles;
+import static prototype.chart.DockElement.getCheckbox;
+import static prototype.chart.DockElement.getScale;
+import static prototype.chart.DockElement.getTurtleListView;
 import prototype.listener.SelectionEventListener;
 import prototype.object.Category;
 import prototype.object.Parameter;
@@ -45,81 +46,22 @@ import prototype.object.Turtle;
 import prototype.object.Type;
 import prototype.object.Value;
 import prototype.settings.Configuration;
-import org.dockfx.DockNode;
-import static prototype.chart.Chart.getAllTurtles;
 import prototype.object.Filter;
 
-public class CategoricalChart implements Chart {
+public final class CategoricalChart extends BaseChart {
   private static final int MIN_WIDTH = 1;
-  
-  private Scene scene;
-  private List<Turtle> data;
-  private List<SelectionEventListener> listenerList = new ArrayList();
-  
-  public int[] selectedTurtles;
-  public String parameter;
-  public int parameterIndex;
-  public String parameterValue;
-  public boolean liveUpdate;
-  
-  private DockNode dockNode;
-  
-  private ParameterMap parameterMap;
-  
-  private BorderPane rootPane; 
-  private ScatterChart<Number,String> scattterChart;
-  
-  private Rectangle selectionRectangle;
-  private Point2D selectionPoint;
-  private Rectangle selectionFrame;
-  
-  private Point2D basePoint;
-  private List<Rectangle> filterRectangles;
-  private int selectedFilterIndex;
-  private boolean newFilter;
-  
+  private ScatterChart<Number,String> scattterChart;  
   private double initSelectionX = 0;
   private double initSelectionWidth = 0;
   private Object[] initSelectionData = new Object[]{ 0, 0 };
   
-  private int selectedStartIndex;
-  private int selectedEndIndex;
-  private boolean forward;
-  
   public CategoricalChart(Scene scene, int[] selectedTurtles, String yParameter, int yParameterIndex, String yParameterValue, List<Turtle> data, boolean liveUpdate) {
-    this.scene = scene;
-    this.selectedTurtles = selectedTurtles;
-    this.parameter = yParameter;
-    this.parameterIndex = yParameterIndex;
-    this.parameterValue = yParameterValue;
-    this.data = data;
-    this.liveUpdate = liveUpdate;
-    this.rootPane = new BorderPane();
-    this.rootPane.getStylesheets().add("prototype/plot.css");
-    this.filterRectangles = new ArrayList();
-    this.parameterMap = new ParameterMap();
-    
-    initialize();
+    super(scene, selectedTurtles, yParameter, yParameterIndex, yParameterValue, data,  liveUpdate);    
+    initialize(false);
   }
   
   public CategoricalChart(Scene scene, List<Turtle> data, int selectionStart, int selectionEnd, boolean forward) {
-    this.scene = scene;
-    
-    this.parameterMap = new ParameterMap();
-    
-    Configuration configuration = new Configuration();
-    this.selectedTurtles = new int[configuration.MaxTurtles];
-    for(int i = 0; i < configuration.MaxTurtles; i++) {
-      this.selectedTurtles[i] = i;
-    }
-    
-    this.selectedStartIndex = selectionStart;    
-    this.selectedEndIndex = selectionEnd;    
-    this.forward = forward;
-    
-    this.parameterIndex = 0;
-    this.data = data;
-    this.liveUpdate = true;
+    super(scene, data, selectionStart, selectionEnd, forward);
     
     if(this.parameterMap.getParametersOfType(Type.Categorical).size() > 0) {
     Parameter firstParameter = this.parameterMap.getParametersOfType(Type.Categorical).get(0);
@@ -128,17 +70,8 @@ public class CategoricalChart implements Chart {
         this.parameterValue = firstParameter.getValues().get(0).getName();
       }
     }
-    
-    this.rootPane = new BorderPane();
-    this.rootPane.getStylesheets().add("prototype/plot.css");
-    this.filterRectangles = new ArrayList();
-    
-    initialize();
-  }
-  
-  @Override
-  public Node getNode() {
-    return rootPane;
+        
+    initialize(false);
   }
   
   @Override
@@ -146,42 +79,6 @@ public class CategoricalChart implements Chart {
     return "Categorical-chart";
   }
   
-  @Override
-  public Chart getCopy() {
-    return new CategoricalChart(scene, selectedTurtles, parameter, parameterIndex, parameterValue, data, liveUpdate);
-  }
-  
-  @Override
-  public void addSelectionEventListener(SelectionEventListener listener) {
-    listenerList.add(listener);
-  }
-  
-  @Override
-  public void updateData(List<Turtle> data) {
-    clearFilter();
-    this.data = data;
-    initialize();
-  }
-  
-  @Override
-  public void clearFilter() {
-    boolean hadFilters = false;
-    for(Turtle turtle : data) {
-      hadFilters = turtle.removeFilters(this) || hadFilters;
-    }
-    
-    for(Rectangle filter : filterRectangles) {
-      this.rootPane.getChildren().remove(filter);
-    }
-    filterRectangles.clear();
-
-    if(hadFilters) {
-      for(SelectionEventListener listener : listenerList) {
-        listener.update();
-      }
-    }
-  }
-
   @Override
   public void selectFrames(int startIndex, int endIndex, boolean drag, boolean forward) {
     if((!drag || liveUpdate) && data. size() > 0) {
@@ -218,165 +115,18 @@ public class CategoricalChart implements Chart {
       setDockTitle();
     }
   }
-  
+    
   @Override
-  public void update() {
-    initialize();
-  }
-  
-  @Override
-  public void setDockNode(DockNode dockNode) {
-    this.dockNode = dockNode;
-    setDockTitle();
-  }
-  
-  @Override
-  public void showParameterDialog() {
-    GridPane grid = new GridPane();
-    grid.setHgap(10);
-    grid.setVgap(10);
-    grid.setPadding(new Insets(10, 10, 10, 10));
-    
-    Dialog<Boolean> dialog = new Dialog();
-    dialog.setTitle("Categorical-chart options");
-    dialog.setHeaderText("Choose categorical-chart options");
-    dialog.setContentText("Choose categorical-chart options:");
-
-    dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-    CheckBox liveCheckbox = getCheckbox("Live update", liveUpdate);
-    
-    ListView listView = getTurtleListView(selectedTurtles); 
-    
-    ChoiceBox<String> parameterChoiceBox = new ChoiceBox();
-    ChoiceBox<Integer> indexChoiceBox = new ChoiceBox();
-    ChoiceBox<String> valueChoiceBox = new ChoiceBox();
-
-    List<Parameter> choices = parameterMap.getParametersOfType(Type.Categorical);
-    ObservableList<String> options = FXCollections.observableArrayList();
-    for(Parameter choise : choices) {
-      options.add(choise.getName());
-    }
-    options = options.sorted();
-
-    parameterChoiceBox.setItems(options);
-    if(options.contains(parameter)) {
-      parameterChoiceBox.getSelectionModel().select(parameter);
-      Parameter parameter = parameterMap.getParameter(this.parameter);
-      
-      int count = parameter.getCount();
-      ObservableList<Integer> indexOptions = FXCollections.observableArrayList();
-      for(int index = 0; index < count; index++) {
-        indexOptions.add(index);
-      }      
-      indexChoiceBox.setItems(indexOptions);
-      if(indexOptions.contains(parameterIndex)) {
-        indexChoiceBox.getSelectionModel().select(parameterIndex);
-      }
-      
-      List<Value> values = parameter.getValues();
-      ObservableList<String> valueOptions = FXCollections.observableArrayList();
-      for(Value value : values) {
-        valueOptions.add(value.getName());
-      }
-      valueChoiceBox.setItems(valueOptions);
-      if(valueOptions.contains(parameterValue)) {
-        valueChoiceBox.getSelectionModel().select(parameterValue);
-      }
-    }
-
-    parameterChoiceBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
-      @Override
-      public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-        Parameter parameter = parameterMap.getParameter(newValue.toString());
-        
-        int count = parameter.getCount();
-        ObservableList<Integer> indexOptions = FXCollections.observableArrayList();
-        for(int index = 0; index < count; index++) {
-          indexOptions.add(index);
-        }      
-        indexChoiceBox.setItems(indexOptions);
-        indexChoiceBox.getSelectionModel().select(0);
-
-        List<Value> values = parameter.getValues();
-        ObservableList<String> valueOptions = FXCollections.observableArrayList();
-        for(Value value : values) {
-          valueOptions.add(value.getName());
-        }
-        valueChoiceBox.setItems(valueOptions);
-        valueChoiceBox.getSelectionModel().select(0);
-      }
-    });
-    
-    grid.add(liveCheckbox, 0, 0);
-    
-    grid.add(new Label("Parameter:"), 0, 1);
-    grid.add(parameterChoiceBox, 0, 2);
-    grid.add(new Label("Index:"), 0, 3);
-    grid.add(indexChoiceBox, 0, 4);
-    grid.add(new Label("Value:"), 0, 5);
-    grid.add(valueChoiceBox, 0, 6);
-
-    grid.add(new Label("Turtles"), 0, 7);
-    grid.add(listView, 0, 8);
-    
-    dialog.getDialogPane().setContent(grid);
-    listView.setPrefHeight(200);
-        
-    dialog.setResultConverter(dialogButton -> {
-      if(dialogButton == ButtonType.OK) {
-        ObservableList<StringValuePair<String, Integer>> selectedItems = listView.getSelectionModel().getSelectedItems();
-        selectedTurtles = new int[selectedItems.size()];
-        for(int i = 0; i < selectedItems.size(); i++) {
-          selectedTurtles[i] = selectedItems.get(i).getValue();
-        }
-        
-        if(parameterChoiceBox.getSelectionModel().getSelectedItem() != null) {
-          clearFilter();
-          
-          parameter = parameterChoiceBox.getSelectionModel().getSelectedItem();
-          parameterIndex = indexChoiceBox.getSelectionModel().getSelectedItem();
-          parameterValue = valueChoiceBox.getSelectionModel().getSelectedItem();
-        }
-        
-        liveUpdate = liveCheckbox.isSelected();
-        
-        setDockTitle();
-
-        return true;
-      }
-      return null;
-    });
-
-    Optional<Boolean> result = dialog.showAndWait();
-
-    if(result.isPresent() && result.get() != null) {
-      initialize();
-    }
-  }
-  
-  private void setDockTitle() {
-    if(this.dockNode != null) {
-      this.dockNode.setTitle(String.format("%s - %s[%d] (%s) [%d - %d]", getName(), this.parameter, this.parameterIndex, this.parameterValue, this.selectedStartIndex, this.selectedEndIndex));
-    }
-  }
-  
-  private void notifyListeners(int startIndex, int endIndex, boolean drag, boolean forward) {
-    for(SelectionEventListener listener : listenerList) {
-      listener.timeFrameSelected(startIndex, endIndex, drag, forward);
-    }
-  }
-  
-  private void initialize() {
+  void initialize(boolean resize) {
     this.parameterMap = new ParameterMap();
     createChart();
   }
   
-  private void setCursor(Cursor cursor) {
-    scene.setCursor(cursor);
-    rootPane.setCursor(cursor);    
+  @Override
+  boolean isCategorical() {
+    return true;
   }
-  
+    
   private void createChart() {
     ObservableList<String> categories = FXCollections.observableArrayList();
     
@@ -597,12 +347,12 @@ public class CategoricalChart implements Chart {
       
       for(Node child : this.rootPane.getChildren()) {
         if(child.getClass() == Rectangle.class) {
-          createRectangleSelectionEvents(child, xAxis, yAxis);
+          createRectangleSelectionEvents(child, rootPane, xAxis, yAxis);
         }
       }
       
       createAxisFilter();
-      
+      createAxisZoom(xAxis, yAxis);
       createLegend();
     }
   }
@@ -698,7 +448,7 @@ public class CategoricalChart implements Chart {
         filterRectangles.add(filterRectangle);
         selectedFilterIndex = filterRectangles.indexOf(filterRectangle);
         
-        createRectangleSelectionEvents(filterRectangle, xAxis, yAxis);
+        createRectangleSelectionEvents(filterRectangle, rootPane, xAxis, yAxis);
       } else {
         if(selectedFilterIndex >= 0 && filterRectangles.size() > selectedFilterIndex) {
           Rectangle removeFilter = filterRectangles.get(selectedFilterIndex);
@@ -925,99 +675,5 @@ public class CategoricalChart implements Chart {
         height = height - 10;
       }
       return height;
-  }
-  
-  private void createRectangleSelectionEvents(Node node, NumberAxis xAxis, CategoryAxis yAxis) {
-    ScatterChart<Number,String> scattterChart = (ScatterChart<Number,String>)rootPane.getCenter();
-    
-    node.setOnMousePressed((MouseEvent event) -> {      
-      double xAxisShift = getSceneXShift(xAxis);
-      double yAxisShift = getSceneYShift(yAxis);
-      
-      selectionPoint = new Point2D(event.getX(), event.getY());
-      
-      Rectangle selection = getSelectionRectangle(selectionPoint, event.getX(), event.getY(), xAxisShift, yAxisShift, xAxis.getWidth(), yAxis.getHeight());
-            
-      int start = xAxis.getValueForDisplay(selection.getX() - xAxisShift).intValue();
-      int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xAxisShift).intValue();
-      
-      notifyListeners(start, end, false, true);
-    });
-
-    node.setOnMouseDragged((MouseEvent event) -> {      
-      if(selectionPoint != null) {
-        double xAxisShift = getSceneXShift(xAxis);
-        double yAxisShift = getSceneYShift(yAxis);
-
-        Rectangle selection = getSelectionRectangle(selectionPoint, event.getX(), event.getY(), xAxisShift, yAxisShift, xAxis.getWidth(), yAxis.getHeight());
-
-        int start = xAxis.getValueForDisplay(selection.getX() - xAxisShift).intValue();
-        int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xAxisShift).intValue();
-
-        boolean forward = true;
-        if( selectionPoint.getX() == (selection.getX() + selection.getWidth())) {
-          //Backward selection
-          forward = false;
-        }
-
-        notifyListeners(start, end, true, forward);
-        
-        selectFrames(start, end, false, forward); //Always update this selection
-      }
-    });
-    
-    node.setOnMouseReleased((MouseEvent event) -> {      
-      if(selectionPoint != null) {
-        double xAxisShift = getSceneXShift(xAxis);
-        double yAxisShift = getSceneYShift(yAxis);
-
-        Rectangle selection = getSelectionRectangle(selectionPoint, event.getX(), event.getY(), xAxisShift, yAxisShift, xAxis.getWidth(), yAxis.getHeight());
-
-        int start = xAxis.getValueForDisplay(selection.getX() - xAxisShift).intValue();
-        int end = xAxis.getValueForDisplay(selection.getX() + selection.getWidth() - xAxisShift).intValue();
-
-        boolean forward = true;
-        if( selectionPoint.getX() == (selection.getX() + selection.getWidth())) {
-          //Backward selection
-          forward = false;
-        }
-
-        notifyListeners(start, end, true, forward);
-      }
-    });
-  }
-  
-  private Rectangle getSelectionRectangle(Point2D start, double mouseX, double mouseY, double xShift, double yShift, double chartWidth, double chartHeight) {
-    
-    //Bound the rectangle to be only within the chart
-    mouseX = Math.max(mouseX, xShift);
-    mouseX = Math.min(mouseX, chartWidth + xShift);    
-    mouseY = Math.max(mouseY, yShift);
-    mouseY = Math.min(mouseY, chartHeight + yShift);
-    
-    double width = mouseX - start.getX();
-    double height = mouseY - start.getY();
-    double x = Math.max(0, start.getX() + Math.min(width, 0));
-    double y = start.getY() + Math.min(height, 0);
-      
-    return new Rectangle(x, y, Math.abs(width), Math.abs(height));
-  }
-  
-  private double getSceneXShift(Node node) { 
-    double shift = 0; 
-    do {  
-        shift += node.getLayoutX();  
-        node = node.getParent(); 
-    } while (node != null && node.getClass() != ScatterChart.class); 
-    return shift; 
-  }
-  
-  private double getSceneYShift(Node node) { 
-    double shift = 0; 
-    do {  
-        shift += node.getLayoutY();
-        node = node.getParent(); 
-    } while (node != null && node.getClass() != ScatterChart.class); 
-    return shift; 
   }
 }

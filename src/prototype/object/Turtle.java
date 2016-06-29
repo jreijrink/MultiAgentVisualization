@@ -5,7 +5,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import prototype.chart.Chart;
+import prototype.chart.BaseChart;
+import prototype.chart.DockElement;
 import prototype.chart.DataPoint;
 
 public class Turtle {
@@ -13,7 +14,7 @@ public class Turtle {
   public double[][] data;
   private final ParameterMap parameterMap;
   private boolean[] filterMap;
-  private final Map<Chart, List<Filter>> filters;
+  private final Map<BaseChart, List<Filter>> filters;
   
   public Turtle(int turtleID, double[][] data) {
     this.turtleID = turtleID;
@@ -25,14 +26,14 @@ public class Turtle {
   }
   
   public void setFilter(Filter newFilter) {
-    Chart chart = newFilter.getChart();
+    BaseChart chart = newFilter.getChart();
     if(!filters.containsKey(chart))
       filters.put(chart, new ArrayList());
     filters.get(chart).add(newFilter);
     applyFilters();
   }
   
-  public boolean removeFilters(Chart chart) {
+  public boolean removeFilters(BaseChart chart) {
     if(filters.containsKey(chart) && filters.get(chart).size() > 0) {
       filters.remove(chart);
       applyFilters();
@@ -42,7 +43,7 @@ public class Turtle {
   }
     
   public boolean removeFilter(Filter filter) {
-    Chart chart = filter.getChart();
+    BaseChart chart = filter.getChart();
     boolean success = false;
     
     if(filters.containsKey(chart) && filters.get(chart).size() > 0) {
@@ -311,7 +312,7 @@ public class Turtle {
         this.filterMap[i] = true;
       }
       
-      for(Chart chart : filters.keySet()) {
+      for(BaseChart chart : filters.keySet()) {
         if(filters.get(chart).size() > 0) {
           boolean[] localFilterMap = new boolean[this.data[0].length];
           for(int i = 0; i < this.data[0].length; i++) {

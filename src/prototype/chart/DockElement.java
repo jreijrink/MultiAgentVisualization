@@ -20,16 +20,14 @@ import prototype.object.Turtle;
 import prototype.settings.Configuration;
 import org.dockfx.DockNode;
 
-public interface Chart extends EventListener {
+public interface DockElement extends EventListener {
   
   public void updateData(List<Turtle> data);
   
   public String getName();  
   
   public Node getNode();
-  
-  public Chart getCopy();
-  
+    
   public void update();
   
   public void clearFilter();

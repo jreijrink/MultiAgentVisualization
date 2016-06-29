@@ -6,7 +6,7 @@ import javafx.scene.Scene;
 import org.dockfx.DockPos;
 import prototype.chart.AgentChart;
 import prototype.chart.CategoricalChart;
-import prototype.chart.Chart;
+import prototype.chart.DockElement;
 import prototype.chart.FieldCanvas;
 import prototype.chart.XYBaseChart;
 
@@ -39,7 +39,7 @@ public class LayoutChart {
     this.turtleHistory = turtleHistory;
   }
   
-  public Chart getChart(Scene scene, List<Turtle> data) {
+  public DockElement getChart(Scene scene, List<Turtle> data) {
     switch(this.type)
     {
       case "Field":

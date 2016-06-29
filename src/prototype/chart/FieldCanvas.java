@@ -38,18 +38,18 @@ import prototype.object.ParameterMap;
 import prototype.listener.SelectionEventListener;
 import prototype.object.StringValuePair;
 import prototype.object.Turtle;
-import static prototype.chart.Chart.getCheckbox;
-import static prototype.chart.Chart.getTurtleListView;
+import static prototype.chart.DockElement.getCheckbox;
+import static prototype.chart.DockElement.getTurtleListView;
 import prototype.object.Parameter;
 import prototype.object.Range;
 import prototype.settings.Configuration;
 import org.dockfx.DockNode;
-import static prototype.chart.Chart.selectionToString;
-import static prototype.chart.Chart.getAllTurtles;
+import static prototype.chart.DockElement.selectionToString;
+import static prototype.chart.DockElement.getAllTurtles;
 import prototype.object.CombinedBall;
 import prototype.object.CombinedOpponent;
 
-public class FieldCanvas extends Pane implements Chart{
+public class FieldCanvas extends Pane implements DockElement{
   private static double TRANSPARENCY = 0.5;
   private List<Turtle> data;
   private Range<Integer> selection;
@@ -182,12 +182,7 @@ public class FieldCanvas extends Pane implements Chart{
   public String getName() {
     return "Field";
   }
-  
-  @Override
-  public Chart getCopy() {
-    return new FieldCanvas(data, liveUpdate, selectedTurtles, turtleHistory);
-  }
-    
+      
   @Override
   public void addSelectionEventListener(SelectionEventListener listener) {
     listenerList.add(listener);
