@@ -196,8 +196,12 @@ public class XYBaseChart implements Chart {
       
       if(selectionRectangle != null) {
         selectionRectangle.setX(xAxisShift + start);
-        selectionRectangle.setWidth(end - start);
+        selectionRectangle.setWidth(end - start);        
         selectionRectangle.setUserData(new Object[]{ startIndex, endIndex });
+      } 
+      
+      if (xAxis.getWidth() == 0) {
+        Platform.runLater(()-> selectFrames(startIndex, endIndex, drag, forward));    
       }
       
       if(selectionFrame != null) {

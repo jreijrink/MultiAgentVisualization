@@ -73,6 +73,16 @@
               "id": 8
             }
           ]
+        },
+        {
+          "and-conditions": [
+            {
+              "id": 3
+            },
+            {
+              "id": 5
+            }
+          ]
         }
       ]
     },
@@ -149,7 +159,15 @@
     },
     {
       "name": "*NotAttacker",
-      "post-conditions-succes": [],
+      "post-conditions-succes": [
+        {
+          "and-conditions": [
+            {
+              "id": 917237989
+            }
+          ]
+        }
+      ],
       "pre-conditions": [
         {
           "and-conditions": [
@@ -230,6 +248,52 @@
             },
             {
               "id": 15
+            }
+          ]
+        }
+      ],
+      "post-conditions-failed": [
+        {
+          "and-conditions": [
+            {
+              "id": 6
+            }
+          ]
+        },
+        {
+          "and-conditions": [
+            {
+              "id": 9
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "*Throw-in",
+      "post-conditions-succes": [
+        {
+          "and-conditions": [
+            {
+              "id": 3
+            },
+            {
+              "id": 5
+            },
+            {
+              "id": 1505489551
+            }
+          ]
+        }
+      ],
+      "pre-conditions": [
+        {
+          "and-conditions": [
+            {
+              "id": 1505489551
+            },
+            {
+              "id": 1505456496
             }
           ]
         }

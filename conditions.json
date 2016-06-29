@@ -95,7 +95,7 @@
           "value": "None"
         }
       ],
-      "name": "Opponnant has ball",
+      "name": "Opponnent has ball",
       "equationType": "is not",
       "id": 6,
       "parameterName": "Opponent with ball",
@@ -186,6 +186,19 @@
       "equationType": "is",
       "id": 9,
       "parameterName": "Refbox command",
+      "parameterIndex": 0
+    },
+    {
+      "valueName": "refbox-role",
+      "values": [
+        {
+          "value": "Refbox 1"
+        }
+      ],
+      "name": "RefboxOne",
+      "equationType": "is",
+      "id": 1505489551,
+      "parameterName": "Refbox role",
       "parameterIndex": 0
     },
     {
@@ -298,6 +311,19 @@
       "equationType": "is",
       "id": 915967453,
       "parameterName": "Battery voltage",
+      "parameterIndex": 0
+    },
+    {
+      "valueName": "all",
+      "values": [
+        {
+          "value": "Throwin magenta"
+        }
+      ],
+      "name": "Throw-in",
+      "equationType": "is",
+      "id": 1505456496,
+      "parameterName": "Refbox command",
       "parameterIndex": 0
     }
   ]

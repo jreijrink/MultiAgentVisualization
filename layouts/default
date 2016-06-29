@@ -3,8 +3,46 @@
     {
       "charts": [
         {
-          "charts": [],
-          "pos": "BOTTOM",
+          "charts": [
+            {
+              "charts": [],
+              "pos": "LEFT",
+              "liveUpdate": true,
+              "selectedTurtles": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              "parameter": "Ball",
+              "time": "2016-06-29T11:49:54.362",
+              "chart": "Scatter-chart",
+              "parameterIndex": 0,
+              "parameterValue": "y"
+            },
+            {
+              "charts": [],
+              "pos": "LEFT",
+              "liveUpdate": true,
+              "selectedTurtles": [
+                0,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              "parameter": "Skill ID",
+              "time": "2016-06-29T11:49:54.346",
+              "chart": "Turtle-chart",
+              "parameterIndex": 0,
+              "parameterValue": "shottype"
+            }
+          ],
+          "pos": "TOP",
           "liveUpdate": true,
           "selectedTurtles": [
             0,
@@ -15,80 +53,26 @@
             5,
             6
           ],
-          "parameter": "Battery voltage",
-          "time": "2016-06-13T12:24:32.218",
-          "chart": "Scatter-chart",
+          "parameter": "Skill ID",
+          "time": "2016-06-29T11:49:54.321",
+          "chart": "Categorical-chart",
           "parameterIndex": 0,
-          "parameterValue": "battery-voltage"
+          "parameterValue": "shottype"
         }
       ],
-      "pos": "RIGHT",
+      "pos": "TOP",
       "liveUpdate": true,
       "selectedTurtles": [
-        0,
         1,
-        2,
         3,
         4,
-        5,
-        6
+        5
       ],
-      "parameter": "Cpu0 load",
-      "time": "2016-06-13T12:24:14.484",
-      "chart": "Scatter-chart",
+      "parameter": "Role ID",
+      "time": "2016-06-29T11:49:54.247",
+      "chart": "Categorical-chart",
       "parameterIndex": 0,
-      "parameterValue": "cpu0-load"
-    },
-    {
-      "charts": [
-        {
-          "charts": [],
-          "pos": "BOTTOM",
-          "liveUpdate": true,
-          "selectedTurtles": [
-            0,
-            1,
-            2,
-            3,
-            4,
-            5,
-            6
-          ],
-          "parameter": "Motor temperature",
-          "time": "2016-06-13T12:24:55.033",
-          "chart": "Scatter-chart",
-          "parameterIndex": 0,
-          "parameterValue": "temperature"
-        }
-      ],
-      "pos": "RIGHT",
-      "liveUpdate": true,
-      "selectedTurtles": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6
-      ],
-      "parameter": "Cpu1 load",
-      "time": "2016-06-13T12:23:10.810",
-      "chart": "Scatter-chart",
-      "parameterIndex": 0,
-      "parameterValue": "cpu1-load"
-    },
-    {
-      "charts": [],
-      "pos": "FLOAT",
-      "liveUpdate": true,
-      "selectedTurtles": [
-        0
-      ],
-      "parameter": "Turtle",
-      "chart": "Scatter-chart",
-      "parameterIndex": 0,
-      "parameterValue": "x"
+      "parameterValue": "current"
     }
   ]
 }

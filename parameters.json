@@ -431,11 +431,11 @@
           "decimalmask": "",
           "categories": [
             {
-              "name": "False",
+              "name": "Magenta",
               "value": 0
             },
             {
-              "name": "True",
+              "name": "Cyan",
               "value": 1
             }
           ],
@@ -539,6 +539,21 @@
             {
               "name": "Goalkeeper",
               "value": 6
+            }
+          ],
+          "rangeEnabled": false
+        },
+        {
+          "unit": "role",
+          "min": 0,
+          "max": 0,
+          "name": "attacker",
+          "index": 0,
+          "decimalmask": "",
+          "categories": [
+            {
+              "name": "Attacker main",
+              "value": 1
             }
           ],
           "rangeEnabled": false

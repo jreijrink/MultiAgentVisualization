@@ -641,7 +641,7 @@ public class FieldCanvas extends Pane implements Chart{
     
     return combinedPoints;
   }
-  
+   
   private List<CombinedBall> filterBall(Map<Integer, Point2D> ballPoints, double distance) {
     List<CombinedBall> combinedPoints = new ArrayList();
     
