@@ -7,59 +7,37 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.chart.Axis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
-import javafx.scene.chart.XYChart.Series;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.RectangleBuilder;
 import org.apache.pivot.util.Console;
-import prototype.object.ParameterMap;
+import static prototype.chart.DockElement.getAllTurtles;
 import prototype.listener.SelectionEventListener;
-import prototype.object.StringValuePair;
 import prototype.object.Parameter;
 import prototype.object.Turtle;
-import prototype.object.Value;
-import org.dockfx.DockNode;
-import static prototype.chart.DockElement.getAllTurtles;
-import static prototype.chart.DockElement.getCheckbox;
-import static prototype.chart.DockElement.getScale;
-import static prototype.chart.DockElement.getTurtleListView;
 import prototype.object.Filter;
 import prototype.object.Range;
 
 public final class XYBaseChart extends BaseChart {  
   public enum ChartType { Scatter, Line };  
-  private ChartType type;  
-  private XYChart<Number,Number> XYChart;  
+  private final ChartType type;
   private Timer resizeTimer;
   private TimerTask resizeTask;
-  private int visibleDataPoints;
   
   public XYBaseChart(Scene scene, ChartType type, int[] selectedTurtles, String yParameter, int yParameterIndex, String yParameterValue, List<Turtle> data,  boolean liveUpdate) {
     super(scene, selectedTurtles, yParameter, yParameterIndex, yParameterValue, data,  liveUpdate);
@@ -69,6 +47,7 @@ public final class XYBaseChart extends BaseChart {
   
   public XYBaseChart(Scene scene, ChartType type, List<Turtle> data, int selectionStart, int selectionEnd, boolean forward) {
     super(scene, data, selectionStart, selectionEnd, forward);
+    this.type = type;
     
     if(this.parameterMap.getAllParameters().size() > 0) {
     Parameter firstParameter = this.parameterMap.getAllParameters().get(0);
@@ -92,48 +71,7 @@ public final class XYBaseChart extends BaseChart {
     }
     return "XY-chart";
   }
-  
-  @Override
-  public void selectFrames(int startIndex, int endIndex, boolean drag, boolean forward) {    
-    if((!drag || liveUpdate) && data.size() > 0 && XYChart != null) {
-      
-      selectedStartIndex = startIndex;
-      selectedEndIndex = endIndex;
-      this.forward = forward;
-      
-      clearSelection();
-      
-      NumberAxis xAxis = (NumberAxis) this.XYChart.getXAxis();
-      double xAxisShift = getSceneXShift(xAxis);
-      double start = xAxis.getDisplayPosition(startIndex);
-      double end = xAxis.getDisplayPosition(endIndex);
-      
-      if(start == end)
-        end +=1;
-      
-      if(selectionRectangle != null) {
-        selectionRectangle.setX(xAxisShift + start);
-        selectionRectangle.setWidth(end - start);        
-        selectionRectangle.setUserData(new Object[]{ startIndex, endIndex });
-      } 
-      
-      if (xAxis.getWidth() == 0) {
-        Platform.runLater(()-> selectFrames(startIndex, endIndex, drag, forward));    
-      }
-      
-      if(selectionFrame != null) {
-        if(forward)
-          selectionFrame.setX(xAxisShift + end);
-        else
-          selectionFrame.setX(xAxisShift + start);
-        selectionFrame.setWidth(2);
-        selectionFrame.setUserData(forward);
-      }
-      
-      setDockTitle();
-    }
-  }
-  
+    
   private void initRootPaneListeners() {
 
     resizeTimer = new Timer();
@@ -179,69 +117,13 @@ public final class XYBaseChart extends BaseChart {
     });    
   }
   
-  private void clearSelection() {    
-    if(XYChart != null) {
-      NumberAxis yAxis = (NumberAxis) XYChart.getYAxis();
-      double yAxisShift = getSceneYShift(yAxis);
-
-      if(selectionRectangle != null) {
-        selectionRectangle.setX(0);
-        selectionRectangle.setY(yAxisShift);
-        selectionRectangle.setWidth(0);
-        selectionRectangle.setHeight(yAxis.getHeight());
-      }
-      
-      if(selectionFrame != null) {
-        selectionFrame.setX(0);
-        selectionFrame.setWidth(0);
-        selectionFrame.setY(yAxisShift);
-        selectionFrame.setHeight(yAxis.getHeight());      
-      }
-    }
-  }
-  
-  @Override
-  void initialize(boolean resize) {
-    setCursor(Cursor.WAIT);
-    
-    this.parameterMap = new ParameterMap();
-    (new Thread() {
-      public void run() {
-        List<XYChart.Series> datapoints = getData();
-        if(!resize || dataIncreaseAchieved(datapoints)) {
-          visibleDataPoints = getDataSize(datapoints);
-          createChart(datapoints);
-          Platform.runLater(()-> setMouseListeners());    
-          Platform.runLater(()-> selectFrames(selectedStartIndex, selectedEndIndex, false, forward));
-          //selectFrames(selectedStartIndex, selectedEndIndex, false, forward);
-        }
-        Platform.runLater(()->  setCursor(Cursor.DEFAULT));
-      }
-    }).start();
-  }
-    
   @Override
   boolean isCategorical() {
     return false;
   }
   
-  private boolean dataIncreaseAchieved(List<XYChart.Series> data) {
-    int newSize = getDataSize(data);
-    double difference = Math.abs(newSize - visibleDataPoints);
-    double threshold = ((double)visibleDataPoints) * 0.2;
-    
-    return difference > threshold; 
-  }
-  
-  private int getDataSize(List<XYChart.Series> data) {
-    int totalSize = 0;
-    for(XYChart.Series series : data) {
-      totalSize += series.getData().size();
-    }    
-    return totalSize;
-  }
-  
-  private void createChart(Collection datapoints) {
+  @Override
+  void createChart(Collection datapoints) {
     
     NumberAxis xAxis = new NumberAxis();
     try {
@@ -393,83 +275,8 @@ public final class XYBaseChart extends BaseChart {
     drawInvalidData();
   }
   
-  private void setMouseListeners() {
-
-    //XYChart<Number,Number> XYChart = (XYChart<Number,Number>)rootPane.getCenter();
-    
-    NumberAxis xAxis = (NumberAxis) this.XYChart.getXAxis();
-    NumberAxis yAxis = (NumberAxis) this.XYChart.getYAxis();
-
-    for(Series series : XYChart.getData()) {
-      for (Node n : series.getChart().getChildrenUnmodifiable()) {
-        
-        if(n.getStyleClass().contains("chart-content")) {          
-
-          final Pane chart = (Pane) n;
-          ObservableList<Node> children = chart.getChildren();
-          
-          for(Node child : children) {
-            if(child.getStyleClass().contains("chart-plot-background")) {
-              createRectangleSelectionEvents(child, null, xAxis, yAxis);
-            }
-            if(child.getClass().getName().equals("javafx.scene.chart.XYChart$1")) {
-              createRectangleSelectionEvents(child, chart, xAxis, yAxis);
-            }
-          }
-        }
-      }
-    }
-
-    if(selectionRectangle == null) {
-      selectionRectangle = RectangleBuilder.create()
-              .x(0)
-              .y(0)
-              .height(yAxis.getHeight())
-              .width(0)
-              .fill(Color.web("0x222222"))
-              .opacity(0.2)
-              .id("selection")
-              .build();
-      selectionRectangle.setUserData(new Object[]{ -1, -1 });
-    }
-    
-    Platform.runLater(new Runnable() {
-      @Override
-      public void run() {
-      if(!rootPane.getChildren().contains(selectionRectangle))
-        rootPane.getChildren().add(selectionRectangle);
-        createRectangleSelectionEvents(selectionRectangle, rootPane, xAxis, yAxis);
-      }
-    });
-
-    if(selectionFrame == null) {
-      selectionFrame = RectangleBuilder.create()
-              .x(0)
-              .y(0)
-              .height(yAxis.getHeight())
-              .width(0)
-              .fill(Color.web("0x222222"))
-              .opacity(0.4)
-              .id("selection")
-              .build();
-      selectionFrame.setUserData(forward);
-    }
-    
-    Platform.runLater(new Runnable() {
-      @Override
-      public void run() {
-      if(!rootPane.getChildren().contains(selectionFrame))
-        rootPane.getChildren().add(selectionFrame);
-        createRectangleSelectionEvents(selectionFrame, rootPane, xAxis, yAxis);
-      }
-    });
-    
-    createAxisFilter();
-    createAxisZoom(xAxis, yAxis);
-  }
-  
-  private void createAxisFilter() {
-    
+  @Override
+  void createAxisFilter() {    
     Platform.runLater(new Runnable() {
       @Override
       public void run() {
@@ -599,8 +406,9 @@ public final class XYBaseChart extends BaseChart {
       }
     });
   }
-    
-  private List<XYChart.Series> getData() { 
+  
+  @Override
+  List<XYChart.Series> getData() { 
     List<XYChart.Series> seriesList = new ArrayList<>();
         
     if(data.size() > 0) {
@@ -612,7 +420,7 @@ public final class XYBaseChart extends BaseChart {
       int after = 0;
 
       Map<Integer, List<DataPoint>> datapoints = new HashMap();
-        for(int turtle =  0; turtle < turtles; turtle++) {
+      for(int turtle =  0; turtle < turtles; turtle++) {
         datapoints.put(turtle, new ArrayList());
       }
       
@@ -652,8 +460,8 @@ public final class XYBaseChart extends BaseChart {
           elements.add(element);
         }
 
-        ObservableList<XYChart.Data> data = series.getData();
-        data.addAll(elements);
+        ObservableList<XYChart.Data> seriesData = series.getData();
+        seriesData.addAll(elements);
 
         seriesList.add(series);        
       }
@@ -758,10 +566,10 @@ public final class XYBaseChart extends BaseChart {
     for(Integer turtleIndex : data.keySet()) {
       result.put(turtleIndex, new ArrayList());
       //Show at least one point, so the legend shows the turtle color
-      if(data.get(turtleIndex).size() > 0)
-        result.get(turtleIndex).add(data.get(turtleIndex).get(0));
+      //if(data.get(turtleIndex).size() > 0)
+        //result.get(turtleIndex).add(data.get(turtleIndex).get(0));
     }
-       
+    
     for(SimpleEntry<Integer, DataPoint> point : sortedPoints) {
       result.get(point.getKey()).add(point.getValue());
     }

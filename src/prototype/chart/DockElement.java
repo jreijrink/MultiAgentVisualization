@@ -30,7 +30,7 @@ public interface DockElement extends EventListener {
     
   public void update();
   
-  public void clearFilter();
+  public void clearFilters();
   
   public void setDockNode(DockNode dockNode);
   
@@ -39,18 +39,6 @@ public interface DockElement extends EventListener {
   public void selectFrames(int startIndex, int endIndex, boolean drag, boolean forward);
     
   public void showParameterDialog();
-
-  static double getScale(double range) {
-    double leftDigits = range;
-    int dividings = 0;
-    while(leftDigits >= 100) {
-      leftDigits = Math.round(leftDigits / 10);
-      dividings += 1;
-    }
-    double scale = Math.round(leftDigits / 10);
-    double result = scale * Math.pow(10, dividings);    
-    return result;
-  }
     
   static ListView getTurtleListView(int[] selected) {
     ListView<StringValuePair<String, Integer>> turtleListView = new ListView();              

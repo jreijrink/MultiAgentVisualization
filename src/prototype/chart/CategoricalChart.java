@@ -5,43 +5,29 @@ import com.sun.javafx.charts.Legend.LegendItem;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.Timer;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.chart.Axis;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.RectangleBuilder;
 import static prototype.chart.DockElement.getAllTurtles;
-import static prototype.chart.DockElement.getCheckbox;
-import static prototype.chart.DockElement.getScale;
-import static prototype.chart.DockElement.getTurtleListView;
 import prototype.listener.SelectionEventListener;
 import prototype.object.Category;
 import prototype.object.Parameter;
 import prototype.object.ParameterMap;
-import prototype.object.StringValuePair;
 import prototype.object.Turtle;
 import prototype.object.Type;
 import prototype.object.Value;
@@ -50,10 +36,6 @@ import prototype.object.Filter;
 
 public final class CategoricalChart extends BaseChart {
   private static final int MIN_WIDTH = 1;
-  private ScatterChart<Number,String> scattterChart;  
-  private double initSelectionX = 0;
-  private double initSelectionWidth = 0;
-  private Object[] initSelectionData = new Object[]{ 0, 0 };
   
   public CategoricalChart(Scene scene, int[] selectedTurtles, String yParameter, int yParameterIndex, String yParameterValue, List<Turtle> data, boolean liveUpdate) {
     super(scene, selectedTurtles, yParameter, yParameterIndex, yParameterValue, data,  liveUpdate);    
@@ -80,54 +62,17 @@ public final class CategoricalChart extends BaseChart {
   }
   
   @Override
-  public void selectFrames(int startIndex, int endIndex, boolean drag, boolean forward) {
-    if((!drag || liveUpdate) && data. size() > 0) {
-      selectedStartIndex = startIndex;
-      selectedEndIndex = endIndex;
-      this.forward = forward;
-      
-      NumberAxis xAxis = (NumberAxis) scattterChart.getXAxis();
-      double xAxisShift = getSceneXShift(xAxis);
-      double start = xAxis.getDisplayPosition(startIndex);
-      double end = xAxis.getDisplayPosition(endIndex);
-      
-      if(start == end)
-        end +=1;
-      
-      if(selectionRectangle != null) {        
-        selectionRectangle.setX(xAxisShift + start);
-        selectionRectangle.setWidth(end - start);
-        selectionRectangle.setUserData(new Object[]{ startIndex, endIndex });
-      } else {
-        initSelectionX = xAxisShift + start;
-        initSelectionWidth = end - start;
-        initSelectionData = new Object[]{ startIndex, endIndex };
-      }
-      
-      if(selectionFrame != null) {
-        if(forward)
-          selectionFrame.setX(xAxisShift + end);
-        else
-          selectionFrame.setX(xAxisShift + start);
-        selectionFrame.setUserData(forward);
-      }
-      
-      setDockTitle();
-    }
-  }
-    
-  @Override
-  void initialize(boolean resize) {
-    this.parameterMap = new ParameterMap();
-    createChart();
-  }
-  
-  @Override
   boolean isCategorical() {
     return true;
   }
     
-  private void createChart() {
+  @Override
+  List<XYChart.Series> getData() {
+    return new ArrayList();
+  }
+
+  @Override
+  void createChart(Collection datapoints) {
     ObservableList<String> categories = FXCollections.observableArrayList();
     
     try {
@@ -146,10 +91,13 @@ public final class CategoricalChart extends BaseChart {
     try {
         int timeframes = this.data.get(0).getTimeFrameCount();
         double scale = getScale(timeframes);
-        xAxis = new NumberAxis(0, timeframes, scale);
+        if(zoomRange == null)
+          xAxis = new NumberAxis(0, timeframes, scale);
+        else
+          xAxis = new NumberAxis(zoomRange.getMin(), zoomRange.getMax(), scale);
     } catch(Exception ex) { }
 
-    this.scattterChart = new ScatterChart<>(xAxis, yAxis);
+    this.XYChart = (XYChart)new ScatterChart(xAxis, yAxis);
 
     xAxis.widthProperty().addListener((ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) -> {
       Timer timer = new java.util.Timer();
@@ -189,11 +137,11 @@ public final class CategoricalChart extends BaseChart {
 
     if(data.size() > 0) {
       xAxis.setLabel("Time");
-      this.scattterChart.getData().addAll(getData());
+      this.XYChart.getData().addAll(datapoints);
     }
 
     rootPane.getChildren().clear();
-    rootPane.setCenter(this.scattterChart);
+    rootPane.setCenter(this.XYChart);
 
     Timer timer = new java.util.Timer();
     timer.schedule( 
@@ -213,14 +161,165 @@ public final class CategoricalChart extends BaseChart {
       }, 100);
   }
   
-  private Collection getData() {
-    List<XYChart.Series> seriesList = new ArrayList<>();
+  @Override
+  void createAxisFilter() {
     
-    return seriesList;
+    Platform.runLater(new Runnable() {
+      @Override
+      public void run() {
+      for(Rectangle filter : filterRectangles) {
+        if(!rootPane.getChildren().contains(filter))
+          rootPane.getChildren().add(filter);
+        }
+      }
+    });
+    
+    NumberAxis xAxis = (NumberAxis) this.XYChart.getXAxis();
+    CategoryAxis yAxis = (CategoryAxis) this.XYChart.getYAxis();
+    
+    yAxis.setOnMouseMoved((MouseEvent event) -> {
+      double yAxisShift = getSceneYShift(yAxis);
+      newFilter = true;
+      selectedFilterIndex = -1;
+
+      for(Rectangle filter : filterRectangles) {
+        if(event.getY() > filter.getY() - yAxisShift && event.getY() < filter.getY() - yAxisShift + filter.getHeight()) {
+          selectedFilterIndex = filterRectangles.indexOf(filter);
+          newFilter = false;
+        }
+      }
+
+      if(scene.getCursor() != Cursor.WAIT) {
+        if(newFilter) {
+          setCursor(Cursor.CROSSHAIR);
+        } else {
+          setCursor(Cursor.CLOSED_HAND);
+        }
+      }
+    });
+    
+    yAxis.setOnMouseExited((MouseEvent event) -> {
+      if(scene.getCursor() != Cursor.WAIT)
+        setCursor(Cursor.DEFAULT);
+    });
+    
+    yAxis.setOnMousePressed((MouseEvent event) -> {
+      
+      
+      if(scene.getCursor() != Cursor.WAIT)
+        setCursor(Cursor.V_RESIZE);
+
+      if(newFilter) {        
+        double yAxisShift = getSceneYShift(yAxis);    
+        double xShift = getSceneXShift(xAxis);
+        double yShift = 0;//getSceneYShift(yAxis);
+
+        basePoint = new Point2D(event.getX(), event.getY());
+
+        Rectangle selection = getSelectionRectangle(basePoint, event.getX(), event.getY(), xShift, yShift, xAxis.getWidth(), yAxis.getHeight());
+
+        Rectangle filterRectangle = RectangleBuilder.create()
+                .x(getSceneXShift(xAxis))
+                .y(selection.getY() + yAxisShift)
+                .height(selection.getHeight())
+                .width(xAxis.getWidth())
+                .fill(Color.web("0x222222"))
+                .opacity(0.3)
+                .id("filter")
+                .build();
+        filterRectangle.setUserData(new Object[]{ "", "" });
+        rootPane.getChildren().add(filterRectangle);
+        filterRectangles.add(filterRectangle);
+        selectedFilterIndex = filterRectangles.indexOf(filterRectangle);
+        
+        createRectangleSelectionEvents(filterRectangle, rootPane, xAxis, yAxis);
+      } else {
+        if(selectedFilterIndex >= 0 && filterRectangles.size() > selectedFilterIndex) {
+          Rectangle removeFilter = filterRectangles.get(selectedFilterIndex);
+          for(Turtle turtle : data) {
+            Filter filter = (Filter)((Object[])removeFilter.getUserData())[2];
+            turtle.removeFilter(filter);
+          }
+          rootPane.getChildren().remove(removeFilter);
+          filterRectangles.remove(removeFilter);
+
+          for(SelectionEventListener listener : listenerList) {
+            listener.update();
+          }
+        }
+      }      
+    });
+
+    yAxis.setOnMouseDragged((MouseEvent event) -> {
+      setCursor(Cursor.V_RESIZE);
+      
+      if(newFilter && selectedFilterIndex >= 0 && filterRectangles.size() > selectedFilterIndex) {
+      double yAxisShift = getSceneYShift(yAxis);    
+      double xShift = getSceneXShift(xAxis);
+        double yShift = 0;//getSceneYShift(yAxis);
+
+      Rectangle selection = getSelectionRectangle(basePoint, event.getX(), event.getY(), xShift, yShift, xAxis.getWidth(), yAxis.getHeight());
+      
+        Rectangle filterRectangle = filterRectangles.get(selectedFilterIndex);
+        filterRectangle.setY(selection.getY() + yAxisShift);
+        filterRectangle.setHeight(selection.getHeight());
+      }
+    });
+    
+    yAxis.setOnMouseReleased((MouseEvent event) -> {
+      setCursor(Cursor.DEFAULT);
+      
+      if(newFilter && selectedFilterIndex >= 0 && filterRectangles.size() > selectedFilterIndex) {
+        double yAxisShift = getSceneYShift(yAxis);    
+        double xShift = getSceneXShift(xAxis);
+        double yShift = 0;//getSceneYShift(yAxis);
+
+        Rectangle selection = getSelectionRectangle(basePoint, event.getX(), event.getY(), xShift, yShift, xAxis.getWidth(), yAxis.getHeight());
+
+        Rectangle filterRectangle = filterRectangles.get(selectedFilterIndex);
+        
+        if(selection.getHeight() != 0) {
+          filterRectangle.setY(selection.getY() + yAxisShift);
+          filterRectangle.setHeight(selection.getHeight());
+
+          String minValue = yAxis.getValueForDisplay(selection.getY() + selection.getHeight());
+          if(minValue == null)
+            minValue = yAxis.getValueForDisplay(selection.getY() + selection.getHeight() - (getRowHeigt() / 2));
+          String maxValue = yAxis.getValueForDisplay(selection.getY());
+          if(maxValue == null)
+            maxValue = yAxis.getValueForDisplay(selection.getY() + (getRowHeigt() / 2));
+          
+          if(minValue != null && maxValue != null) {
+            filterRectangle.setUserData(new Object[]{ minValue, maxValue });
+
+            List<String> filterCategories = new ArrayList();
+            boolean started = false;
+            for(String category : yAxis.getCategories()) {
+              if(category.equals(minValue))
+                started = true;
+              if(started)
+                filterCategories.add(category);
+              if(category.equals(maxValue))
+                started = false;
+            }
+
+            Filter filter = filter(filterCategories);
+            if(filter != null) {
+              filterRectangle.setUserData(new Object[]{ minValue, maxValue, filter });
+            } else {
+              rootPane.getChildren().remove(filterRectangle);
+              filterRectangles.remove(filterRectangle);
+            }
+          } else {
+            rootPane.getChildren().remove(filterRectangle);
+            filterRectangles.remove(filterRectangle);
+          }
+        }
+      }      
+    });
   }
     
-  private void plotData() {
-    
+  private void plotData() {    
     List<Node> pointChildren = new ArrayList();
     for(Node child : this.rootPane.getChildren()) {
       if(child.getClass() == Rectangle.class && child.getId() == null) {
@@ -230,8 +329,8 @@ public final class CategoricalChart extends BaseChart {
     this.rootPane.getChildren().removeAll(pointChildren);
     
     if(data.size() > 0) {
-      CategoryAxis yAxis = (CategoryAxis) scattterChart.getYAxis();
-      NumberAxis xAxis = (NumberAxis) scattterChart.getXAxis();
+      Axis yAxis = XYChart.getYAxis();
+      NumberAxis xAxis = (NumberAxis) XYChart.getXAxis();
 
       double xAxisShift = getSceneXShift(xAxis);
       double yAxisShift = getSceneYShift(yAxis);
@@ -315,227 +414,47 @@ public final class CategoricalChart extends BaseChart {
         }
       }
 
-      if(selectionRectangle != null) 
-        rootPane.getChildren().remove(selectionRectangle);
-      
-      selectionRectangle = RectangleBuilder.create()
-              .x(initSelectionX)
-              .y(yAxisShift + 5)
-              .height(yAxis.getHeight() - 10)
-              .width(initSelectionWidth)
-              .fill(Color.web("0x222222"))
-              .opacity(0.2)
-              .id("selection")
-              .userData(initSelectionData)
-              .build();    
-      rootPane.getChildren().add(selectionRectangle);
-      
-      if(selectionFrame != null) 
-        rootPane.getChildren().remove(selectionFrame);
-      
-      selectionFrame = RectangleBuilder.create()
-              .x(0)
-              .y(0)
-              .height(yAxis.getHeight())
-              .width(2)
-              .fill(Color.web("0x222222"))
-              .opacity(0.4)
-              .id("selection")
-              .build();
-      selectionFrame.setUserData(true);
-      rootPane.getChildren().add(selectionFrame);
-      
       for(Node child : this.rootPane.getChildren()) {
         if(child.getClass() == Rectangle.class) {
           createRectangleSelectionEvents(child, rootPane, xAxis, yAxis);
         }
       }
       
-      createAxisFilter();
-      createAxisZoom(xAxis, yAxis);
       createLegend();
     }
   }
     
   private void createLegend() {
-      Legend legend = (Legend)scattterChart.lookup(".chart-legend");
-      legend.getStylesheets().add("prototype/plot.css");
-          
-      List<LegendItem> items = new ArrayList();
+    Legend legend = (Legend)XYChart.lookup(".chart-legend");
+    legend.getStylesheets().add("prototype/plot.css");
+
+    List<LegendItem> items = new ArrayList();
+
+    for(int turtle = 0; turtle < new Configuration().MaxTurtles; turtle++) {
+      Rectangle legendPoint = RectangleBuilder.create()
+              .height(10)
+              .width(10)
+              .build();
+
+      LegendItem item = new Legend.LegendItem(String.format("Turtle %d", turtle + 1), legendPoint);
       
-      for(int turtle = 0; turtle < new Configuration().MaxTurtles; turtle++) {
-          Rectangle legendPoint = RectangleBuilder.create()
-                  .height(10)
-                  .width(10)
-                  .build();
-        
-        LegendItem item = new Legend.LegendItem(String.format("Turtle %d", turtle + 1), legendPoint);
-        item.getSymbol().getStyleClass().add(String.format("default-color%d-fill", turtle));
-        
-        items.add(item);
+      boolean selected = false;
+      for(int turtleId : selectedTurtles) {
+        if(turtleId == turtle)
+          selected = true;
       }
       
-      legend.getItems().setAll(items);
+      if(selected)
+        item.getSymbol().getStyleClass().add(String.format("default-secondary-color%d-fill", turtle));
+      else
+        item.getSymbol().getStyleClass().add("default-legend-color");
+
+      items.add(item);
+    }
+
+    legend.getItems().setAll(items);
   }
   
-  private void createAxisFilter() {
-    
-    Platform.runLater(new Runnable() {
-      @Override
-      public void run() {
-      for(Rectangle filter : filterRectangles) {
-        if(!rootPane.getChildren().contains(filter))
-          rootPane.getChildren().add(filter);
-        }
-      }
-    });
-    
-    NumberAxis xAxis = (NumberAxis) this.scattterChart.getXAxis();
-    CategoryAxis yAxis = (CategoryAxis) this.scattterChart.getYAxis();
-    
-    yAxis.setOnMouseMoved((MouseEvent event) -> {
-      double yAxisShift = getSceneYShift(yAxis);
-      newFilter = true;
-      selectedFilterIndex = -1;
-
-      for(Rectangle filter : filterRectangles) {
-        if(event.getY() > filter.getY() - yAxisShift && event.getY() < filter.getY() - yAxisShift + filter.getHeight()) {
-          selectedFilterIndex = filterRectangles.indexOf(filter);
-          newFilter = false;
-        }
-      }
-
-      if(scene.getCursor() != Cursor.WAIT) {
-        if(newFilter) {
-          setCursor(Cursor.CROSSHAIR);
-        } else {
-          setCursor(Cursor.CLOSED_HAND);
-        }
-      }
-    });
-    
-    yAxis.setOnMouseExited((MouseEvent event) -> {
-      if(scene.getCursor() != Cursor.WAIT)
-        setCursor(Cursor.DEFAULT);
-    });
-    
-    yAxis.setOnMousePressed((MouseEvent event) -> {
-      
-      
-      if(scene.getCursor() != Cursor.WAIT)
-        setCursor(Cursor.V_RESIZE);
-
-      if(newFilter) {        
-        double yAxisShift = getSceneYShift(yAxis);    
-        double xShift = getSceneXShift(xAxis);
-        double yShift = 0;//getSceneYShift(yAxis);
-
-        basePoint = new Point2D(event.getX(), event.getY());
-
-        Rectangle selection = getSelectionRectangle(basePoint, event.getX(), event.getY(), xShift, yShift, xAxis.getWidth(), yAxis.getHeight());
-
-        Rectangle filterRectangle = RectangleBuilder.create()
-                .x(getSceneXShift(xAxis))
-                .y(selection.getY() + yAxisShift)
-                .height(selection.getHeight())
-                .width(xAxis.getWidth())
-                .fill(Color.web("0x222222"))
-                .opacity(0.3)
-                .id("filter")
-                .build();
-        filterRectangle.setUserData(new Object[]{ "", "" });
-        rootPane.getChildren().add(filterRectangle);
-        filterRectangles.add(filterRectangle);
-        selectedFilterIndex = filterRectangles.indexOf(filterRectangle);
-        
-        createRectangleSelectionEvents(filterRectangle, rootPane, xAxis, yAxis);
-      } else {
-        if(selectedFilterIndex >= 0 && filterRectangles.size() > selectedFilterIndex) {
-          Rectangle removeFilter = filterRectangles.get(selectedFilterIndex);
-          for(Turtle turtle : data) {
-            Filter filter = (Filter)((Object[])removeFilter.getUserData())[2];
-            turtle.removeFilter(filter);
-          }
-          rootPane.getChildren().remove(removeFilter);
-          filterRectangles.remove(removeFilter);
-
-          for(SelectionEventListener listener : listenerList) {
-            listener.update();
-          }
-        }
-      }
-      
-    });
-
-    yAxis.setOnMouseDragged((MouseEvent event) -> {
-      setCursor(Cursor.V_RESIZE);
-      
-      if(newFilter && selectedFilterIndex >= 0 && filterRectangles.size() > selectedFilterIndex) {
-      double yAxisShift = getSceneYShift(yAxis);    
-      double xShift = getSceneXShift(xAxis);
-        double yShift = 0;//getSceneYShift(yAxis);
-
-      Rectangle selection = getSelectionRectangle(basePoint, event.getX(), event.getY(), xShift, yShift, xAxis.getWidth(), yAxis.getHeight());
-      
-        Rectangle filterRectangle = filterRectangles.get(selectedFilterIndex);
-        filterRectangle.setY(selection.getY() + yAxisShift);
-        filterRectangle.setHeight(selection.getHeight());
-      }
-    });
-    
-    yAxis.setOnMouseReleased((MouseEvent event) -> {
-      setCursor(Cursor.DEFAULT);
-      
-      if(newFilter && selectedFilterIndex >= 0 && filterRectangles.size() > selectedFilterIndex) {
-        double yAxisShift = getSceneYShift(yAxis);    
-        double xShift = getSceneXShift(xAxis);
-        double yShift = 0;//getSceneYShift(yAxis);
-
-        Rectangle selection = getSelectionRectangle(basePoint, event.getX(), event.getY(), xShift, yShift, xAxis.getWidth(), yAxis.getHeight());
-
-        Rectangle filterRectangle = filterRectangles.get(selectedFilterIndex);
-        
-        if(selection.getHeight() != 0) {
-          filterRectangle.setY(selection.getY() + yAxisShift);
-          filterRectangle.setHeight(selection.getHeight());
-
-          String minValue = yAxis.getValueForDisplay(selection.getY() + selection.getHeight());
-          if(minValue == null)
-            minValue = yAxis.getValueForDisplay(selection.getY() + selection.getHeight() - (getRowHeigt() / 2));
-          String maxValue = yAxis.getValueForDisplay(selection.getY());
-          if(maxValue == null)
-            maxValue = yAxis.getValueForDisplay(selection.getY() + (getRowHeigt() / 2));
-          
-          if(minValue != null && maxValue != null) {
-            filterRectangle.setUserData(new Object[]{ minValue, maxValue });
-
-            List<String> filterCategories = new ArrayList();
-            boolean started = false;
-            for(String category : yAxis.getCategories()) {
-              if(category.equals(minValue))
-                started = true;
-              if(started)
-                filterCategories.add(category);
-              if(category.equals(maxValue))
-                started = false;
-            }
-
-            Filter filter = filter(filterCategories);
-            if(filter != null) {
-              filterRectangle.setUserData(new Object[]{ minValue, maxValue, filter });
-            } else {
-              rootPane.getChildren().remove(filterRectangle);
-              filterRectangles.remove(filterRectangle);
-            }
-          } else {
-            rootPane.getChildren().remove(filterRectangle);
-            filterRectangles.remove(filterRectangle);
-          }
-        }
-      }      
-    });
-  }
-    
   private Filter filter(List<String> filterCategories) {
     if(filterCategories.size() > 0) {
       Parameter selectedParameter = this.parameterMap.getParameter(this.parameter);
@@ -568,8 +487,8 @@ public final class CategoricalChart extends BaseChart {
   }
     
   private void resizeChart() {    
-    CategoryAxis yAxis = (CategoryAxis) scattterChart.getYAxis();
-    NumberAxis xAxis = (NumberAxis) scattterChart.getXAxis();
+    Axis yAxis = XYChart.getYAxis();
+    NumberAxis xAxis = (NumberAxis) XYChart.getXAxis();
 
     double xAxisShift = getSceneXShift(xAxis);
     double yAxisShift = getSceneYShift(yAxis);
@@ -660,20 +579,5 @@ public final class CategoricalChart extends BaseChart {
       filterRectangle.setX(xAxisShift);
       filterRectangle.setWidth(xAxis.getWidth());
     }
-  }
-  
-  private double getRowHeigt() {  
-      CategoryAxis yAxis = (CategoryAxis) scattterChart.getYAxis();
-      
-      double height = yAxis.getHeight();
-      List<String> categories = yAxis.getCategories();
-      if(categories.size() >= 2) {
-        double agent1YPosition = yAxis.getDisplayPosition(categories.get(0));
-        double agent2YPosition = yAxis.getDisplayPosition(categories.get(1));
-        height = Math.abs(agent2YPosition - agent1YPosition);
-      } else {
-        height = height - 10;
-      }
-      return height;
   }
 }

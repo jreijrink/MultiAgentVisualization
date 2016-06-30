@@ -7,6 +7,39 @@
           "pos": "RIGHT",
           "liveUpdate": true,
           "selectedTurtles": [
+            0
+          ],
+          "parameter": "Turtle",
+          "time": "2016-06-30T18:57:06.087",
+          "chart": "Line-chart",
+          "parameterIndex": 0,
+          "parameterValue": "x"
+        }
+      ],
+      "pos": "BOTTOM",
+      "liveUpdate": true,
+      "selectedTurtles": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
+      ],
+      "parameter": "Role ID",
+      "time": "2016-06-30T18:57:06.075",
+      "chart": "Categorical-chart",
+      "parameterIndex": 0,
+      "parameterValue": "current"
+    },
+    {
+      "charts": [
+        {
+          "charts": [],
+          "pos": "RIGHT",
+          "liveUpdate": true,
+          "selectedTurtles": [
             0,
             1,
             2,
@@ -16,7 +49,7 @@
             6
           ],
           "parameter": "Skill ID",
-          "time": "2016-06-29T15:46:46.966",
+          "time": "2016-06-30T18:57:06.048",
           "chart": "Turtle-chart",
           "parameterIndex": 0,
           "parameterValue": "skill ID"
@@ -25,44 +58,14 @@
       "pos": "TOP",
       "liveUpdate": true,
       "selectedTurtles": [
+        1,
         3
       ],
       "parameter": "Battery voltage",
-      "time": "2016-06-29T15:46:46.866",
+      "time": "2016-06-30T18:57:05.984",
       "chart": "Scatter-chart",
       "parameterIndex": 0,
       "parameterValue": "battery-voltage"
-    },
-    {
-      "charts": [
-        {
-          "charts": [],
-          "pos": "RIGHT",
-          "liveUpdate": true,
-          "selectedTurtles": [
-            0
-          ],
-          "parameter": "Turtle",
-          "time": "2016-06-29T15:46:47.008",
-          "chart": "Line-chart",
-          "parameterIndex": 0,
-          "parameterValue": "x"
-        }
-      ],
-      "pos": "BOTTOM",
-      "liveUpdate": true,
-      "selectedTurtles": [
-        1,
-        2,
-        3,
-        4,
-        5
-      ],
-      "parameter": "Role ID",
-      "time": "2016-06-29T15:46:47.001",
-      "chart": "Categorical-chart",
-      "parameterIndex": 0,
-      "parameterValue": "current"
     }
   ]
 }

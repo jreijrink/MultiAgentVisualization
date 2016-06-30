@@ -1,6 +1,7 @@
 package prototype.chart;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import javafx.application.Platform;
@@ -14,10 +15,12 @@ import javafx.scene.Cursor;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.chart.Axis;
+import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.ValueAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
@@ -27,6 +30,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.RectangleBuilder;
@@ -45,8 +49,10 @@ import prototype.object.Value;
 public abstract class BaseChart implements DockElement {
   protected Scene scene;
   protected List<Turtle> data;
+  private int visibleDataPoints;
   protected BorderPane rootPane; 
   protected DockNode dockNode;  
+  protected XYChart XYChart; 
   protected ParameterMap parameterMap;
   protected List<SelectionEventListener> listenerList = new ArrayList();
   
@@ -104,11 +110,14 @@ public abstract class BaseChart implements DockElement {
     this.rootPane.getStylesheets().add("prototype/plot.css");
     this.filterRectangles = new ArrayList();
   }
-  
-  abstract void initialize(boolean resize);
-  
+    
   abstract boolean isCategorical();
   
+  abstract List<XYChart.Series> getData();
+  
+  abstract void createAxisFilter();
+  
+  abstract void createChart(Collection datapoints);
   
   @Override
   public void addSelectionEventListener(SelectionEventListener listener) {
@@ -127,13 +136,13 @@ public abstract class BaseChart implements DockElement {
   
   @Override
   public void updateData(List<Turtle> data) {
-    clearFilter();
+    clearFilters();
     this.data = data;
     initialize(false);
   }
   
   @Override
-  public void clearFilter() {
+  public void clearFilters() {
     boolean hadFilters = false;
     for(Turtle turtle : data) {
       hadFilters = turtle.removeFilters(this) || hadFilters;
@@ -262,7 +271,7 @@ public abstract class BaseChart implements DockElement {
         }
         
         if(parameterChoiceBox.getSelectionModel().getSelectedItem() != null) {
-          clearFilter();
+          clearFilters();
           
           parameter = parameterChoiceBox.getSelectionModel().getSelectedItem();
           parameterIndex = indexChoiceBox.getSelectionModel().getSelectedItem();
@@ -284,6 +293,72 @@ public abstract class BaseChart implements DockElement {
       initialize(false);
     }
   }
+  
+  @Override
+  public void selectFrames(int startIndex, int endIndex, boolean drag, boolean forward) {    
+    if((!drag || liveUpdate) && data.size() > 0 && XYChart != null) {
+      
+      selectedStartIndex = startIndex;
+      selectedEndIndex = endIndex;
+      this.forward = forward;
+      
+      clearSelection();
+      
+      NumberAxis xAxis = (NumberAxis) this.XYChart.getXAxis();
+      double xAxisShift = getSceneXShift(xAxis);
+      double start = xAxis.getDisplayPosition(startIndex);
+      double end = xAxis.getDisplayPosition(endIndex);
+      
+      if(start == end)
+        end +=1;
+      
+      if(selectionRectangle != null) {
+        selectionRectangle.setX(xAxisShift + start);
+        selectionRectangle.setWidth(end - start);        
+        selectionRectangle.setUserData(new Object[]{ startIndex, endIndex });
+      } 
+      
+      if (xAxis.getWidth() == 0) {
+        Platform.runLater(()-> selectFrames(startIndex, endIndex, drag, forward));    
+      }
+      
+      if(selectionFrame != null) {
+        if(forward)
+          selectionFrame.setX(xAxisShift + end);
+        else
+          selectionFrame.setX(xAxisShift + start);
+        selectionFrame.setWidth(2);
+        selectionFrame.setUserData(forward);
+      }
+      
+      setDockTitle();
+    }
+  }
+  
+  public void initialize(boolean resize) {
+    setCursor(Cursor.WAIT);    
+    this.parameterMap = new ParameterMap();
+    
+    (new Thread() {
+      public void run() {
+        List<XYChart.Series> datapoints = getData();
+        if(!resize || dataIncreaseAchieved(datapoints)) {
+          visibleDataPoints = getDataSize(datapoints);
+          Platform.runLater(() -> {
+            createChart(datapoints);
+            Platform.runLater(() -> {
+              setMouseListeners();
+              createAxisFilter();
+              createAxisZoom();
+              selectFrames(selectedStartIndex, selectedEndIndex, false, forward);
+            });
+          });
+        }
+        Platform.runLater(()->  setCursor(Cursor.DEFAULT));
+      }
+    }).start();
+  }
+  
   protected void setDockTitle() {
     if(this.dockNode != null) {
       this.dockNode.setTitle(String.format("%s - %s[%d] (%s) [%d - %d]", getName(), this.parameter, this.parameterIndex, this.parameterValue, this.selectedStartIndex, this.selectedEndIndex));
@@ -311,14 +386,92 @@ public abstract class BaseChart implements DockElement {
     return yShift;
   }  
   
-  
   protected void notifyListeners(int startIndex, int endIndex, boolean drag, boolean forward) {
     for(SelectionEventListener listener : listenerList) {
       listener.timeFrameSelected(startIndex, endIndex, drag, forward);
     }
   }
   
-  protected void createAxisZoom(ValueAxis xAxis, Axis yAxis) {
+  protected int getDataSize(List<XYChart.Series> data) {
+    int totalSize = 0;
+    for(XYChart.Series series : data) {
+      totalSize += series.getData().size();
+    }    
+    return totalSize;
+  }
+    
+  protected void setMouseListeners() {
+    NumberAxis xAxis = (NumberAxis) this.XYChart.getXAxis();
+    Axis yAxis = this.XYChart.getYAxis();
+
+    for(XYChart.Series series : (List<XYChart.Series>)XYChart.getData()) {
+      for (Node n : series.getChart().getChildrenUnmodifiable()) {
+        
+        if(n.getStyleClass().contains("chart-content")) {          
+
+          final Pane chart = (Pane) n;
+          ObservableList<Node> children = chart.getChildren();
+          
+          for(Node child : children) {
+            if(child.getStyleClass().contains("chart-plot-background")) {
+              createRectangleSelectionEvents(child, null, xAxis, yAxis);
+            }
+            if(child.getClass().getName().equals("javafx.scene.chart.XYChart$1")) {
+              createRectangleSelectionEvents(child, chart, xAxis, yAxis);
+            }
+          }
+        }
+      }
+    }
+
+    if(selectionRectangle == null) {
+      selectionRectangle = RectangleBuilder.create()
+              .x(0)
+              .y(0)
+              .height(yAxis.getHeight())
+              .width(0)
+              .fill(Color.web("0x222222"))
+              .opacity(0.2)
+              .id("selection")
+              .build();
+      selectionRectangle.setUserData(new Object[]{ -1, -1 });
+    }
+    
+    Platform.runLater(new Runnable() {
+      @Override
+      public void run() {
+      if(!rootPane.getChildren().contains(selectionRectangle))
+        rootPane.getChildren().add(selectionRectangle);
+        createRectangleSelectionEvents(selectionRectangle, rootPane, xAxis, yAxis);
+      }
+    });
+
+    if(selectionFrame == null) {
+      selectionFrame = RectangleBuilder.create()
+              .x(0)
+              .y(0)
+              .height(yAxis.getHeight())
+              .width(0)
+              .fill(Color.web("0x222222"))
+              .opacity(0.4)
+              .id("selection")
+              .build();
+      selectionFrame.setUserData(forward);
+    }
+    
+    Platform.runLater(new Runnable() {
+      @Override
+      public void run() {
+      if(!rootPane.getChildren().contains(selectionFrame))
+        rootPane.getChildren().add(selectionFrame);
+        createRectangleSelectionEvents(selectionFrame, rootPane, xAxis, yAxis);
+      }
+    });
+  }
+  
+  protected void createAxisZoom() {
+    NumberAxis xAxis = (NumberAxis) this.XYChart.getXAxis();
+    Axis yAxis = this.XYChart.getYAxis();
     
     if(zoomRange != null) {      
       Platform.runLater(()-> setZoomedBar(xAxis, yAxis));    
@@ -417,34 +570,6 @@ public abstract class BaseChart implements DockElement {
     });
   }
   
-  private void setZoomedBar(ValueAxis xAxis, Axis yAxis) {    
-    double xAxisShift = getSceneXShift(xAxis);
-
-    zoomRectangle.setY(getSceneYShift(yAxis) + yAxis.getHeight());
-    zoomRectangle.setHeight(xAxis.getHeight());
-    zoomRectangle.setX(xAxisShift);
-    zoomRectangle.setWidth(xAxis.getWidth());
-    
-    
-    zoomRectangle.setOnMouseMoved((MouseEvent event) -> {        
-      if(scene.getCursor() != Cursor.WAIT) {
-        setCursor(Cursor.CLOSED_HAND);
-      }
-    });
-    
-    zoomRectangle.setOnMouseExited((MouseEvent event) -> {   
-      if(scene.getCursor() != Cursor.WAIT)
-        setCursor(Cursor.DEFAULT);
-    });
-    
-    zoomRectangle.setOnMousePressed((MouseEvent event) -> {
-      setCursor(Cursor.DEFAULT);
-      zooming = false;
-      zoomRange = null;
-      initialize(false);
-    });
-  }
-  
   protected void createRectangleSelectionEvents(Node node, Node parent, NumberAxis xAxis, Axis yAxis) {    
     node.setOnMousePressed((MouseEvent event) -> {
       double xShift = getXShift(node, parent, xAxis);
@@ -538,5 +663,89 @@ public abstract class BaseChart implements DockElement {
         node = node.getParent(); 
     } while (node != null && (node.getClass() != LineChart.class && node.getClass() != ScatterChart.class));
     return shift; 
+  }
+
+  protected double getScale(double range) {
+    double leftDigits = range;
+    int dividings = 0;
+    while(leftDigits >= 100) {
+      leftDigits = Math.round(leftDigits / 10);
+      dividings += 1;
+    }
+    double scale = Math.round(leftDigits / 10);
+    double result = scale * Math.pow(10, dividings);    
+    return result;
+  }
+  
+  protected double getRowHeigt() {  
+      CategoryAxis yAxis = (CategoryAxis) XYChart.getYAxis();
+      
+      double height = yAxis.getHeight();
+      List<String> categories = yAxis.getCategories();
+      if(categories.size() >= 2) {
+        double agent1YPosition = yAxis.getDisplayPosition(categories.get(0));
+        double agent2YPosition = yAxis.getDisplayPosition(categories.get(1));
+        height = Math.abs(agent2YPosition - agent1YPosition);
+      } else {
+        height = height - 10;
+      }
+      return height;
+  }
+  
+  private void setZoomedBar(ValueAxis xAxis, Axis yAxis) {    
+    double xAxisShift = getSceneXShift(xAxis);
+
+    zoomRectangle.setY(getSceneYShift(yAxis) + yAxis.getHeight());
+    zoomRectangle.setHeight(xAxis.getHeight());
+    zoomRectangle.setX(xAxisShift);
+    zoomRectangle.setWidth(xAxis.getWidth());
+    
+    
+    zoomRectangle.setOnMouseMoved((MouseEvent event) -> {        
+      if(scene.getCursor() != Cursor.WAIT) {
+        setCursor(Cursor.CLOSED_HAND);
+      }
+    });
+    
+    zoomRectangle.setOnMouseExited((MouseEvent event) -> {   
+      if(scene.getCursor() != Cursor.WAIT)
+        setCursor(Cursor.DEFAULT);
+    });
+    
+    zoomRectangle.setOnMousePressed((MouseEvent event) -> {
+      setCursor(Cursor.DEFAULT);
+      zooming = false;
+      zoomRange = null;
+      initialize(false);
+    });
+  }
+  
+  private boolean dataIncreaseAchieved(List<XYChart.Series> data) {
+    int newSize = getDataSize(data);
+    double difference = Math.abs(newSize - visibleDataPoints);
+    double threshold = ((double)visibleDataPoints) * 0.2;
+    
+    return difference > threshold; 
+  }
+
+  private void clearSelection() {    
+    if(XYChart != null) {
+      Axis yAxis = XYChart.getYAxis();
+      double yAxisShift = getSceneYShift(yAxis);
+
+      if(selectionRectangle != null) {
+        selectionRectangle.setX(0);
+        selectionRectangle.setY(yAxisShift);
+        selectionRectangle.setWidth(0);
+        selectionRectangle.setHeight(yAxis.getHeight());
+      }
+      
+      if(selectionFrame != null) {
+        selectionFrame.setX(0);
+        selectionFrame.setWidth(0);
+        selectionFrame.setY(yAxisShift);
+        selectionFrame.setHeight(yAxis.getHeight());      
+      }
+    }
   }
 }

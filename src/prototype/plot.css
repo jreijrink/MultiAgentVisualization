@@ -159,6 +159,10 @@
   -fx-fill: -fx-secondary-color6 !important;
 }
 
+.default-legend-color {
+  -fx-fill: f5f5f5;
+}
+
 .default-color0.chart-series-line, .default-color0-stroke {
   -fx-stroke: -fx-primary-color0;
 }

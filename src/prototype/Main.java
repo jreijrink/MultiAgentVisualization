@@ -800,7 +800,7 @@ public class Main extends Application {
           if(e.getSource().isEnlarging()) {
             e.getSource().getEnlargingDockNode().close();
           }
-          chart.clearFilter();
+          chart.clearFilters();
           charts.remove(chart);
         }
       }

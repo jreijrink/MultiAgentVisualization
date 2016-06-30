@@ -5,14 +5,11 @@ import com.sun.javafx.charts.Legend.LegendItem;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.Timer;
 import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
 import javafx.geometry.Point2D;
 import javafx.scene.Cursor;
 import javafx.scene.Node;
@@ -21,37 +18,21 @@ import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.RectangleBuilder;
-import static prototype.chart.DockElement.getCheckbox;
-import static prototype.chart.DockElement.getScale;
-import static prototype.chart.DockElement.getTurtleListView;
 import prototype.listener.SelectionEventListener;
 import prototype.object.Category;
 import prototype.object.Parameter;
-import prototype.object.ParameterMap;
-import prototype.object.StringValuePair;
 import prototype.object.Turtle;
 import prototype.object.Type;
 import prototype.object.Value;
 import prototype.object.Filter;
 
 public final class AgentChart extends BaseChart {
-  private static final int MIN_WIDTH = 1;    
-  private ScatterChart<Number,String> scattterChart;    
-  private double initSelectionX = 0;
-  private double initSelectionWidth = 0;
-  private Object[] initSelectionData = new Object[]{ 0, 0 };
+  private static final int MIN_WIDTH = 1;
     
   public AgentChart(Scene scene, int[] selectedTurtles, String yParameter, int yParameterIndex, String yParameterValue, List<Turtle> data, boolean liveUpdate) {
     super(scene, selectedTurtles, yParameter, yParameterIndex, yParameterValue, data,  liveUpdate);    
@@ -80,57 +61,19 @@ public final class AgentChart extends BaseChart {
   public String getName() {
     return "Turtle-chart";
   }
-  
-  @Override
-  public void selectFrames(int startIndex, int endIndex, boolean drag, boolean forward) {
-    if((!drag || liveUpdate) && data.size() > 0) {
       
-      selectedStartIndex = startIndex;
-      selectedEndIndex = endIndex;
-      this.forward = forward;
-      
-      NumberAxis xAxis = (NumberAxis) scattterChart.getXAxis();
-      double xAxisShift = getSceneXShift(xAxis);
-      double start = xAxis.getDisplayPosition(startIndex);
-      double end = xAxis.getDisplayPosition(endIndex);
-      
-      if(start == end)
-        end +=1;
-      
-      if(selectionRectangle != null) {
-        selectionRectangle.setX(xAxisShift + start);
-        selectionRectangle.setWidth(end - start);
-        selectionRectangle.setUserData(new Object[]{ startIndex, endIndex });
-      } else {
-        initSelectionX = xAxisShift + start;
-        initSelectionWidth = end - start;
-        initSelectionData = new Object[]{ startIndex, endIndex };
-      }
-      
-      if(selectionFrame != null) {
-        if(forward)
-          selectionFrame.setX(xAxisShift + end);
-        else
-          selectionFrame.setX(xAxisShift + start);
-        selectionFrame.setUserData(forward);
-      }
-      
-      setDockTitle();
-    }
-  }
-  
-  @Override
-  void initialize(boolean resize) {
-    this.parameterMap = new ParameterMap();
-    createChart();
-  }
-  
   @Override
   boolean isCategorical() {
     return true;
   }
   
-  private void createChart() {
+  @Override
+  List<XYChart.Series> getData() {
+    return new ArrayList();
+  }
+
+  @Override
+  void createChart(Collection datapoints) {
     ObservableList<String> categories = FXCollections.observableArrayList();
     for(int turtle : selectedTurtles) {
       categories.add(String.format("Turtle %d", turtle + 1));
@@ -141,10 +84,13 @@ public final class AgentChart extends BaseChart {
     try {
         int timeframes = this.data.get(0).getTimeFrameCount();
         double scale = getScale(timeframes);
-        xAxis = new NumberAxis(0, timeframes, scale);
+        if(zoomRange == null)
+          xAxis = new NumberAxis(0, timeframes, scale);
+        else
+          xAxis = new NumberAxis(zoomRange.getMin(), zoomRange.getMax(), scale);
     } catch(Exception ex) { }
     
-    this.scattterChart = new ScatterChart<>(xAxis, yAxis);
+    this.XYChart = new ScatterChart<>(xAxis, yAxis);
     
     xAxis.widthProperty().addListener((ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) -> {
       Timer timer = new java.util.Timer();
@@ -184,11 +130,11 @@ public final class AgentChart extends BaseChart {
     
     if(data.size() > 0) {
       xAxis.setLabel("Time");
-      this.scattterChart.getData().addAll(getData());
+      this.XYChart.getData().addAll(datapoints);
     }
     
     rootPane.getChildren().clear();
-    rootPane.setCenter(this.scattterChart);
+    rootPane.setCenter(this.XYChart);
 
       Timer timer = new java.util.Timer();
       timer.schedule( 
@@ -208,169 +154,8 @@ public final class AgentChart extends BaseChart {
         }, 0);
   }
   
-  private Collection getData() {
-    List<XYChart.Series> seriesList = new ArrayList<>();
-    
-    return seriesList;
-  }
-    
-  private void plotData() {
-    
-    List<Node> pointChildren = new ArrayList();
-    for(Node child : this.rootPane.getChildren()) {
-      if(child.getClass() == Rectangle.class && child.getId() == null) {
-        pointChildren.add(child);
-      }
-    }
-    this.rootPane.getChildren().removeAll(pointChildren);
-    
-    if(data.size() > 0) {
-      CategoryAxis yAxis = (CategoryAxis) scattterChart.getYAxis();
-      NumberAxis xAxis = (NumberAxis) scattterChart.getXAxis();
-
-      double xAxisShift = getSceneXShift(xAxis);
-      double yAxisShift = getSceneYShift(yAxis);
-
-      double height = getRowHeigt();
-      
-      Parameter parameter = this.parameterMap.getParameter(this.parameter);
-      Value value = parameter.getValue(parameterValue);
-      
-      for(int turtleIndex : selectedTurtles) {
-        String categoryName = String.format("Turtle %d", turtleIndex + 1);
-        double yPosition = yAxis.getDisplayPosition(categoryName);
-        int timeframes = this.data.get(0).getTimeFrameCount();
-
-        Rectangle categoryBlock = RectangleBuilder.create()
-                .x(xAxisShift)
-                .y(yPosition + yAxisShift - (height / 2))
-                .height(height)
-                .width(xAxis.getWidth())
-                .userData(new Object[]{ categoryName, 0, 0, timeframes })
-                .styleClass("default-category-background")
-                .id("background")
-                .build();
-        this.rootPane.getChildren().add(categoryBlock);
-        
-        double currentCategory = -1;
-        boolean currentVisibility = true;
-        int currentFrame = 0;
-        double currentPosition = xAxis.getDisplayPosition(0);
-        
-        Turtle turtle = data.get(turtleIndex);
-        List<DataPoint> categoricalValues = turtle.getAllValues(this.parameter, parameterIndex, parameterValue);
-        
-        for(int timeFrame = 0; timeFrame < categoricalValues.size(); timeFrame++) {
-          DataPoint category = categoricalValues.get(timeFrame);
-          
-          boolean newBlock = false;
-          double newCategory = currentCategory;
-          
-          if(category.isVisible()) {
-            if(!currentVisibility || category.getLocation().getY() != currentCategory || timeFrame >= categoricalValues.size() - 1) {
-              newBlock = true;
-              newCategory = category.getLocation().getY();    
-            }
-            currentVisibility = true;
-          } else {
-            if(currentVisibility || timeFrame >= categoricalValues.size() - 1) {
-              currentVisibility = false;
-              newBlock = true;
-              newCategory = -1;
-            }
-          }
-          
-          if(newBlock) {
-            double xPosition = xAxis.getDisplayPosition(timeFrame);
-
-            int categoryIndex = value.getCategoryIndex((int)currentCategory);
-            if(categoryIndex != -1) {
-              Rectangle valueBlock = RectangleBuilder.create()
-                      .x(currentPosition + xAxisShift)
-                      .y(yPosition + yAxisShift - (height / 2))
-                      .height(height)
-                      .width(Math.max(xPosition - currentPosition, MIN_WIDTH))
-                      .userData(new Object[]{ categoryName, currentFrame, timeFrame })
-                        .styleClass(String.format("default-category-color%d", categoryIndex))
-                      .build();
-              this.rootPane.getChildren().add(valueBlock);
-            }
-
-            currentPosition = xPosition;
-            currentFrame = timeFrame;
-            currentCategory = newCategory;
-          }
-        }
-      }
-
-      if(selectionRectangle != null) 
-        rootPane.getChildren().remove(selectionRectangle);
-      
-      selectionRectangle = RectangleBuilder.create()
-              .x(initSelectionX)
-              .y(yAxisShift + 5)
-              .height(yAxis.getHeight() - 10)
-              .width(initSelectionWidth)
-              .fill(Color.web("0x222222"))
-              .opacity(0.2)
-              .id("selection")
-              .userData(initSelectionData)
-              .build();    
-      rootPane.getChildren().add(selectionRectangle);
-      
-      if(selectionFrame != null) 
-        rootPane.getChildren().remove(selectionFrame);
-      
-      selectionFrame = RectangleBuilder.create()
-              .x(0)
-              .y(0)
-              .height(yAxis.getHeight())
-              .width(2)
-              .fill(Color.web("0x222222"))
-              .opacity(0.4)
-              .id("selection")
-              .build();
-      selectionFrame.setUserData(true);
-      rootPane.getChildren().add(selectionFrame);
-      
-      for(Node child : this.rootPane.getChildren()) {
-        if(child.getClass() == Rectangle.class) {
-          createRectangleSelectionEvents(child, rootPane, xAxis, yAxis);
-        }
-      }
-      
-      createAxisFilter();
-      
-      createLegend();
-    }
-  }
-    
-  private void createLegend() {
-      Parameter parameter = this.parameterMap.getParameter(this.parameter);
-      Value value = parameter.getValue(parameterValue);
-      List<Category> categories = value.getCategories();
-      
-      Legend legend = (Legend)scattterChart.lookup(".chart-legend");
-      legend.getStylesheets().add("prototype/plot.css");
-          
-      List<LegendItem> items = new ArrayList();
-      
-      for(int index = 0; index < categories.size(); index++) {
-          Rectangle legendPoint = RectangleBuilder.create()
-                  .height(10)
-                  .width(10)
-                  .build();
-        
-        LegendItem item = new Legend.LegendItem(categories.get(index).getName(), legendPoint);
-        item.getSymbol().getStyleClass().add(String.format("default-category-color%d", index));
-        
-        items.add(item);
-      }
-      
-      legend.getItems().setAll(items);
-  }
-  
-  private void createAxisFilter() {
+  @Override
+  void createAxisFilter() {
     
     Platform.runLater(new Runnable() {
       @Override
@@ -382,8 +167,8 @@ public final class AgentChart extends BaseChart {
       }
     });
     
-    NumberAxis xAxis = (NumberAxis) this.scattterChart.getXAxis();
-    CategoryAxis yAxis = (CategoryAxis) this.scattterChart.getYAxis();
+    NumberAxis xAxis = (NumberAxis) this.XYChart.getXAxis();
+    CategoryAxis yAxis = (CategoryAxis) this.XYChart.getYAxis();
     
     yAxis.setOnMouseMoved((MouseEvent event) -> {
       double yAxisShift = getSceneYShift(yAxis);
@@ -526,6 +311,130 @@ public final class AgentChart extends BaseChart {
     });
   }
     
+  private void plotData() {
+    
+    List<Node> pointChildren = new ArrayList();
+    for(Node child : this.rootPane.getChildren()) {
+      if(child.getClass() == Rectangle.class && child.getId() == null) {
+        pointChildren.add(child);
+      }
+    }
+    this.rootPane.getChildren().removeAll(pointChildren);
+    
+    if(data.size() > 0) {
+      CategoryAxis yAxis = (CategoryAxis) XYChart.getYAxis();
+      NumberAxis xAxis = (NumberAxis) XYChart.getXAxis();
+
+      double xAxisShift = getSceneXShift(xAxis);
+      double yAxisShift = getSceneYShift(yAxis);
+
+      double height = getRowHeigt();
+      
+      Parameter parameter = this.parameterMap.getParameter(this.parameter);
+      Value value = parameter.getValue(parameterValue);
+      
+      for(int turtleIndex : selectedTurtles) {
+        String categoryName = String.format("Turtle %d", turtleIndex + 1);
+        double yPosition = yAxis.getDisplayPosition(categoryName);
+        int timeframes = this.data.get(0).getTimeFrameCount();
+
+        Rectangle categoryBlock = RectangleBuilder.create()
+                .x(xAxisShift)
+                .y(yPosition + yAxisShift - (height / 2))
+                .height(height)
+                .width(xAxis.getWidth())
+                .userData(new Object[]{ categoryName, 0, 0, timeframes })
+                .styleClass("default-category-background")
+                .id("background")
+                .build();
+        this.rootPane.getChildren().add(categoryBlock);
+        
+        double currentCategory = -1;
+        boolean currentVisibility = true;
+        int currentFrame = 0;
+        double currentPosition = xAxis.getDisplayPosition(0);
+        
+        Turtle turtle = data.get(turtleIndex);
+        List<DataPoint> categoricalValues = turtle.getAllValues(this.parameter, parameterIndex, parameterValue);
+        
+        for(int timeFrame = 0; timeFrame < categoricalValues.size(); timeFrame++) {
+          DataPoint category = categoricalValues.get(timeFrame);
+          
+          boolean newBlock = false;
+          double newCategory = currentCategory;
+          
+          if(category.isVisible()) {
+            if(!currentVisibility || category.getLocation().getY() != currentCategory || timeFrame >= categoricalValues.size() - 1) {
+              newBlock = true;
+              newCategory = category.getLocation().getY();    
+            }
+            currentVisibility = true;
+          } else {
+            if(currentVisibility || timeFrame >= categoricalValues.size() - 1) {
+              currentVisibility = false;
+              newBlock = true;
+              newCategory = -1;
+            }
+          }
+          
+          if(newBlock) {
+            double xPosition = xAxis.getDisplayPosition(timeFrame);
+
+            int categoryIndex = value.getCategoryIndex((int)currentCategory);
+            if(categoryIndex != -1) {
+              Rectangle valueBlock = RectangleBuilder.create()
+                      .x(currentPosition + xAxisShift)
+                      .y(yPosition + yAxisShift - (height / 2))
+                      .height(height)
+                      .width(Math.max(xPosition - currentPosition, MIN_WIDTH))
+                      .userData(new Object[]{ categoryName, currentFrame, timeFrame })
+                        .styleClass(String.format("default-category-color%d", categoryIndex))
+                      .build();
+              this.rootPane.getChildren().add(valueBlock);
+            }
+
+            currentPosition = xPosition;
+            currentFrame = timeFrame;
+            currentCategory = newCategory;
+          }
+        }
+      }
+
+      for(Node child : this.rootPane.getChildren()) {
+        if(child.getClass() == Rectangle.class) {
+          createRectangleSelectionEvents(child, rootPane, xAxis, yAxis);
+        }
+      }
+       
+      createLegend();
+    }
+  }
+    
+  private void createLegend() {
+      Parameter parameter = this.parameterMap.getParameter(this.parameter);
+      Value value = parameter.getValue(parameterValue);
+      List<Category> categories = value.getCategories();
+      
+      Legend legend = (Legend)XYChart.lookup(".chart-legend");
+      legend.getStylesheets().add("prototype/plot.css");
+          
+      List<LegendItem> items = new ArrayList();
+      
+      for(int index = 0; index < categories.size(); index++) {
+          Rectangle legendPoint = RectangleBuilder.create()
+                  .height(10)
+                  .width(10)
+                  .build();
+        
+        LegendItem item = new Legend.LegendItem(categories.get(index).getName(), legendPoint);
+        item.getSymbol().getStyleClass().add(String.format("default-category-color%d", index));
+        
+        items.add(item);
+      }
+      
+      legend.getItems().setAll(items);
+  }
+  
   private Filter filter(List<String> filterTurtles) {
     if(filterTurtles.size() > 0) {
       Parameter selectedParameter = this.parameterMap.getParameter(this.parameter);
@@ -552,8 +461,8 @@ public final class AgentChart extends BaseChart {
   }
   
   private void resizeChart() {    
-    CategoryAxis yAxis = (CategoryAxis) scattterChart.getYAxis();
-    NumberAxis xAxis = (NumberAxis) scattterChart.getXAxis();
+    CategoryAxis yAxis = (CategoryAxis) XYChart.getYAxis();
+    NumberAxis xAxis = (NumberAxis) XYChart.getXAxis();
 
     double xAxisShift = getSceneXShift(xAxis);
     double yAxisShift = getSceneYShift(yAxis);
@@ -642,20 +551,5 @@ public final class AgentChart extends BaseChart {
       filterRectangle.setX(xAxisShift);
       filterRectangle.setWidth(xAxis.getWidth());
     }
-  }
-  
-  private double getRowHeigt() {  
-      CategoryAxis yAxis = (CategoryAxis) scattterChart.getYAxis();
-      
-      double height = yAxis.getHeight();
-      List<String> categories = yAxis.getCategories();
-      if(categories.size() >= 2) {
-        double agent1YPosition = yAxis.getDisplayPosition(categories.get(0));
-        double agent2YPosition = yAxis.getDisplayPosition(categories.get(1));
-        height = Math.abs(agent2YPosition - agent1YPosition);
-      } else {
-        height = height - 10;
-      }
-      return height;
   }
 }

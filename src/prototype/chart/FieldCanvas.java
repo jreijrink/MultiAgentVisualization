@@ -38,14 +38,14 @@ import prototype.object.ParameterMap;
 import prototype.listener.SelectionEventListener;
 import prototype.object.StringValuePair;
 import prototype.object.Turtle;
-import static prototype.chart.DockElement.getCheckbox;
-import static prototype.chart.DockElement.getTurtleListView;
 import prototype.object.Parameter;
 import prototype.object.Range;
 import prototype.settings.Configuration;
 import org.dockfx.DockNode;
-import static prototype.chart.DockElement.selectionToString;
 import static prototype.chart.DockElement.getAllTurtles;
+import static prototype.chart.DockElement.getCheckbox;
+import static prototype.chart.DockElement.getTurtleListView;
+import static prototype.chart.DockElement.selectionToString;
 import prototype.object.CombinedBall;
 import prototype.object.CombinedOpponent;
 
@@ -194,8 +194,8 @@ public class FieldCanvas extends Pane implements DockElement{
   }
   
   @Override
-  public void clearFilter() {
-  
+  public void clearFilters() {
+    
   }
 
   @Override
