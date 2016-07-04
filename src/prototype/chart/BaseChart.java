@@ -295,8 +295,16 @@ public abstract class BaseChart implements DockElement {
   }
   
   @Override
-  public void selectFrames(int startIndex, int endIndex, boolean drag, boolean forward) {    
+  public void selectFrames(final int startIndex, final int endIndex, final boolean drag, final boolean forward) {    
     if((!drag || liveUpdate) && data.size() > 0 && XYChart != null) {
+      
+      int actualStartIndex = startIndex;
+      int actualEndIndex = endIndex;
+      
+      if(zoomRange != null) {
+        actualStartIndex = Math.max(zoomRange.getMin(), actualStartIndex);
+        actualEndIndex = Math.min(zoomRange.getMax(), actualEndIndex);
+      }
       
       selectedStartIndex = startIndex;
       selectedEndIndex = endIndex;
@@ -306,8 +314,8 @@ public abstract class BaseChart implements DockElement {
       
       NumberAxis xAxis = (NumberAxis) this.XYChart.getXAxis();
       double xAxisShift = getSceneXShift(xAxis);
-      double start = xAxis.getDisplayPosition(startIndex);
-      double end = xAxis.getDisplayPosition(endIndex);
+      double start = xAxis.getDisplayPosition(actualStartIndex);
+      double end = xAxis.getDisplayPosition(actualEndIndex);
       
       if(start == end)
         end +=1;
@@ -523,6 +531,9 @@ public abstract class BaseChart implements DockElement {
 
         Rectangle selection = getSelectionRectangle(basePoint, event.getX(), event.getY(), 0, yShift, xAxis.getWidth(), yAxis.getHeight());
 
+        rootPane.getChildren().remove(zoomRectangle);
+        rootPane.getChildren().add(zoomRectangle);
+    
         zoomRectangle.setY(getSceneYShift(yAxis));
         zoomRectangle.setHeight(yAxis.getHeight() + xAxis.getHeight());
         zoomRectangle.setX(xAxisShift + selection.getX());

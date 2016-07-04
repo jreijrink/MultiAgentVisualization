@@ -357,20 +357,23 @@ public final class AgentChart extends BaseChart {
         Turtle turtle = data.get(turtleIndex);
         List<DataPoint> categoricalValues = turtle.getAllValues(this.parameter, parameterIndex, parameterValue);
         
-        for(int timeFrame = 0; timeFrame < categoricalValues.size(); timeFrame++) {
-          DataPoint category = categoricalValues.get(timeFrame);
+        if(zoomRange != null)
+          categoricalValues = categoricalValues.subList(Math.max(zoomRange.getMin(), 0), Math.min(zoomRange.getMax(), categoricalValues.size() - 1));
+        
+        for(int i = 0; i < categoricalValues.size(); i++) {
+          DataPoint category = categoricalValues.get(i);
           
           boolean newBlock = false;
           double newCategory = currentCategory;
           
           if(category.isVisible()) {
-            if(!currentVisibility || category.getLocation().getY() != currentCategory || timeFrame >= categoricalValues.size() - 1) {
+            if(!currentVisibility || category.getLocation().getY() != currentCategory || i >= categoricalValues.size() - 1) {
               newBlock = true;
               newCategory = category.getLocation().getY();    
             }
             currentVisibility = true;
           } else {
-            if(currentVisibility || timeFrame >= categoricalValues.size() - 1) {
+            if(currentVisibility || i >= categoricalValues.size() - 1) {
               currentVisibility = false;
               newBlock = true;
               newCategory = -1;
@@ -378,7 +381,7 @@ public final class AgentChart extends BaseChart {
           }
           
           if(newBlock) {
-            double xPosition = xAxis.getDisplayPosition(timeFrame);
+            double xPosition = xAxis.getDisplayPosition(category.getTimeframe());
 
             int categoryIndex = value.getCategoryIndex((int)currentCategory);
             if(categoryIndex != -1) {
@@ -387,14 +390,14 @@ public final class AgentChart extends BaseChart {
                       .y(yPosition + yAxisShift - (height / 2))
                       .height(height)
                       .width(Math.max(xPosition - currentPosition, MIN_WIDTH))
-                      .userData(new Object[]{ categoryName, currentFrame, timeFrame })
+                      .userData(new Object[]{ categoryName, currentFrame, category.getTimeframe() })
                         .styleClass(String.format("default-category-color%d", categoryIndex))
                       .build();
               this.rootPane.getChildren().add(valueBlock);
             }
 
             currentPosition = xPosition;
-            currentFrame = timeFrame;
+            currentFrame = category.getTimeframe();
             currentCategory = newCategory;
           }
         }
@@ -498,6 +501,11 @@ public final class AgentChart extends BaseChart {
           int startFrame = (int)userData[2];
           int endFrame = (int)userData[3];
 
+          if(zoomRange != null) {
+            startFrame = zoomRange.getMin();
+            endFrame = zoomRange.getMax();
+          }
+          
           double startPosition = xAxis.getDisplayPosition(startFrame);
           double endPosition = xAxis.getDisplayPosition(endFrame);
           double yPosition = yAxis.getDisplayPosition(category);

@@ -426,7 +426,7 @@ public final class XYBaseChart extends BaseChart {
       
       for (int i : selectedTurtles) {
         Turtle turtle = data.get(i);
-        List<DataPoint> values = turtle.getAllValues(parameter, parameterIndex, parameterValue);        
+        List<DataPoint> values = turtle.getAllValues(parameter, parameterIndex, parameterValue);
         if(zoomRange != null)
           values = values.subList(Math.max(zoomRange.getMin(), 0), Math.min(zoomRange.getMax(), values.size() - 1));
         timeframes = values.size();

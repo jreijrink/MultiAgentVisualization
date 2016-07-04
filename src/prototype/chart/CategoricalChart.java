@@ -143,22 +143,10 @@ public final class CategoricalChart extends BaseChart {
     rootPane.getChildren().clear();
     rootPane.setCenter(this.XYChart);
 
-    Timer timer = new java.util.Timer();
-    timer.schedule( 
-      new java.util.TimerTask() {
-      @Override
-      public void run() {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-              plotData();
-              selectFrames(selectedStartIndex, selectedEndIndex, false, forward);
-              timer.cancel();
-              timer.purge();
-            }
-          });
-        }
-      }, 100);
+    Platform.runLater(() -> {
+      plotData();
+      selectFrames(selectedStartIndex, selectedEndIndex, false, forward);
+    });
   }
   
   @Override
@@ -343,7 +331,7 @@ public final class CategoricalChart extends BaseChart {
       for(Category category : value.getCategories()) {        
         double yPosition = yAxis.getDisplayPosition(category.getName());
         int timeframes = this.data.get(0).getTimeFrameCount();
-
+        
         Rectangle categoryBlock = RectangleBuilder.create()
                 .x(xAxisShift)
                 .y(yPosition + yAxisShift - (height / 2))
@@ -372,20 +360,23 @@ public final class CategoricalChart extends BaseChart {
         Turtle turtle = data.get(turtleIndex);
         List<DataPoint> categoricalValues = turtle.getAllValues(this.parameter, parameterIndex, parameterValue);
         
-        for(int timeFrame = 0; timeFrame < categoricalValues.size(); timeFrame++) {
-          DataPoint category = categoricalValues.get(timeFrame);
+        if(zoomRange != null)
+          categoricalValues = categoricalValues.subList(Math.max(zoomRange.getMin(), 0), Math.min(zoomRange.getMax(), categoricalValues.size() - 1));
+        
+        for(int i = 0; i < categoricalValues.size(); i++) {
+          DataPoint category = categoricalValues.get(i);
           
           boolean newBlock = false;
           double newCategory = currentCategory;
           
           if(category.isVisible()) {
-            if(!currentVisibility || category.getLocation().getY() != currentCategory || timeFrame >= categoricalValues.size() - 1) {
+            if(!currentVisibility || category.getLocation().getY() != currentCategory || i >= categoricalValues.size() - 1) {
               newBlock = true;
               newCategory = category.getLocation().getY();    
             }
             currentVisibility = true;
           } else {
-            if(currentVisibility || timeFrame >= categoricalValues.size() - 1) {
+            if(currentVisibility || i >= categoricalValues.size() - 1) {
               currentVisibility = false;
               newBlock = true;
               newCategory = -1;
@@ -393,7 +384,7 @@ public final class CategoricalChart extends BaseChart {
           }
           
           if(newBlock) {
-            double xPosition = xAxis.getDisplayPosition(timeFrame);
+            double xPosition = xAxis.getDisplayPosition(category.getTimeframe());
             double yPosition = yAxis.getDisplayPosition(value.getCategoryName((int)currentCategory));
 
             Rectangle categoryBlock = RectangleBuilder.create()
@@ -401,14 +392,14 @@ public final class CategoricalChart extends BaseChart {
                     .y(yPosition + yAxisShift - (height / 2) + (turtleHeight * index) + offset)
                     .height(turtleHeight)
                     .width(Math.max(xPosition - currentPosition, MIN_WIDTH))
-                    .userData(new Object[]{ value.getCategoryName((int)currentCategory), index, currentFrame, timeFrame })
+                    .userData(new Object[]{ value.getCategoryName((int)currentCategory), index, currentFrame, category.getTimeframe() })
                     .styleClass(String.format("default-secondary-color%d-fill", turtleIndex))
                     .build();
 
             this.rootPane.getChildren().add(categoryBlock);
 
             currentPosition = xPosition;
-            currentFrame = timeFrame;
+            currentFrame = category.getTimeframe();
             currentCategory = newCategory;
           }
         }
@@ -525,6 +516,11 @@ public final class CategoricalChart extends BaseChart {
           int index = (int)userData[1];
           int startFrame = (int)userData[2];
           int endFrame = (int)userData[3];
+          
+          if(zoomRange != null) {
+            startFrame = zoomRange.getMin();
+            endFrame = zoomRange.getMax();
+          }
 
           double startPosition = xAxis.getDisplayPosition(startFrame);
           double endPosition = xAxis.getDisplayPosition(endFrame);
