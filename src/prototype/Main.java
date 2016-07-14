@@ -390,7 +390,7 @@ public class Main extends Application {
     });
     settingsMenu.getItems().add(conditionsMenu);
     
-    MenuItem generateMenu = new MenuItem("Generate Parameters");
+    MenuItem generateMenu = new MenuItem("Derive Attributes");
     generateMenu.setAccelerator(new KeyCodeCombination(KeyCode.G, KeyCombination.CONTROL_DOWN));
     generateMenu.setOnAction(new EventHandler() {
       @Override
@@ -399,7 +399,7 @@ public class Main extends Application {
           FXMLLoader loader = new FXMLLoader(FXMLGeneratedParametersController.class.getResource("FXMLGeneratedParameters.fxml"));
           AnchorPane page = (AnchorPane) loader.load();
           Stage dialogStage = new Stage();
-          dialogStage.setTitle("Generate Parameters");
+          dialogStage.setTitle("Derive Attributes");
           dialogStage.initModality(Modality.WINDOW_MODAL);
           dialogStage.initOwner(stage);
 

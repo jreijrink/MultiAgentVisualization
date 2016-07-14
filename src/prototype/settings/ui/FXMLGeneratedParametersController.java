@@ -110,7 +110,7 @@ public class FXMLGeneratedParametersController implements Initializable {
       FXMLLoader loader = new FXMLLoader(FXMLGeneratedParameterController.class.getResource("FXMLGeneratedParameter.fxml"));
       AnchorPane page = (AnchorPane) loader.load();
       Stage dialogStage = new Stage();
-      dialogStage.setTitle("Generate Parameter");
+      dialogStage.setTitle("Derive Attribute");
       dialogStage.initModality(Modality.WINDOW_MODAL);
       dialogStage.initOwner(this.dialogStage);
       Scene scene = new Scene(page);

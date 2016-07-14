@@ -10,7 +10,7 @@
             4
           ],
           "parameter": "Turtle",
-          "time": "2016-07-04T17:29:19.669",
+          "time": "2016-07-14T16:13:37.557",
           "chart": "Line-chart",
           "parameterIndex": 0,
           "parameterValue": "x"
@@ -28,7 +28,7 @@
         6
       ],
       "parameter": "Role ID",
-      "time": "2016-07-04T17:29:19.661",
+      "time": "2016-07-14T16:13:37.546",
       "chart": "Categorical-chart",
       "parameterIndex": 0,
       "parameterValue": "current"
@@ -49,7 +49,7 @@
             6
           ],
           "parameter": "Skill ID",
-          "time": "2016-07-04T17:29:19.644",
+          "time": "2016-07-14T16:13:37.530",
           "chart": "Turtle-chart",
           "parameterIndex": 0,
           "parameterValue": "skill ID"
@@ -61,7 +61,7 @@
         3
       ],
       "parameter": "Battery voltage",
-      "time": "2016-07-04T17:29:19.585",
+      "time": "2016-07-14T16:13:37.466",
       "chart": "Scatter-chart",
       "parameterIndex": 0,
       "parameterValue": "battery-voltage"
