@@ -3,14 +3,40 @@
     {
       "charts": [
         {
-          "charts": [],
+          "charts": [
+            {
+              "charts": [],
+              "pos": "LEFT",
+              "liveUpdate": true,
+              "selectedTurtles": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5,
+                6
+              ],
+              "parameter": "Skill ID",
+              "time": "2016-07-15T17:54:18.431",
+              "chart": "Turtle-chart",
+              "parameterIndex": 0,
+              "parameterValue": "shottype"
+            }
+          ],
           "pos": "RIGHT",
           "liveUpdate": true,
           "selectedTurtles": [
-            4
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
           ],
           "parameter": "Turtle",
-          "time": "2016-07-14T16:13:37.557",
+          "time": "2016-07-15T17:54:18.419",
           "chart": "Line-chart",
           "parameterIndex": 0,
           "parameterValue": "x"
@@ -28,7 +54,7 @@
         6
       ],
       "parameter": "Role ID",
-      "time": "2016-07-14T16:13:37.546",
+      "time": "2016-07-15T17:54:18.411",
       "chart": "Categorical-chart",
       "parameterIndex": 0,
       "parameterValue": "current"
@@ -49,7 +75,7 @@
             6
           ],
           "parameter": "Skill ID",
-          "time": "2016-07-14T16:13:37.530",
+          "time": "2016-07-15T17:54:18.395",
           "chart": "Turtle-chart",
           "parameterIndex": 0,
           "parameterValue": "skill ID"
@@ -58,10 +84,16 @@
       "pos": "TOP",
       "liveUpdate": true,
       "selectedTurtles": [
-        3
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6
       ],
       "parameter": "Battery voltage",
-      "time": "2016-07-14T16:13:37.466",
+      "time": "2016-07-15T17:54:18.336",
       "chart": "Scatter-chart",
       "parameterIndex": 0,
       "parameterValue": "battery-voltage"

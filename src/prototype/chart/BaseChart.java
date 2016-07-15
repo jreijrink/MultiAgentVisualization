@@ -1,9 +1,11 @@
 package prototype.chart;
 
+import com.sun.javafx.charts.Legend;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Timer;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -27,14 +29,18 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.ImagePattern;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.RectangleBuilder;
+import org.apache.pivot.util.Console;
 import org.dockfx.DockNode;
+import prototype.Main;
 import static prototype.chart.DockElement.getCheckbox;
 import static prototype.chart.DockElement.getTurtleListView;
 import prototype.listener.SelectionEventListener;
@@ -76,7 +82,9 @@ public abstract class BaseChart implements DockElement {
   protected boolean newFilter;
   
   protected Rectangle zoomRectangle;
-  protected boolean zooming;
+  protected Rectangle zoomCloseRectangle;
+  protected Rectangle moveLeftRectangle;
+  protected Rectangle moveRightRectangle;
   protected Range<Integer> zoomRange;
   
   public BaseChart(Scene scene, int[] selectedTurtles, String yParameter, int yParameterIndex, String yParameterValue, List<Turtle> data, boolean liveUpdate) {
@@ -355,6 +363,7 @@ public abstract class BaseChart implements DockElement {
           Platform.runLater(() -> {
             createChart(datapoints);
             Platform.runLater(() -> {
+              setResizeListeners();
               setMouseListeners();
               createAxisFilter();
               createAxisZoom();
@@ -408,6 +417,20 @@ public abstract class BaseChart implements DockElement {
     return totalSize;
   }
     
+  protected void setResizeListeners() {
+    
+    NumberAxis xAxis = (NumberAxis) this.XYChart.getXAxis();
+    Axis yAxis = this.XYChart.getYAxis();
+    
+    xAxis.widthProperty().addListener((ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) -> {   
+      Platform.runLater(()-> setZoomControls(xAxis, yAxis));
+    });
+    
+    yAxis.heightProperty().addListener((ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) -> {  
+      Platform.runLater(()-> setZoomControls(xAxis, yAxis));
+    });
+  }
+  
   protected void setMouseListeners() {
     NumberAxis xAxis = (NumberAxis) this.XYChart.getXAxis();
     Axis yAxis = this.XYChart.getYAxis();
@@ -481,9 +504,7 @@ public abstract class BaseChart implements DockElement {
     NumberAxis xAxis = (NumberAxis) this.XYChart.getXAxis();
     Axis yAxis = this.XYChart.getYAxis();
     
-    if(zoomRange != null) {      
-      Platform.runLater(()-> setZoomedBar(xAxis, yAxis));    
-    }
+    Platform.runLater(()-> setZoomControls(xAxis, yAxis));
     
     zoomRectangle = RectangleBuilder.create()
             .x(getSceneXShift(xAxis))
@@ -496,14 +517,10 @@ public abstract class BaseChart implements DockElement {
             .build();
 
     rootPane.getChildren().add(zoomRectangle);
-        
+    
     xAxis.setOnMouseMoved((MouseEvent event) -> {        
       if(scene.getCursor() != Cursor.WAIT) {
-        if(zoomRectangle.getWidth() == 0) {
-          setCursor(Cursor.CROSSHAIR);
-        } else {
-          setCursor(Cursor.CLOSED_HAND);
-        }
+        setCursor(Cursor.CROSSHAIR);
       }
     });
     
@@ -513,65 +530,53 @@ public abstract class BaseChart implements DockElement {
     });
     
     xAxis.setOnMousePressed((MouseEvent event) -> {
-      if(zoomRectangle.getWidth() != 0) {
-        setCursor(Cursor.DEFAULT);
-        zooming = false;
-        zoomRange = null;
-        initialize(false);
-      } else {
-        zooming = true;        
-        if(scene.getCursor() != Cursor.WAIT)
-          setCursor(Cursor.H_RESIZE);
+      if(scene.getCursor() != Cursor.WAIT)
+        setCursor(Cursor.H_RESIZE);
 
-        double xAxisShift = getSceneXShift(xAxis);    
-        double xShift = getXShift(yAxis, null, xAxis);
-        double yShift = getYShift(yAxis, null, yAxis);
+      double xAxisShift = getSceneXShift(xAxis);    
+      double xShift = getXShift(yAxis, null, xAxis);
+      double yShift = getYShift(yAxis, null, yAxis);
 
-        basePoint = new Point2D(event.getX(), event.getY());
+      basePoint = new Point2D(event.getX(), event.getY());
 
-        Rectangle selection = getSelectionRectangle(basePoint, event.getX(), event.getY(), 0, yShift, xAxis.getWidth(), yAxis.getHeight());
+      Rectangle selection = getSelectionRectangle(basePoint, event.getX(), event.getY(), 0, yShift, xAxis.getWidth(), yAxis.getHeight());
 
-        rootPane.getChildren().remove(zoomRectangle);
-        rootPane.getChildren().add(zoomRectangle);
-    
-        zoomRectangle.setY(getSceneYShift(yAxis));
-        zoomRectangle.setHeight(yAxis.getHeight() + xAxis.getHeight());
-        zoomRectangle.setX(xAxisShift + selection.getX());
-        zoomRectangle.setWidth(selection.getWidth());
-      }
+      rootPane.getChildren().remove(zoomRectangle);
+      rootPane.getChildren().add(zoomRectangle);
+
+      zoomRectangle.setY(getSceneYShift(yAxis));
+      zoomRectangle.setHeight(yAxis.getHeight() + xAxis.getHeight());
+      zoomRectangle.setX(xAxisShift + selection.getX());
+      zoomRectangle.setWidth(selection.getWidth());
     });
 
     xAxis.setOnMouseDragged((MouseEvent event) -> {
-      if(zooming) {
-        setCursor(Cursor.H_RESIZE);
+      setCursor(Cursor.H_RESIZE);
 
-        double xAxisShift = getSceneXShift(xAxis);    
-        double xShift = getXShift(yAxis, null, xAxis);
-        double yShift = getYShift(yAxis, null, yAxis);
+      double xAxisShift = getSceneXShift(xAxis);    
+      double xShift = getXShift(yAxis, null, xAxis);
+      double yShift = getYShift(yAxis, null, yAxis);
 
-        Rectangle selection = getSelectionRectangle(basePoint, event.getX(), event.getY(), 0, yShift, xAxis.getWidth(), yAxis.getHeight());
+      Rectangle selection = getSelectionRectangle(basePoint, event.getX(), event.getY(), 0, yShift, xAxis.getWidth(), yAxis.getHeight());
 
-        zoomRectangle.setX(xAxisShift + selection.getX());
-        zoomRectangle.setWidth(selection.getWidth());
-      }
+      zoomRectangle.setX(xAxisShift + selection.getX());
+      zoomRectangle.setWidth(selection.getWidth());
     });
     
     xAxis.setOnMouseReleased((MouseEvent event) -> {
       setCursor(Cursor.DEFAULT);
-      
-      if(zooming) {
-        double xAxisShift = getSceneXShift(xAxis);    
-        double xShift = getXShift(yAxis, null, xAxis);
-        double yShift = getYShift(yAxis, null, yAxis);
 
-        Rectangle selection = getSelectionRectangle(basePoint, event.getX(), event.getY(), 0, yShift, xAxis.getWidth(), yAxis.getHeight());
+      double yShift = getYShift(yAxis, null, yAxis);
 
-        zoomRectangle.setX(0);
-        zoomRectangle.setWidth(0);
+      Rectangle selection = getSelectionRectangle(basePoint, event.getX(), event.getY(), 0, yShift, xAxis.getWidth(), yAxis.getHeight());
 
-        int minValue = (int)xAxis.getValueForDisplay(selection.getX()).doubleValue();
-        int maxValue = (int)xAxis.getValueForDisplay(selection.getX() + selection.getWidth()).doubleValue();
+      zoomRectangle.setX(0);
+      zoomRectangle.setWidth(0);
 
+      int minValue = (int)xAxis.getValueForDisplay(selection.getX()).doubleValue();
+      int maxValue = (int)xAxis.getValueForDisplay(selection.getX() + selection.getWidth()).doubleValue();
+
+      if(maxValue - minValue > 5) {
         xAxis.setLowerBound(minValue);
         xAxis.setUpperBound(maxValue);
 
@@ -703,34 +708,140 @@ public abstract class BaseChart implements DockElement {
       return height;
   }
   
-  private void setZoomedBar(ValueAxis xAxis, Axis yAxis) {    
-    double xAxisShift = getSceneXShift(xAxis);
+  private void setZoomControls(ValueAxis xAxis, Axis yAxis) {
+    Legend legend = (Legend)XYChart.lookup(".chart-legend");
+    if(legend.getHeight() == 0) {
+      Platform.runLater(()-> setZoomControls(xAxis, yAxis));
+      return;
+    }
+    
+    if(zoomCloseRectangle != null) {
+      rootPane.getChildren().remove(zoomCloseRectangle);
+      rootPane.getChildren().remove(moveLeftRectangle);
+      rootPane.getChildren().remove(moveRightRectangle);
+    }
+    
+    if(zoomRange != null) {
+      
+      double rectangeWidth, rectangleHeight;
+      rectangeWidth = rectangleHeight = xAxis.getHeight() / 2;
+      double xPosition = getSceneXShift(xAxis);
+      double yPosition = getSceneYShift(yAxis) + yAxis.getHeight() +  + rectangleHeight + 5;
+      double xOffset = 5;
+      
+      moveLeftRectangle = RectangleBuilder.create()
+          .x(xPosition)
+          .y(yPosition)
+          .height(rectangleHeight)
+          .width(rectangeWidth)
+          .fill(Color.web("0x222222"))
+          .opacity(1)
+          .id("leftZoom")
+          .build();
+      Image leftImg = new Image(Main.class.getClassLoader().getResource("prototype/moveleft.png").toExternalForm());
+      moveLeftRectangle.setFill(new ImagePattern(leftImg));
+      
+      moveLeftRectangle.setOnMouseMoved((MouseEvent event) -> {        
+        if(scene.getCursor() != Cursor.WAIT) {
+          setCursor(Cursor.HAND);
+        }
+      });
+      moveLeftRectangle.setOnMouseExited((MouseEvent event) -> {   
+        if(scene.getCursor() != Cursor.WAIT)
+          setCursor(Cursor.DEFAULT);
+      });
+      moveLeftRectangle.setOnMousePressed((MouseEvent event) -> {
+        zoomLeft();
+      });
+    
+      rootPane.getChildren().add(moveLeftRectangle);
+      
+      
+      xPosition += rectangeWidth + xOffset;
+      
+      zoomCloseRectangle = RectangleBuilder.create()
+          .x(xPosition)
+          .y(yPosition)
+          .height(rectangleHeight)
+          .width(rectangeWidth)
+          .fill(Color.web("0x222222"))
+          .opacity(1)
+          .id("closeZoom")
+          .build();
+      Image zoomImg = new Image(Main.class.getClassLoader().getResource("prototype/zoomout.png").toExternalForm());
+      zoomCloseRectangle.setFill(new ImagePattern(zoomImg));
 
-    zoomRectangle.setY(getSceneYShift(yAxis) + yAxis.getHeight());
-    zoomRectangle.setHeight(xAxis.getHeight());
-    zoomRectangle.setX(xAxisShift);
-    zoomRectangle.setWidth(xAxis.getWidth());
+      zoomCloseRectangle.setOnMouseMoved((MouseEvent event) -> {        
+        if(scene.getCursor() != Cursor.WAIT) {
+          setCursor(Cursor.HAND);
+        }
+      });
+      zoomCloseRectangle.setOnMouseExited((MouseEvent event) -> {   
+        if(scene.getCursor() != Cursor.WAIT)
+          setCursor(Cursor.DEFAULT);
+      });
+      zoomCloseRectangle.setOnMousePressed((MouseEvent event) -> {
+        resetZooming();
+      });
+      
+      rootPane.getChildren().add(zoomCloseRectangle);
+      
+      
+      xPosition += rectangeWidth + xOffset;
+      
+      moveRightRectangle = RectangleBuilder.create()
+          .x(xPosition)
+          .y(yPosition)
+          .height(rectangleHeight)
+          .width(rectangeWidth)
+          .fill(Color.web("0x222222"))
+          .opacity(1)
+          .id("rightZoom")
+          .build();
+      Image rightImg = new Image(Main.class.getClassLoader().getResource("prototype/moveright.png").toExternalForm());
+      moveRightRectangle.setFill(new ImagePattern(rightImg));
+      
+      moveRightRectangle.setOnMouseMoved((MouseEvent event) -> {        
+        if(scene.getCursor() != Cursor.WAIT) {
+          setCursor(Cursor.HAND);
+        }
+      });
+      moveRightRectangle.setOnMouseExited((MouseEvent event) -> {   
+        if(scene.getCursor() != Cursor.WAIT)
+          setCursor(Cursor.DEFAULT);
+      });
+      moveRightRectangle.setOnMousePressed((MouseEvent event) -> {
+        zoomRight();
+      });
     
-    
-    zoomRectangle.setOnMouseMoved((MouseEvent event) -> {        
-      if(scene.getCursor() != Cursor.WAIT) {
-        setCursor(Cursor.CLOSED_HAND);
-      }
-    });
-    
-    zoomRectangle.setOnMouseExited((MouseEvent event) -> {   
-      if(scene.getCursor() != Cursor.WAIT)
-        setCursor(Cursor.DEFAULT);
-    });
-    
-    zoomRectangle.setOnMousePressed((MouseEvent event) -> {
-      setCursor(Cursor.DEFAULT);
-      zooming = false;
-      zoomRange = null;
-      initialize(false);
-    });
+      rootPane.getChildren().add(moveRightRectangle);
+    }
   }
   
+  private void resetZooming() {
+    zoomRange = null;
+    initialize(false);
+  }
+    
+  private void zoomLeft() {
+    int range = zoomRange.getMax() - zoomRange.getMin();
+    double increase = range * 0.25;
+    int min = Math.max(0 , (int)(zoomRange.getMin() - increase));
+    zoomRange = new Range(min, min + range);
+    
+    initialize(false);
+  }
+    
+  private void zoomRight() {
+    int timeframes = this.data.get(0).getTimeFrameCount();
+    int range = zoomRange.getMax() - zoomRange.getMin();
+    double increase = range * 0.25;
+    int max = Math.min(timeframes , (int)(zoomRange.getMax() + increase));
+    zoomRange = new Range(max - range, max);
+    
+    initialize(false);
+  }
+    
   private boolean dataIncreaseAchieved(List<XYChart.Series> data) {
     int newSize = getDataSize(data);
     double difference = Math.abs(newSize - visibleDataPoints);
