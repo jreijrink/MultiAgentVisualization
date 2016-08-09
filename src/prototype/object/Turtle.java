@@ -191,6 +191,8 @@ public class Turtle {
           int result = 0;
           boolean finished = false;
           
+          boolean preConditionsFinished = false;
+          
           for(int i = 0; i < newDataRow.length - 1; i++) {
             
             if(!active) {
@@ -210,12 +212,12 @@ public class Turtle {
               if(anyCombinedSatisfied) {
                 active = true;
                 finished = false;
+                preConditionsFinished = false;
                 activationIndex = i;
                 newDataRow[i] = 1;
               }         
               
             } else {
-              boolean preConditionsFinished = false;
               
               //Wait until the preconditions is unsatisfied.
               for(Map<Condition, List<DataPoint>> andMap : preConditions) {
@@ -230,7 +232,7 @@ public class Turtle {
               }
               
               if(preConditionsFinished || i == newDataRow.length - 2) {
-                boolean success = (postConditionsSuccess.size() == 0); // If no conditions -> success
+                boolean success = (postConditionsSuccess.isEmpty()); // If no conditions -> success
                 boolean failed = false;
 
                 for(Map<Condition, List<DataPoint>> andMap : postConditionsSuccess) {
@@ -256,7 +258,7 @@ public class Turtle {
                 }
 
                 //Don't end if the post conditions success and failed are both satisfied
-                if((success || failed) && !(success && failed)) {
+                if((success || failed)) {// && !(success && failed)) {
                   endIndex = i;
                   if(success) {
                     result = 1; //Succes
